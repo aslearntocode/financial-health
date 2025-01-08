@@ -29,7 +29,7 @@ export default function SignupPage() {
   const router = useRouter()
   const [showPinDialog, setShowPinDialog] = useState(false)
   const [pin, setPin] = useState(['', '', '', ''])
-  const [error, setError] = useState("")
+  const [, setError] = useState('')
 
   const handlePinChange = (index: number, value: string) => {
     if (value.length <= 1 && /^\d*$/.test(value)) {
