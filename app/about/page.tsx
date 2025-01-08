@@ -18,7 +18,7 @@ export default function AboutPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-blue-600">Our Mission</h2>
             <p className="text-lg text-gray-700 leading-relaxed">
-              In today's complex financial landscape, making investment decisions can be overwhelming. We're here to simplify that journey by providing clear, unbiased information and tools to help you grow your wealth sustainably.
+              In today&apos;s complex financial landscape, making investment decisions can be overwhelming. We&apos;re here to simplify that journey by providing clear, unbiased information and tools to help you grow your wealth sustainably.
             </p>
           </section>
 
@@ -54,7 +54,7 @@ export default function AboutPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold text-blue-600">Join Us</h2>
             <p className="text-lg text-gray-700 leading-relaxed">
-              Whether you're just starting your investment journey or looking to optimize your portfolio, we're here to help. Join our community of informed investors and take control of your financial future.
+              Whether you&apos;re just starting your investment journey or looking to optimize your portfolio, we&apos;re here to help. Join our community of informed investors and take control of your financial future.
             </p>
           </section>
         </div>

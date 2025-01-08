@@ -5,19 +5,25 @@ import { InvestmentForm } from "@/components/InvestmentForm"
 import { useState } from "react"
 import { PieChart } from 'react-minimal-pie-chart'
 
+// Define proper types instead of any
+interface ChartData {
+  title: string;
+  value: number;
+  color: string;
+}
+
+interface FormData {
+  // Add your form fields here
+  [key: string]: string | number;
+}
+
+// Remove unused InvestmentProps interface since data is not used
 export default function InvestmentPage() {
   const [showResults, setShowResults] = useState(false);
 
-  const handleFormSubmit = (data: any) => {
+  // Update the type from any to FormData
+  const handleFormSubmit = (formData: FormData) => {
     setShowResults(true);
-  };
-
-  const chartColors = {
-    segment1: '#4F46E5',
-    segment2: '#34D399',
-    segment3: '#A855F7',
-    segment4: '#F59E0B',
-    segment5: '#EC4899'
   };
 
   return (

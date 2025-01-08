@@ -29,7 +29,7 @@ export default function SignupPage() {
   const router = useRouter()
   const [showPinDialog, setShowPinDialog] = useState(false)
   const [pin, setPin] = useState(['', '', '', ''])
-  const [, setError] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   const handlePinChange = (index: number, value: string) => {
     if (value.length <= 1 && /^\d*$/.test(value)) {
@@ -53,15 +53,16 @@ export default function SignupPage() {
       if (result.user) {
         setShowPinDialog(true)
       }
-    } catch (error) {
-      setError("Failed to sign up with Google. Please try again.")
+    } catch (err) {
+      setErrorMessage("Failed to sign up with Google. Please try again.")
+      console.error(err)
     }
   }
 
   const handlePinSubmit = async () => {
     const finalPin = pin.join('')
     if (finalPin.length !== 4) {
-      setError("Please enter a 4-digit PIN")
+      setErrorMessage("Please enter a 4-digit PIN")
       return
     }
 
@@ -74,10 +75,11 @@ export default function SignupPage() {
           createdAt: new Date().toISOString()
         })
         
-        router.push('/dashboard') // or wherever you want to redirect after signup
+        router.push('/dashboard')
       }
-    } catch (error) {
-      setError("Failed to save PIN. Please try again.")
+    } catch (err) {
+      setErrorMessage("Failed to save PIN. Please try again.")
+      console.error(err)
     }
   }
 
@@ -93,11 +95,10 @@ export default function SignupPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {error && (
-              <div className="text-red-600 text-sm">{error}</div>
+            {errorMessage && (
+              <div className="text-red-600 text-sm">{errorMessage}</div>
             )}
 
-            {/* Google Sign Up */}
             <Button 
               variant="outline" 
               className="w-full" 
@@ -107,7 +108,6 @@ export default function SignupPage() {
               Sign up with Google
             </Button>
 
-            {/* Login link */}
             <div className="text-center text-sm">
               Already have an account?{' '}
               <Link href="/login" className="text-blue-600 hover:text-blue-500">
@@ -117,13 +117,12 @@ export default function SignupPage() {
           </CardContent>
         </Card>
 
-        {/* PIN Dialog */}
         <Dialog open={showPinDialog} onOpenChange={setShowPinDialog}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create Your PIN</DialogTitle>
               <DialogDescription>
-                Please create a 4-digit PIN that you'll use for future logins
+                Please create a 4-digit PIN that you&apos;ll use for future logins
               </DialogDescription>
             </DialogHeader>
             <div className="flex justify-center space-x-4 my-4">
