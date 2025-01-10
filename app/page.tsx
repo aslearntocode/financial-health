@@ -5,25 +5,37 @@ import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import Footer from "@/components/Footer"
 import { useEffect, useState } from "react"
+import { auth } from "@/lib/firebase"
+import { User } from "firebase/auth"
+import { ProfileDropdown } from "@/components/ProfileDropdown"
 
 export default function Home() {
-  const [activeSection, setActiveSection] = useState(0);
+  const [activeSection, setActiveSection] = useState(0)
+  const [user, setUser] = useState<User | null>(null)
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user)
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveSection((prev) => (prev === 2 ? 0 : prev + 1));
-    }, 30000);
+      setActiveSection((prev) => (prev === 2 ? 0 : prev + 1))
+    }, 30000)
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearInterval(interval)
+  }, [])
 
   const handlePrevious = () => {
-    setActiveSection((prev) => (prev === 0 ? 2 : prev - 1));
-  };
+    setActiveSection((prev) => (prev === 0 ? 2 : prev - 1))
+  }
 
   const handleNext = () => {
-    setActiveSection((prev) => (prev === 2 ? 0 : prev + 1));
-  };
+    setActiveSection((prev) => (prev === 2 ? 0 : prev + 1))
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -46,18 +58,17 @@ export default function Home() {
               </Link>
             </div>
             
-            {/* Auth Buttons */}
+            {/* Auth Section */}
             <div className="flex items-center space-x-4">
-              <Link href="/login">
-                <Button variant="ghost" className="text-white hover:text-white/90 hover:bg-blue-500">
-                  Log in
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button className="bg-white text-blue-600 hover:bg-white/90">
-                  Sign up
-                </Button>
-              </Link>
+              {user ? (
+                <ProfileDropdown user={user} />
+              ) : (
+                <Link href="/login">
+                  <Button variant="ghost" className="text-white hover:text-white/90 hover:bg-blue-500">
+                    Log in
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </nav>

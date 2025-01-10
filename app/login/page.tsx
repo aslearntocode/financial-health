@@ -1,29 +1,50 @@
 'use client'
 
 import { useRouter } from "next/navigation"
-import { useState, useEffect } from "react"
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth"
-import { auth } from "@/lib/firebase"
+import { useState } from "react"
+import { GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth"
+import { doc, getDoc, setDoc } from "firebase/firestore"
+import { auth, db } from "@/lib/firebase"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
   const handleGoogleLogin = async () => {
     try {
       setIsLoading(true)
       setError("")
+      
       const provider = new GoogleAuthProvider()
       const result = await signInWithPopup(auth, provider)
       
       if (result.user) {
+        // Check if this is a first-time user
+        const userDoc = await getDoc(doc(db, "users", result.user.uid))
+        
+        if (!userDoc.exists()) {
+          // First time user - save their info
+          await setDoc(doc(db, "users", result.user.uid), {
+            email: result.user.email,
+            name: result.user.displayName,
+            createdAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString()
+          })
+        } else {
+          // Returning user - update last login
+          await setDoc(doc(db, "users", result.user.uid), {
+            lastLogin: new Date().toISOString()
+          }, { merge: true })
+        }
+
+        // Redirect to investment page
         router.push('/investment')
       }
     } catch (err) {
-      console.error(err)
+      console.error('Login error:', err)
       setError("Failed to log in with Google. Please try again.")
     } finally {
       setIsLoading(false)
@@ -31,26 +52,30 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Card className="w-[350px]">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-600 to-blue-700">
+      <Card className="w-[400px]">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
+          <CardTitle className="text-3xl font-bold text-center">Welcome</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <p className="text-center text-gray-600">
+            Log in or create an account to get started
+          </p>
+          
           <Button
             variant="outline"
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="w-full"
+            className="w-full h-12 text-lg"
           >
             {isLoading ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                Signing in...
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                <span>Please wait...</span>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <div className="flex items-center justify-center gap-3">
+                <svg className="w-6 h-6" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                     fill="#4285F4"
@@ -74,7 +99,7 @@ export default function LoginPage() {
           </Button>
 
           {error && (
-            <div className="mt-4 text-sm text-red-500 text-center">
+            <div className="text-red-500 text-sm text-center mt-4">
               {error}
             </div>
           )}
