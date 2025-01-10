@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useState } from "react"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -40,7 +41,14 @@ const formSchema = z.object({
   }),
 })
 
-export function InvestmentForm() {
+interface InvestmentFormProps {
+  onSubmit: (data: any) => void;
+}
+
+export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,14 +61,49 @@ export function InvestmentForm() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
-    // Handle form submission here
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/portfolio-recommendation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: values.name,
+          age: Number(values.age),
+          current_savings: Number(values.currentSavings),
+          monthly_savings: Number(values.monthlySavings),
+          investment_horizon_years: Number(values.investmentHorizon),
+          financial_goal: values.financialGoal
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(
+          errorData?.message || 
+          `HTTP error! status: ${response.status}`
+        );
+      }
+
+      const data = await response.json();
+      console.log('API Response:', data);
+      onSubmit(data);
+      
+    } catch (error) {
+      console.error('Error details:', error);
+      setError('Failed to get investment advice. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <FormField
           control={form.control}
           name="name"
@@ -158,7 +201,19 @@ export function InvestmentForm() {
           )}
         />
 
-        <Button type="submit" className="w-full">Calculate</Button>
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Calculating...' : 'Calculate'}
+        </Button>
+
+        {error && (
+          <div className="text-red-500 mt-2 text-sm">
+            {error}
+          </div>
+        )}
       </form>
     </Form>
   )

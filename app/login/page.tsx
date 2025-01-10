@@ -11,8 +11,31 @@ import {
 import { Input } from "@/components/ui/input"
 import { FcGoogle } from 'react-icons/fc'
 import Header from "@/components/Header"
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 
 export default function LoginPage() {
+  const router = useRouter()
+  const [pin, setPin] = useState(['', '', '', ''])
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const handleGoogleLogin = async () => {
+    try {
+      const provider = new GoogleAuthProvider()
+      const result = await signInWithPopup(auth, provider)
+      
+      if (result.user) {
+        // Redirect to investment page after successful login
+        router.push('/investment')
+      }
+    } catch (err) {
+      setErrorMessage("Failed to log in with Google. Please try again.")
+      console.error(err)
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -67,7 +90,7 @@ export default function LoginPage() {
             </div>
 
             {/* Google Login */}
-            <Button variant="outline" className="w-full" onClick={() => {}}>
+            <Button variant="outline" className="w-full" onClick={handleGoogleLogin}>
               <FcGoogle className="mr-2 h-4 w-4" />
               Google
             </Button>

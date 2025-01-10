@@ -75,7 +75,7 @@ export default function SignupPage() {
           createdAt: new Date().toISOString()
         })
         
-        router.push('/dashboard')
+        router.push('/investment')
       }
     } catch (err) {
       setErrorMessage("Failed to save PIN. Please try again.")

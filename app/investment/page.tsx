@@ -1,30 +1,116 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import Header from "@/components/Header"
 import { InvestmentForm } from "@/components/InvestmentForm"
-import { useState } from "react"
-import { PieChart } from 'react-minimal-pie-chart'
+import { useState, useEffect } from "react"
+import { Pie, PieChart } from "recharts"
+import { auth } from "@/lib/firebase"
+import { onAuthStateChanged } from "firebase/auth"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
 
-// Define proper types instead of any
-interface ChartData {
-  title: string;
-  value: number;
-  color: string;
-}
-
-interface FormData {
-  // Add your form fields here
-  [key: string]: string | number;
-}
-
-// Remove unused InvestmentProps interface since data is not used
-export default function InvestmentPage() {
-  const [showResults, setShowResults] = useState(false);
-
-  // Update the type from any to FormData
-  const handleFormSubmit = (formData: FormData) => {
-    setShowResults(true);
+interface ChartConfig {
+  [key: string]: {
+    color: string;
+    label: string;
   };
+}
+
+interface ChartDataItem {
+  category: string;
+  fill: string;
+  percentage: number;
+}
+
+interface ApiResponse {
+  chartConfig: ChartConfig;
+  chartData: ChartDataItem[];
+  full_response: string;
+  totalPercentage: number;
+}
+
+export default function InvestmentPage() {
+  const router = useRouter();
+  const [showResults, setShowResults] = useState(false);
+  const [apiResponse, setApiResponse] = useState<ApiResponse | null>(null);
+  const [error, setError] = useState<string>('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsAuthenticated(true);
+      } else {
+        router.push('/login');
+      }
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [router]);
+
+  const handleFormSubmit = async (data: any) => {
+    try {
+      console.log('Received response:', data);
+      setApiResponse(data);
+      setShowResults(true);
+      setError('');
+    } catch (error) {
+      console.error('Error handling response:', error);
+      setError('Failed to process investment data');
+    }
+  };
+
+  const transformDataForChart = (chartData: ChartDataItem[]) => {
+    return chartData.map(item => ({
+      category: item.category,
+      percentage: item.percentage,
+      fill: item.fill
+    }))
+  }
+
+  const createChartConfig = (chartConfig: ChartConfig) => {
+    const config = {
+      percentage: {
+        label: "Percentage",
+      },
+    } as any
+
+    Object.entries(chartConfig).forEach(([key, value]) => {
+      if (key !== 'percentage') {
+        config[key.toLowerCase()] = {
+          label: value.label,
+          color: value.color,
+        }
+      }
+    })
+
+    return config
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -38,108 +124,87 @@ export default function InvestmentPage() {
             {/* Left side form */}
             <div className="bg-white p-6 rounded-lg shadow-xl">
               <InvestmentForm onSubmit={handleFormSubmit} />
-            </div>
-
-            {/* Right side donut chart */}
-            <div className="bg-white p-6 rounded-lg shadow-xl">
-              <h2 className="text-2xl font-semibold mb-4">
-                {showResults ? "Your Investment Allocation" : "Investment Allocation"}
-              </h2>
-              <p className="text-gray-600 mb-6">January - June 2024</p>
-              
-              {/* Donut Chart Section */}
-              <div className="relative aspect-square w-full max-w-md mx-auto bg-white">
-                <div className="relative">
-                  <PieChart
-                    data={!showResults ? [
-                      { title: 'Segment 1', value: 1, color: '#e5e7eb' },
-                      { title: 'Segment 2', value: 1, color: '#d1d5db' },
-                      { title: 'Segment 3', value: 1, color: '#9ca3af' },
-                      { title: 'Segment 4', value: 1, color: '#6b7280' },
-                      { title: 'Segment 5', value: 1, color: '#4b5563' },
-                    ] : [
-                      { title: 'Segment 1', value: 25, color: '#4F46E5' }, // Royal Blue
-                      { title: 'Segment 2', value: 20, color: '#34D399' }, // Green
-                      { title: 'Segment 3', value: 20, color: '#A855F7' }, // Purple
-                      { title: 'Segment 4', value: 15, color: '#F59E0B' }, // Orange/Gold
-                      { title: 'Segment 5', value: 20, color: '#EC4899' }  // Pink/Red
-                    ]}
-                    lineWidth={40}
-                    labelStyle={{
-                      fontSize: '0px',
-                    }}
-                    startAngle={-90}
-                    background="#ffffff"
-                    animate
-                  />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-4xl font-bold">
-                      {showResults ? "1,125" : "0"}
-                    </span>
-                    <span className="text-gray-500">Visitors</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Trend Indicator */}
-              {showResults && (
-                <div className="text-center mt-6">
-                  <p className="text-lg font-semibold">
-                    Trending up by 5.2% this month <span className="inline-block transform rotate-45">↗</span>
-                  </p>
-                  <p className="text-gray-500 mt-2">
-                    Showing total visitors for the last 6 months
-                  </p>
+              {error && (
+                <div className="mt-4 text-red-600 text-sm">
+                  {error}
                 </div>
               )}
-
-              {/* Legend Section */}
-              <div className="mt-6 space-y-3">
-                {!showResults ? (
-                  <div className="text-center text-gray-400">
-                    Submit form to see your personalized allocation
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-[#4F46E5] mr-2"></div>
-                        <span>Direct Traffic</span>
-                      </div>
-                      <span>25%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-[#34D399] mr-2"></div>
-                        <span>Social Media</span>
-                      </div>
-                      <span>20%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-[#A855F7] mr-2"></div>
-                        <span>Email</span>
-                      </div>
-                      <span>20%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-[#F59E0B] mr-2"></div>
-                        <span>Organic Search</span>
-                      </div>
-                      <span>15%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 rounded-full bg-[#EC4899] mr-2"></div>
-                        <span>Referral</span>
-                      </div>
-                      <span>20%</span>
-                    </div>
-                  </>
-                )}
-              </div>
             </div>
+
+            {/* Right side results */}
+            {showResults && apiResponse ? (
+              <Card className="bg-white">
+                <CardHeader>
+                  <CardTitle className="text-4xl font-bold">Your Investment Allocation</CardTitle>
+                  <p className="text-xl text-gray-700 mt-4">
+                    Based on your profile, here&apos;s your recommended investment allocation:
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between gap-16">
+                    {/* Pie Chart */}
+                    <ChartContainer
+                      config={createChartConfig(apiResponse.chartConfig)}
+                      className="w-[500px] aspect-square"
+                    >
+                      <PieChart width={500} height={500}>
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent />}
+                        />
+                        <Pie
+                          data={transformDataForChart(apiResponse.chartData)}
+                          dataKey="percentage"
+                          nameKey="category"
+                          innerRadius={60}
+                          outerRadius={200}
+                        />
+                      </PieChart>
+                    </ChartContainer>
+
+                    {/* Legend */}
+                    <div className="flex flex-col space-y-6">
+                      {apiResponse.chartData.map((item) => (
+                        <div key={item.category} className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 mr-16">
+                            <div 
+                              className="w-5 h-5 rounded-full"
+                              style={{ backgroundColor: item.fill }}
+                            />
+                            <span className="text-2xl">
+                              {item.category.includes(' ') ? (
+                                <div>
+                                  {item.category.split(' ').map((word, i) => (
+                                    <div key={i}>{word}</div>
+                                  ))}
+                                </div>
+                              ) : (
+                                item.category
+                              )}
+                            </span>
+                          </div>
+                          <span className="text-2xl font-medium">{item.percentage}%</span>
+                        </div>
+                      ))}
+                      
+                      {/* Total with border */}
+                      <div className="pt-6 mt-2 border-t border-gray-200">
+                        <div className="flex items-center justify-between">
+                          <span className="text-2xl font-bold mr-16">Total</span>
+                          <span className="text-2xl font-bold">{apiResponse.totalPercentage}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="bg-white p-6 rounded-lg shadow-xl">
+                <div className="text-center text-gray-400">
+                  Submit form to see your personalized allocation
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
