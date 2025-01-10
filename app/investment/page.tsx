@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/firebase"
+import { saveInvestmentData } from '@/lib/db'
 
 export default function InvestmentPage() {
   const router = useRouter()
@@ -57,21 +58,26 @@ export default function InvestmentPage() {
 
   const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!auth.currentUser) {
+      sessionStorage.setItem('formData', JSON.stringify(formData))
+      sessionStorage.setItem('returnUrl', window.location.pathname)
+      router.push('/login')
+      return
+    }
+    
     setIsLoading(true)
     setError(null)
     
     try {
+      // Prepare the data for API
       const apiFormData = {
-        name: formData.name,
-        age: parseInt(formData.age),
-        current_savings: parseInt(formData.current_savings),
-        monthly_savings: parseInt(formData.monthly_savings),
-        investment_horizon_years: parseInt(formData.investment_horizon_years),
-        financial_goal: formData.financial_goal
+        ...formData,
+        userId: auth.currentUser.uid
       }
-
-      console.log('1. Sending form data:', apiFormData)
-
+      
+      console.log('1. Sending data to API:', apiFormData)
+      
       const response = await fetch('/api/calculate-allocation', {
         method: 'POST',
         headers: {
@@ -80,24 +86,53 @@ export default function InvestmentPage() {
         body: JSON.stringify(apiFormData)
       })
 
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Failed to calculate allocation')
+      }
+
       const data = await response.json()
       console.log('2. Received response:', data)
 
-      if (!response.ok || data.error) {
-        throw new Error(data.error || 'Failed to calculate allocation')
+      if (!data.allocation) {
+        throw new Error('No allocation data received')
       }
 
-      if (!data.allocation || !Array.isArray(data.allocation)) {
-        throw new Error('Invalid allocation data received')
-      }
-
+      // Set the allocation data
       setAllocation(data.allocation)
       setShowChart(true)
 
+      // Save to Supabase
+      try {
+        console.log('Data being sent to saveInvestmentData:', {
+          user_id: auth.currentUser.uid,
+          name: formData.name,
+          age: parseInt(formData.age),
+          current_savings: parseFloat(formData.current_savings),
+          monthly_savings: parseFloat(formData.monthly_savings),
+          investment_horizon_years: parseInt(formData.investment_horizon_years),
+          financial_goal: formData.financial_goal,
+          allocation: data.allocation
+        })
+        await saveInvestmentData({
+          user_id: auth.currentUser.uid,
+          name: formData.name,
+          age: parseInt(formData.age),
+          current_savings: parseFloat(formData.current_savings),
+          monthly_savings: parseFloat(formData.monthly_savings),
+          investment_horizon_years: parseInt(formData.investment_horizon_years),
+          financial_goal: formData.financial_goal,
+          allocation: data.allocation
+        })
+        console.log('3. Data saved to Supabase')
+      } catch (supabaseError) {
+        console.error('Failed to save to Supabase:', supabaseError)
+        // Don't throw here - we still want to show the chart even if saving fails
+      }
+
     } catch (error) {
-      console.error('3. Error:', error)
-      setError(error instanceof Error ? error.message : 'An unknown error occurred')
-      setShowChart(false)
+      console.error('Error in handleCalculate:', error)
+      setError(error instanceof Error ? error.message : 'Failed to calculate allocation')
     } finally {
       setIsLoading(false)
     }
