@@ -3,11 +3,11 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import Footer from "@/components/Footer"
 import { useEffect, useState } from "react"
 import { auth } from "@/lib/firebase"
 import { User } from "firebase/auth"
 import { ProfileDropdown } from "@/components/ProfileDropdown"
+import Testimonials from "@/components/Testimonials"
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState(0)
@@ -292,8 +292,9 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      <Footer />
+      
+      {/* Add Testimonials before the closing div */}
+      <Testimonials />
     </div>
   )
 }

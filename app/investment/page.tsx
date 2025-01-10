@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { PieChart } from "@/components/PieChart"
 import Header from "@/components/Header"
 import { Button } from "@/components/ui/button"
@@ -13,8 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useRouter } from "next/navigation"
+import { auth } from "@/lib/firebase"
 
 export default function InvestmentPage() {
+  const router = useRouter()
   const [showChart, setShowChart] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -30,6 +33,27 @@ export default function InvestmentPage() {
 
   // Add debug log for render
   console.log('Current state:', { showChart, isLoading, error, allocation })
+
+  // Add click handler for the entire page
+  useEffect(() => {
+    const handlePageClick = () => {
+      if (!auth.currentUser) {
+        // Save current form data
+        sessionStorage.setItem('formData', JSON.stringify(formData))
+        sessionStorage.setItem('returnUrl', window.location.pathname)
+        router.push('/login')
+      }
+    }
+
+    // Add click listener to the page container
+    const pageContainer = document.getElementById('investment-page-container')
+    pageContainer?.addEventListener('click', handlePageClick)
+
+    // Cleanup listener on unmount
+    return () => {
+      pageContainer?.removeEventListener('click', handlePageClick)
+    }
+  }, [auth.currentUser, formData, router])
 
   const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,7 +104,7 @@ export default function InvestmentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div id="investment-page-container" className="min-h-screen bg-white">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

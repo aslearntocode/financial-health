@@ -60,15 +60,19 @@ export default function Footer() {
             <h3 className="text-lg font-semibold">Contact Us</h3>
             <ul className="space-y-2">
               <li>
-                <a href="mailto:support@example.com" className="hover:text-white/90">support@example.com</a>
+                <a href="mailto:support@financialhealth.co.in" className="hover:text-white/90">
+                  support@financialhealth.co.in
+                </a>
               </li>
               <li>
-                <a href="tel:+1234567890" className="hover:text-white/90">+1 (234) 567-890</a>
+                <a href="tel:+919321314553" className="hover:text-white/90">
+                  +91 93213 14553
+                </a>
               </li>
               <li>
                 <address className="not-italic">
-                  123 Investment Street<br />
-                  New York, NY 10001
+                  Mumbai 400012<br />
+                  India
                 </address>
               </li>
             </ul>
