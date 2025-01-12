@@ -16,6 +16,15 @@ import {
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/firebase"
 import { saveInvestmentData } from '@/lib/db'
+import { supabase } from '../../lib/supabase'
+
+interface InvestmentRecord {
+  stocks: number
+  bonds: number
+  cash: number
+  real_estate: number
+  user_id: string
+}
 
 export default function InvestmentPage() {
   const router = useRouter()
@@ -31,10 +40,8 @@ export default function InvestmentPage() {
     investment_horizon_years: '',
     financial_goal: ''
   })
+  const [savedRecord, setSavedRecord] = useState<InvestmentRecord | null>(null)
   const [userName, setUserName] = useState('')
-  const [age, setAge] = useState('')
-  const [investmentHorizon, setInvestmentHorizon] = useState('')
-  const [financialGoal, setFinancialGoal] = useState('')
 
   // Add debug log for render
   console.log('Current state:', { showChart, isLoading, error, allocation })
@@ -60,17 +67,48 @@ export default function InvestmentPage() {
     }
   }, [auth.currentUser, formData, router])
 
-  // Add useEffect to get user's name from Firebase
+  // Add this effect to fetch saved record when component mounts
+  useEffect(() => {
+    async function fetchSavedInvestment() {
+      try {
+        // Get current Firebase user
+        const user = auth.currentUser
+        if (!user) {
+          setIsLoading(false)
+          return
+        }
+
+        // Fetch the latest record for this user
+        const { data, error } = await supabase
+          .from('investment_records')
+          .select('*')
+          .eq('user_id', user.uid)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (error) throw error
+        setSavedRecord(data)
+      } catch (error) {
+        console.error('Error fetching saved investment:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchSavedInvestment()
+  }, []) // Run once when component mounts
+
+  // Add useEffect to get and set user's name from Firebase auth
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        // Get display name from Firebase user
+        // Get the user's name from Firebase auth
         const displayName = user.displayName || user.email?.split('@')[0] || ''
         setUserName(displayName)
       }
     })
 
-    // Cleanup subscription
     return () => unsubscribe()
   }, [])
 
@@ -244,6 +282,7 @@ export default function InvestmentPage() {
                     <SelectItem value="Education">Education</SelectItem>
                     <SelectItem value="House">House Purchase</SelectItem>
                     <SelectItem value="Wealth">Wealth Creation</SelectItem>
+                    <SelectItem value="Passive Income">Passive Income</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
