@@ -1,6 +1,41 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://rruaznytrgasfzkvahyr.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJydWF6bnl0cmdhc2Z6a3ZhaHlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY1MDM3OTcsImV4cCI6MjA1MjA3OTc5N30.ITz519ZuISrQcGKmhA51YNu8VkAD8o03r5cMMFgpXfM'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey) 
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables')
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+})
+
+// Add a simple test function to verify connection
+export async function testSupabaseConnection() {
+  try {
+    const { data, error } = await supabase
+      .from('investment_records')
+      .select('created_at')
+      .limit(1)
+
+    if (error) {
+      console.error('Supabase connection test error:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      })
+      return false
+    }
+
+    console.log('Supabase connection successful')
+    return true
+  } catch (err) {
+    console.error('Supabase connection test failed:', err)
+    return false
+  }
+} 

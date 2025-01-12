@@ -7,81 +7,62 @@ interface InvestmentData {
   age: number
   current_savings: number
   monthly_savings: number
-  investment_horizon_years: number
+  investment_horizon: number
   financial_goal: string
   allocation: Array<{
     name: string
     value: number
     color: string
   }>
-  created_at?: Date
 }
 
 export async function saveInvestmentData(data: InvestmentData) {
   try {
-    // Get the current Firebase user
-    const firebaseUser = auth.currentUser
-    if (!firebaseUser) {
-      throw new Error('No authenticated user found')
-    }
+    console.log('Attempting to save data:', {
+      ...data,
+      user_id: data.user_id.substring(0, 8) + '...'
+    });
 
-    // Get Firebase ID token
-    const idToken = await firebaseUser.getIdToken()
-    
-    // Set Supabase auth header
-    supabase.auth.setSession({
-      access_token: idToken,
-      refresh_token: ''
-    })
-
-    // Log the incoming data
-    console.log('Raw data to save:', data)
-
-    // Format data for Supabase
-    const formattedData = {
-      user_id: firebaseUser.uid,
-      name: data.name || '',
-      age: Number(data.age) || 0,
-      current_savings: Number(data.current_savings) || 0,
-      monthly_savings: Number(data.monthly_savings) || 0,
-      investment_horizon: Number(data.investment_horizon_years) || 0,
-      financial_goal: data.financial_goal || '',
-      allocation: Array.isArray(data.allocation) ? data.allocation : [],
+    const record = {
+      user_id: data.user_id,
+      name: data.name,
+      age: data.age,
+      current_savings: data.current_savings,
+      monthly_savings: data.monthly_savings,
+      investment_horizon: data.investment_horizon,
+      financial_goal: data.financial_goal,
+      allocation: data.allocation,
       created_at: new Date().toISOString()
-    }
+    };
 
-    console.log('Attempting to save with user:', firebaseUser.uid)
-    console.log('Formatted data:', formattedData)
+    console.log('Prepared record:', record);
 
-    // First insert the data
     const { data: result, error: insertError } = await supabase
       .from('investment_records')
-      .insert([formattedData])
+      .insert([record])
       .select()
+      .single();
 
     if (insertError) {
-      console.error('Full insert error:', insertError)
-      throw new Error(`Insert failed: ${insertError.message}`)
+      console.error('Supabase insert error:', {
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint,
+        code: insertError.code
+      });
+      throw new Error(`Failed to save investment data: ${insertError.message}`);
     }
 
-    if (!result) {
-      throw new Error('No data returned from insert')
-    }
+    console.log('Successfully saved investment data:', result);
+    return result;
 
-    console.log('Data saved successfully:', result)
-    return result[0]
-
-  } catch (error: any) {
-    console.error('Full error object:', error)
-    console.error('Error saving data:', {
-      name: error.name,
-      message: error.message,
-      code: error?.code,
-      details: error?.details,
-      hint: error?.hint,
-      stack: error.stack
-    })
-    throw error
+  } catch (error) {
+    console.error('SaveInvestmentData error:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    throw error;
   }
 }
 

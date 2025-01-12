@@ -16,7 +16,7 @@ import {
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/firebase"
 import { saveInvestmentData } from '@/lib/db'
-import { supabase } from '../../lib/supabase'
+import { supabase, testSupabaseConnection } from '../../lib/supabase'
 
 interface InvestmentRecord {
   stocks: number
@@ -24,6 +24,41 @@ interface InvestmentRecord {
   cash: number
   real_estate: number
   user_id: string
+}
+
+// Add type for Supabase error
+type PostgrestError = {
+  code?: string;
+  message?: string;
+  details?: string;
+};
+
+// Modify the checkExistingRecord function with simpler error handling
+async function checkExistingRecord(formData: any, userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from('investment_records')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('age', parseInt(formData.age))
+      .eq('current_savings', parseFloat(formData.current_savings))
+      .eq('monthly_savings', parseFloat(formData.monthly_savings))
+      .eq('investment_horizon', parseInt(formData.investment_horizon_years))
+      .eq('financial_goal', formData.financial_goal)
+      .single();
+
+    if (error) {
+      console.log('Query error:', error);
+      return null;
+    }
+
+    console.log('Found existing record:', data);
+    return data;
+
+  } catch (err) {
+    console.error('Database error:', err);
+    throw new Error(err instanceof Error ? err.message : 'Database query failed');
+  }
 }
 
 export default function InvestmentPage() {
@@ -112,27 +147,58 @@ export default function InvestmentPage() {
     return () => unsubscribe()
   }, [])
 
+  // Add this effect at the top of your component
+  useEffect(() => {
+    async function checkConnection() {
+      const isConnected = await testSupabaseConnection();
+      console.log('Supabase connection status:', isConnected);
+    }
+    checkConnection();
+  }, []);
+
   const handleCalculate = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     
     if (!auth.currentUser) {
-      sessionStorage.setItem('formData', JSON.stringify(formData))
-      sessionStorage.setItem('returnUrl', window.location.pathname)
-      router.push('/login')
-      return
+      sessionStorage.setItem('formData', JSON.stringify(formData));
+      sessionStorage.setItem('returnUrl', window.location.pathname);
+      router.push('/login');
+      return;
     }
     
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
     
     try {
-      // Prepare the data for API
+      // Get the user's name from auth
+      const userName = auth.currentUser.displayName || 
+                      auth.currentUser.email?.split('@')[0] || 
+                      'Anonymous User';
+
+      // Check for existing record
+      const existingRecord = await checkExistingRecord(formData, auth.currentUser.uid);
+      
+      if (existingRecord && existingRecord.allocation) {
+        console.log('Using existing record:', existingRecord);
+        setAllocation(existingRecord.allocation);
+        setShowChart(true);
+        return;
+      }
+
+      // If no existing record, call OpenAI API
+      console.log('No existing record found, calling OpenAI API...');
+      
       const apiFormData = {
         ...formData,
-        userId: auth.currentUser.uid
-      }
+        name: userName, // Include the name
+        userId: auth.currentUser.uid,
+        age: parseInt(formData.age),
+        current_savings: parseFloat(formData.current_savings),
+        monthly_savings: parseFloat(formData.monthly_savings),
+        investment_horizon: parseInt(formData.investment_horizon_years)
+      };
       
-      console.log('1. Sending data to API:', apiFormData)
+      console.log('Sending data to API:', apiFormData);
       
       const response = await fetch('/api/calculate-allocation', {
         method: 'POST',
@@ -140,59 +206,56 @@ export default function InvestmentPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(apiFormData)
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Failed to calculate allocation')
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json()
-      console.log('2. Received response:', data)
+      const data = await response.json();
+      console.log('API Response:', data);
 
       if (!data.allocation) {
-        throw new Error('No allocation data received')
+        throw new Error('No allocation data received from API');
       }
 
-      // Set the allocation data
-      setAllocation(data.allocation)
-      setShowChart(true)
+      // Set the allocation data from API response
+      setAllocation(data.allocation);
+      setShowChart(true);
 
-      // Save to Supabase
+      // Save the new data to Supabase with the name
       try {
-        console.log('Data being sent to saveInvestmentData:', {
+        const saveData = {
           user_id: auth.currentUser.uid,
-          name: formData.name,
+          name: userName, // Ensure name is included
           age: parseInt(formData.age),
           current_savings: parseFloat(formData.current_savings),
           monthly_savings: parseFloat(formData.monthly_savings),
-          investment_horizon_years: parseInt(formData.investment_horizon_years),
+          investment_horizon: parseInt(formData.investment_horizon_years),
           financial_goal: formData.financial_goal,
           allocation: data.allocation
-        })
-        await saveInvestmentData({
-          user_id: auth.currentUser.uid,
-          name: formData.name,
-          age: parseInt(formData.age),
-          current_savings: parseFloat(formData.current_savings),
-          monthly_savings: parseFloat(formData.monthly_savings),
-          investment_horizon_years: parseInt(formData.investment_horizon_years),
-          financial_goal: formData.financial_goal,
-          allocation: data.allocation
-        })
-        console.log('3. Data saved to Supabase')
+        };
+
+        console.log('Saving data with name:', saveData);
+        
+        await saveInvestmentData(saveData);
+        console.log('New data saved to Supabase');
       } catch (supabaseError) {
-        console.error('Failed to save to Supabase:', supabaseError)
-        // Don't throw here - we still want to show the chart even if saving fails
+        console.error('Failed to save to Supabase:', supabaseError);
+        setError('Warning: Failed to save your results, but you can still view them.');
       }
 
     } catch (error) {
-      console.error('Error in handleCalculate:', error)
-      setError(error instanceof Error ? error.message : 'Failed to calculate allocation')
+      console.error('HandleCalculate error:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
+      setError(error instanceof Error ? error.message : 'Failed to calculate allocation');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div id="investment-page-container" className="min-h-screen bg-white">
