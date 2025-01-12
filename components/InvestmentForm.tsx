@@ -151,6 +151,7 @@ export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
                   <SelectItem value="house">Buying a House</SelectItem>
                   <SelectItem value="education">Education Savings</SelectItem>
                   <SelectItem value="wealth">Wealth Building</SelectItem>
+                  <SelectItem value="income">Passive Income</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>

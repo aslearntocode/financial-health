@@ -31,6 +31,10 @@ export default function InvestmentPage() {
     investment_horizon_years: '',
     financial_goal: ''
   })
+  const [userName, setUserName] = useState('')
+  const [age, setAge] = useState('')
+  const [investmentHorizon, setInvestmentHorizon] = useState('')
+  const [financialGoal, setFinancialGoal] = useState('')
 
   // Add debug log for render
   console.log('Current state:', { showChart, isLoading, error, allocation })
@@ -55,6 +59,20 @@ export default function InvestmentPage() {
       pageContainer?.removeEventListener('click', handlePageClick)
     }
   }, [auth.currentUser, formData, router])
+
+  // Add useEffect to get user's name from Firebase
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        // Get display name from Firebase user
+        const displayName = user.displayName || user.email?.split('@')[0] || ''
+        setUserName(displayName)
+      }
+    })
+
+    // Cleanup subscription
+    return () => unsubscribe()
+  }, [])
 
   const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -158,9 +176,9 @@ export default function InvestmentPage() {
                   id="name"
                   type="text"
                   placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
+                  value={userName}
+                  readOnly
+                  className="form-input bg-gray-100"
                 />
               </div>
 
