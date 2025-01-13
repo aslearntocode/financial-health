@@ -24,6 +24,8 @@ interface InvestmentRecord {
   cash: number
   real_estate: number
   user_id: string
+  has_emergency_fund: 'Y' | 'N'
+  needs_money_during_horizon: 'Y' | 'N'
 }
 
 // Add type for Supabase error
@@ -33,31 +35,52 @@ type PostgrestError = {
   details?: string;
 };
 
-// Modify the checkExistingRecord function with simpler error handling
+// Modify the checkExistingRecord function to be more precise
 async function checkExistingRecord(formData: any, userId: string) {
   try {
+    // Format the values for comparison
+    const searchParams = {
+      user_id: userId,
+      age: parseInt(formData.age),
+      current_savings: parseFloat(formData.current_savings),
+      monthly_savings: parseFloat(formData.monthly_savings),
+      investment_horizon: parseInt(formData.investment_horizon_years),
+      financial_goal: formData.financial_goal,
+      has_emergency_fund: formData.has_emergency_fund,
+      needs_money_during_horizon: formData.needs_money_during_horizon
+    };
+
+    console.log('Searching for existing record with params:', searchParams);
+
     const { data, error } = await supabase
       .from('investment_records')
       .select('*')
-      .eq('user_id', userId)
-      .eq('age', parseInt(formData.age))
-      .eq('current_savings', parseFloat(formData.current_savings))
-      .eq('monthly_savings', parseFloat(formData.monthly_savings))
-      .eq('investment_horizon', parseInt(formData.investment_horizon_years))
-      .eq('financial_goal', formData.financial_goal)
-      .single();
+      .eq('user_id', searchParams.user_id)
+      .eq('age', searchParams.age)
+      .eq('current_savings', searchParams.current_savings)
+      .eq('monthly_savings', searchParams.monthly_savings)
+      .eq('investment_horizon', searchParams.investment_horizon)
+      .eq('financial_goal', searchParams.financial_goal)
+      .eq('has_emergency_fund', searchParams.has_emergency_fund)
+      .eq('needs_money_during_horizon', searchParams.needs_money_during_horizon);
 
     if (error) {
-      console.log('Query error:', error);
+      console.error('Supabase query error:', error);
       return null;
     }
 
-    console.log('Found existing record:', data);
-    return data;
+    // Log the results
+    console.log('Supabase query returned:', {
+      recordsFound: data?.length || 0,
+      firstRecord: data?.[0] || null
+    });
+
+    // Return the first matching record if any exists
+    return data && data.length > 0 ? data[0] : null;
 
   } catch (err) {
     console.error('Database error:', err);
-    throw new Error(err instanceof Error ? err.message : 'Database query failed');
+    return null;
   }
 }
 
@@ -73,7 +96,9 @@ export default function InvestmentPage() {
     current_savings: '',
     monthly_savings: '',
     investment_horizon_years: '',
-    financial_goal: ''
+    financial_goal: '',
+    has_emergency_fund: 'N' as 'Y' | 'N',  // Add explicit default
+    needs_money_during_horizon: 'N' as 'Y' | 'N'  // Add explicit default
   })
   const [savedRecord, setSavedRecord] = useState<InvestmentRecord | null>(null)
   const [userName, setUserName] = useState('')
@@ -168,37 +193,49 @@ export default function InvestmentPage() {
     
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      // Get the user's name from auth
+      // Check for existing record first
+      console.log('Checking for existing record with form data:', formData);
+      
+      const existingRecord = await checkExistingRecord(formData, auth.currentUser.uid);
+      
+      if (existingRecord) {
+        console.log('Found existing record:', existingRecord);
+        
+        if (existingRecord.allocation) {
+          console.log('Using existing allocation:', existingRecord.allocation);
+          setAllocation(existingRecord.allocation);
+          setShowChart(true);
+          setIsLoading(false);
+          return; // Exit early - no need to call OpenAI API
+        } else {
+          console.log('Existing record found but no allocation data');
+        }
+      } else {
+        console.log('No existing record found');
+      }
+
+      // If we reach here, we need to call the OpenAI API
+      console.log('Proceeding with OpenAI API call');
+      
       const userName = auth.currentUser.displayName || 
                       auth.currentUser.email?.split('@')[0] || 
                       'Anonymous User';
 
-      // Check for existing record
-      const existingRecord = await checkExistingRecord(formData, auth.currentUser.uid);
-      
-      if (existingRecord && existingRecord.allocation) {
-        console.log('Using existing record:', existingRecord);
-        setAllocation(existingRecord.allocation);
-        setShowChart(true);
-        return;
-      }
-
-      // If no existing record, call OpenAI API
-      console.log('No existing record found, calling OpenAI API...');
-      
       const apiFormData = {
-        ...formData,
-        name: userName, // Include the name
         userId: auth.currentUser.uid,
-        age: parseInt(formData.age),
-        current_savings: parseFloat(formData.current_savings),
-        monthly_savings: parseFloat(formData.monthly_savings),
-        investment_horizon: parseInt(formData.investment_horizon_years)
+        name: userName,
+        age: formData.age,
+        current_savings: formData.current_savings,
+        monthly_savings: formData.monthly_savings,
+        investment_horizon_years: formData.investment_horizon_years,
+        financial_goal: formData.financial_goal,
+        has_emergency_fund: formData.has_emergency_fund,
+        needs_money_during_horizon: formData.needs_money_during_horizon
       };
       
-      console.log('Sending data to API:', apiFormData);
+      console.log('Making API request with:', apiFormData);
       
       const response = await fetch('/api/calculate-allocation', {
         method: 'POST',
@@ -208,49 +245,61 @@ export default function InvestmentPage() {
         body: JSON.stringify(apiFormData)
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      const responseText = await response.text();
+      console.log('Raw API response:', responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error('Failed to parse API response:', e);
+        throw new Error('Invalid API response');
       }
 
-      const data = await response.json();
-      console.log('API Response:', data);
+      if (!response.ok) {
+        throw new Error(data.message || `API error: ${response.status}`);
+      }
 
       if (!data.allocation) {
         throw new Error('No allocation data received from API');
       }
 
-      // Set the allocation data from API response
       setAllocation(data.allocation);
       setShowChart(true);
 
-      // Save the new data to Supabase with the name
+      // Save new result to Supabase
       try {
-        const saveData = {
+        const finalSaveData = {
           user_id: auth.currentUser.uid,
-          name: userName, // Ensure name is included
+          name: userName,
           age: parseInt(formData.age),
           current_savings: parseFloat(formData.current_savings),
           monthly_savings: parseFloat(formData.monthly_savings),
           investment_horizon: parseInt(formData.investment_horizon_years),
           financial_goal: formData.financial_goal,
+          has_emergency_fund: formData.has_emergency_fund,
+          needs_money_during_horizon: formData.needs_money_during_horizon,
           allocation: data.allocation
         };
 
-        console.log('Saving data with name:', saveData);
+        console.log('Saving new allocation to Supabase:', finalSaveData);
         
-        await saveInvestmentData(saveData);
-        console.log('New data saved to Supabase');
+        const { error: supabaseError } = await supabase
+          .from('investment_records')
+          .insert([finalSaveData]);
+
+        if (supabaseError) {
+          throw supabaseError;
+        }
+
+        console.log('Successfully saved to Supabase');
       } catch (supabaseError) {
-        console.error('Failed to save to Supabase:', supabaseError);
+        console.error('Supabase save error:', supabaseError);
         setError('Warning: Failed to save your results, but you can still view them.');
       }
 
     } catch (error) {
-      console.error('HandleCalculate error:', {
-        error,
-        message: error instanceof Error ? error.message : 'Unknown error'
-      });
+      console.error('HandleCalculate error:', error);
       setError(error instanceof Error ? error.message : 'Failed to calculate allocation');
     } finally {
       setIsLoading(false);
@@ -350,6 +399,46 @@ export default function InvestmentPage() {
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="has_emergency_fund">Do you have emergency funds equivalent to 6 months of your income?</Label>
+                <Select 
+                  value={formData.has_emergency_fund}
+                  onValueChange={(value: 'Y' | 'N') => {
+                    console.log('Emergency fund selection:', value);
+                    setFormData(prev => ({ ...prev, has_emergency_fund: value }));
+                  }}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select yes or no" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Y">Yes</SelectItem>
+                    <SelectItem value="N">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="needs_money_during_horizon">Do you anticipate needing this money during your investment horizon?</Label>
+                <Select 
+                  value={formData.needs_money_during_horizon}
+                  onValueChange={(value: 'Y' | 'N') => {
+                    console.log('Money needs selection:', value);
+                    setFormData(prev => ({ ...prev, needs_money_during_horizon: value }));
+                  }}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select yes or no" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Y">Yes</SelectItem>
+                    <SelectItem value="N">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Calculating...' : 'Calculate Allocation'}
               </Button>
@@ -363,9 +452,6 @@ export default function InvestmentPage() {
               <p>Calculating your allocation...</p>
             ) : showChart && allocation.length > 0 ? (
               <>
-                <p className="text-gray-600 mb-8">
-                  Based on your profile, here's your recommended investment allocation:
-                </p>
                 <PieChart data={allocation} />
               </>
             ) : (
