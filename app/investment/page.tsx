@@ -245,6 +245,8 @@ export default function InvestmentPage() {
         body: JSON.stringify(apiFormData)
       });
 
+      // First, log the raw response
+      console.log('Response status:', response.status);
       const responseText = await response.text();
       console.log('Raw API response:', responseText);
 
@@ -252,8 +254,8 @@ export default function InvestmentPage() {
       try {
         data = JSON.parse(responseText);
       } catch (e) {
-        console.error('Failed to parse API response:', e);
-        throw new Error('Invalid API response');
+        console.error('JSON Parse Error:', e);
+        throw new Error(`Failed to parse API response. Raw response: ${responseText}`);
       }
 
       if (!response.ok) {
@@ -261,7 +263,7 @@ export default function InvestmentPage() {
       }
 
       if (!data.allocation) {
-        throw new Error('No allocation data received from API');
+        throw new Error('No allocation data in API response');
       }
 
       setAllocation(data.allocation);
