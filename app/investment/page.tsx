@@ -97,8 +97,8 @@ export default function InvestmentPage() {
     monthly_savings: '',
     investment_horizon_years: '',
     financial_goal: '',
-    has_emergency_fund: 'N' as 'Y' | 'N',  // Add explicit default
-    needs_money_during_horizon: 'N' as 'Y' | 'N'  // Add explicit default
+    has_emergency_fund: 'N' as 'Y' | 'N',
+    needs_money_during_horizon: 'N' as 'Y' | 'N'
   })
   const [savedRecord, setSavedRecord] = useState<InvestmentRecord | null>(null)
   const [userName, setUserName] = useState('')
@@ -127,6 +127,32 @@ export default function InvestmentPage() {
     }
   }, [auth.currentUser, formData, router])
 
+  // Load saved data when component mounts
+  useEffect(() => {
+    try {
+      // Load saved form data and allocation from localStorage
+      const savedFormData = localStorage.getItem('investmentFormData');
+      const savedAllocation = localStorage.getItem('investmentAllocation');
+      
+      console.log('Loading saved data:', { savedFormData, savedAllocation });
+      
+      if (savedFormData) {
+        const parsedFormData = JSON.parse(savedFormData);
+        console.log('Setting form data:', parsedFormData);
+        setFormData(parsedFormData);
+      }
+      
+      if (savedAllocation) {
+        const parsedAllocation = JSON.parse(savedAllocation);
+        console.log('Setting allocation:', parsedAllocation);
+        setAllocation(parsedAllocation);
+        setShowChart(true);
+      }
+    } catch (error) {
+      console.error('Error loading saved data:', error);
+    }
+  }, []); // Run once when component mounts
+
   // Add this effect to fetch saved record when component mounts
   useEffect(() => {
     async function fetchSavedInvestment() {
@@ -148,7 +174,40 @@ export default function InvestmentPage() {
           .single()
 
         if (error) throw error
-        setSavedRecord(data)
+        
+        if (data) {
+          // Save to localStorage
+          localStorage.setItem('investmentFormData', JSON.stringify({
+            name: data.name,
+            age: data.age.toString(),
+            current_savings: data.current_savings.toString(),
+            monthly_savings: data.monthly_savings.toString(),
+            investment_horizon_years: data.investment_horizon.toString(),
+            financial_goal: data.financial_goal,
+            has_emergency_fund: data.has_emergency_fund,
+            needs_money_during_horizon: data.needs_money_during_horizon
+          }));
+          
+          if (data.allocation) {
+            localStorage.setItem('investmentAllocation', JSON.stringify(data.allocation));
+            setAllocation(data.allocation);
+            setShowChart(true);
+          }
+          
+          // Set form data
+          setFormData({
+            name: data.name,
+            age: data.age.toString(),
+            current_savings: data.current_savings.toString(),
+            monthly_savings: data.monthly_savings.toString(),
+            investment_horizon_years: data.investment_horizon.toString(),
+            financial_goal: data.financial_goal,
+            has_emergency_fund: data.has_emergency_fund,
+            needs_money_during_horizon: data.needs_money_during_horizon
+          });
+          
+          setSavedRecord(data);
+        }
       } catch (error) {
         console.error('Error fetching saved investment:', error)
       } finally {
@@ -298,6 +357,24 @@ export default function InvestmentPage() {
       } catch (supabaseError) {
         console.error('Supabase save error:', supabaseError);
         setError('Warning: Failed to save your results, but you can still view them.');
+      }
+
+      if (data.allocation) {
+        console.log('Saving to localStorage:', { formData, allocation: data.allocation });
+        
+        // Save both form data and allocation
+        localStorage.setItem('investmentFormData', JSON.stringify(formData));
+        localStorage.setItem('investmentAllocation', JSON.stringify(data.allocation));
+        
+        // Update state
+        setAllocation(data.allocation);
+        setShowChart(true);
+        
+        // Verify data was saved
+        console.log('Verification - Reading from localStorage:', {
+          savedForm: localStorage.getItem('investmentFormData'),
+          savedAllocation: localStorage.getItem('investmentAllocation')
+        });
       }
 
     } catch (error) {
