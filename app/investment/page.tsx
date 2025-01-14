@@ -242,18 +242,17 @@ export default function InvestmentPage() {
 
   const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!auth.currentUser) {
-      sessionStorage.setItem('formData', JSON.stringify(formData));
-      sessionStorage.setItem('returnUrl', window.location.pathname);
-      router.push('/login');
-      return;
-    }
-    
     setIsLoading(true);
     setError(null);
 
     try {
+      if (!auth.currentUser) {
+        sessionStorage.setItem('formData', JSON.stringify(formData));
+        sessionStorage.setItem('returnUrl', window.location.pathname);
+        router.push('/login');
+        return;
+      }
+
       // Check for existing record first
       console.log('Checking for existing record with form data:', formData);
       
@@ -325,10 +324,16 @@ export default function InvestmentPage() {
         throw new Error('No allocation data in API response');
       }
 
+      console.log('Successfully received allocation data:', data.allocation);
       setAllocation(data.allocation);
       setShowChart(true);
 
-      // Save new result to Supabase
+      // Save to localStorage
+      console.log('Saving data to localStorage');
+      localStorage.setItem('investmentFormData', JSON.stringify(formData));
+      localStorage.setItem('investmentAllocation', JSON.stringify(data.allocation));
+
+      // Save to Supabase
       try {
         const finalSaveData = {
           user_id: auth.currentUser.uid,
@@ -343,7 +348,7 @@ export default function InvestmentPage() {
           allocation: data.allocation
         };
 
-        console.log('Saving new allocation to Supabase:', finalSaveData);
+        console.log('Saving to Supabase:', finalSaveData);
         
         const { error: supabaseError } = await supabase
           .from('investment_records')
@@ -356,30 +361,13 @@ export default function InvestmentPage() {
         console.log('Successfully saved to Supabase');
       } catch (supabaseError) {
         console.error('Supabase save error:', supabaseError);
-        setError('Warning: Failed to save your results, but you can still view them.');
-      }
-
-      if (data.allocation) {
-        console.log('Saving to localStorage:', { formData, allocation: data.allocation });
-        
-        // Save both form data and allocation
-        localStorage.setItem('investmentFormData', JSON.stringify(formData));
-        localStorage.setItem('investmentAllocation', JSON.stringify(data.allocation));
-        
-        // Update state
-        setAllocation(data.allocation);
-        setShowChart(true);
-        
-        // Verify data was saved
-        console.log('Verification - Reading from localStorage:', {
-          savedForm: localStorage.getItem('investmentFormData'),
-          savedAllocation: localStorage.getItem('investmentAllocation')
-        });
+        // Don't throw here, just log the error
       }
 
     } catch (error) {
       console.error('HandleCalculate error:', error);
       setError(error instanceof Error ? error.message : 'Failed to calculate allocation');
+      setShowChart(false); // Ensure chart is hidden on error
     } finally {
       setIsLoading(false);
     }
