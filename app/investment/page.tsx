@@ -176,24 +176,6 @@ export default function InvestmentPage() {
         if (error) throw error
         
         if (data) {
-          // Save to localStorage
-          localStorage.setItem('investmentFormData', JSON.stringify({
-            name: data.name,
-            age: data.age.toString(),
-            current_savings: data.current_savings.toString(),
-            monthly_savings: data.monthly_savings.toString(),
-            investment_horizon_years: data.investment_horizon.toString(),
-            financial_goal: data.financial_goal,
-            has_emergency_fund: data.has_emergency_fund,
-            needs_money_during_horizon: data.needs_money_during_horizon
-          }));
-          
-          if (data.allocation) {
-            localStorage.setItem('investmentAllocation', JSON.stringify(data.allocation));
-            setAllocation(data.allocation);
-            setShowChart(true);
-          }
-          
           // Set form data
           setFormData({
             name: data.name,
@@ -205,6 +187,11 @@ export default function InvestmentPage() {
             has_emergency_fund: data.has_emergency_fund,
             needs_money_during_horizon: data.needs_money_during_horizon
           });
+          
+          if (data.allocation) {
+            setAllocation(data.allocation);
+            setShowChart(true);
+          }
           
           setSavedRecord(data);
         }
