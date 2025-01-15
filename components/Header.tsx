@@ -24,7 +24,7 @@ export default function Header() {
     <header className="bg-gradient-to-r from-blue-600 to-blue-700 w-full overflow-x-hidden">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center w-full">
-          <div className="flex items-center justify-between w-full md:w-auto">
+          <div className="flex items-center">
             <button
               className="md:hidden p-2 text-white"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -45,29 +45,29 @@ export default function Header() {
                 )}
               </svg>
             </button>
+
+            <div className="hidden md:flex space-x-8 ml-8">
+              <Link href="/" className="text-white hover:text-white/90 whitespace-nowrap">
+                Home
+              </Link>
+              <Link href="/about" className="text-white hover:text-white/90 whitespace-nowrap">
+                About Us
+              </Link>
+              <Link href="/investment" className="text-white hover:text-white/90 whitespace-nowrap">
+                Investment
+              </Link>
+              <Link href="/credit" className="text-white hover:text-white/90 whitespace-nowrap">
+                Credit
+              </Link>
+            </div>
           </div>
 
-          <div className="hidden md:flex space-x-8">
-            <Link href="/" className="text-white hover:text-white/90">
-              Home
-            </Link>
-            <Link href="/about" className="text-white hover:text-white/90">
-              About Us
-            </Link>
-            <Link href="/investment" className="text-white hover:text-white/90">
-              Investment
-            </Link>
-            <Link href="/credit" className="text-white hover:text-white/90">
-              Credit
-            </Link>
-          </div>
-          
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center">
             {user ? (
               <ProfileDropdown user={user} />
             ) : (
               <Link href="/login">
-                <button className="text-white hover:text-white/90">
+                <button className="text-white hover:text-white/90 whitespace-nowrap">
                   Log in
                 </button>
               </Link>
