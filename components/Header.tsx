@@ -9,6 +9,7 @@ import Link from "next/link"
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -20,10 +21,33 @@ export default function Header() {
   }, [])
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-blue-700">
+    <header className="bg-gradient-to-r from-blue-600 to-blue-700 w-full overflow-x-hidden">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <div className="flex space-x-8">
+        <div className="flex justify-between h-16 items-center w-full">
+          <div className="flex items-center justify-between w-full md:w-auto">
+            <button
+              className="md:hidden p-2 text-white"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                {isMenuOpen ? (
+                  <path d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
+
+          <div className="hidden md:flex space-x-8">
             <Link href="/" className="text-white hover:text-white/90">
               Home
             </Link>
@@ -50,6 +74,25 @@ export default function Header() {
             )}
           </div>
         </div>
+
+        {isMenuOpen && (
+          <div className="md:hidden py-2 w-full bg-gradient-to-r from-blue-600 to-blue-700">
+            <div className="flex flex-col space-y-2">
+              <Link href="/" className="text-white hover:text-white/90 px-2 py-1">
+                Home
+              </Link>
+              <Link href="/about" className="text-white hover:text-white/90 px-2 py-1">
+                About Us
+              </Link>
+              <Link href="/investment" className="text-white hover:text-white/90 px-2 py-1">
+                Investment
+              </Link>
+              <Link href="/credit" className="text-white hover:text-white/90 px-2 py-1">
+                Credit
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
     </header>
   )

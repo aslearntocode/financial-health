@@ -8,6 +8,7 @@ import { auth } from "@/lib/firebase"
 import { User } from "firebase/auth"
 import { ProfileDropdown } from "@/components/ProfileDropdown"
 import Testimonials from "@/components/Testimonials"
+import Header from "@/components/Header"
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState(0)
@@ -38,44 +39,9 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-blue-700">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex space-x-8">
-              <Link href="/" className="text-white hover:text-white/90">
-                Home
-              </Link>
-              <Link href="/about" className="text-white hover:text-white/90">
-                About Us
-              </Link>
-              <Link href="/investment" className="text-white hover:text-white/90">
-                Investment
-              </Link>
-              <Link href="/credit" className="text-white hover:text-white/90">
-                Credit
-              </Link>
-            </div>
-            
-            {/* Auth Section */}
-            <div className="flex items-center space-x-4">
-              {user ? (
-                <ProfileDropdown user={user} />
-              ) : (
-                <Link href="/login">
-                  <Button variant="ghost" className="text-white hover:text-white/90 hover:bg-blue-500">
-                    Log in
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </div>
-        </nav>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1">
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
+      <Header />
+      <main className="flex-1 overflow-x-hidden">
         {/* Hero Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="text-center space-y-8">
