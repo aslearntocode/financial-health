@@ -59,6 +59,9 @@ export default function Header() {
               <Link href="/credit" className="text-white hover:text-white/90 whitespace-nowrap">
                 Credit
               </Link>
+              <Link href="/learning-center" className="text-white hover:text-white/90 whitespace-nowrap">
+                Learning Center
+              </Link>
             </div>
           </div>
 
@@ -89,6 +92,9 @@ export default function Header() {
               </Link>
               <Link href="/credit" className="text-white hover:text-white/90 px-2 py-1">
                 Credit
+              </Link>
+              <Link href="/learning-center" className="text-white hover:text-white/90 px-2 py-1">
+                Learning Center
               </Link>
             </div>
           </div>
