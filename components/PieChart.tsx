@@ -11,8 +11,15 @@ interface PieChartProps {
   }>
 }
 
-export function PieChart({ data }: PieChartProps) {
+export const PieChart: React.FC<PieChartProps> = ({ data }) => {
   const router = useRouter()
+
+  console.log('PieChart received data:', data);
+
+  if (!Array.isArray(data) || data.length === 0) {
+    console.log('No valid data for PieChart');
+    return null;
+  }
 
   const renderCustomizedLabel = ({
     cx,

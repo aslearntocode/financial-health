@@ -28,10 +28,48 @@ interface InvestmentRecord {
   needs_money_during_horizon: 'Y' | 'N'
 }
 
-async function checkExistingRecord(formData: Record<string, string | number>, userId: string) {
+interface FormData {
+  name: string
+  age: string
+  current_savings: string
+  monthly_savings: string
+  investment_horizon_years: string
+  financial_goal: string
+  has_emergency_fund: 'Y' | 'N'
+  needs_money_during_horizon: 'Y' | 'N'
+}
+
+export async function testSupabaseConnection() {
   try {
-    // Format the values for comparison
-    const searchParams = {
+    const { data, error } = await supabase
+      .from('investment_records')
+      .select('count');
+    
+    if (error) {
+      console.error('Supabase connection test failed:', error);
+      return false;
+    }
+    
+    console.log('Supabase connection successful');
+    return true;
+  } catch (err) {
+    console.error('Supabase connection test error:', err);
+    return false;
+  }
+}
+
+async function checkExistingRecord(formData: FormData, userId: string) {
+  try {
+    // First, log the connection attempt
+    console.log('Testing Supabase connection...');
+    const isConnected = await testSupabaseConnection();
+    
+    if (!isConnected) {
+      throw new Error('Failed to connect to Supabase');
+    }
+
+    // Log query parameters
+    const queryParams = {
       user_id: userId,
       age: parseInt(formData.age),
       current_savings: parseFloat(formData.current_savings),
@@ -42,38 +80,114 @@ async function checkExistingRecord(formData: Record<string, string | number>, us
       needs_money_during_horizon: formData.needs_money_during_horizon
     };
 
-    console.log('Searching for existing record with params:', searchParams);
+    console.log('Querying Supabase with params:', queryParams);
 
-    const { data, error } = await supabase
+    // Perform query in steps to identify where it might be failing
+    const { data: records, error: queryError } = await supabase
       .from('investment_records')
-      .select('*')
-      .eq('user_id', searchParams.user_id)
-      .eq('age', searchParams.age)
-      .eq('current_savings', searchParams.current_savings)
-      .eq('monthly_savings', searchParams.monthly_savings)
-      .eq('investment_horizon', searchParams.investment_horizon)
-      .eq('financial_goal', searchParams.financial_goal)
-      .eq('has_emergency_fund', searchParams.has_emergency_fund)
-      .eq('needs_money_during_horizon', searchParams.needs_money_during_horizon);
+      .select('*');
 
-    if (error) {
-      console.error('Supabase query error:', error);
+    if (queryError) {
+      console.error('Initial query error:', queryError);
       return null;
     }
 
-    // Log the results
-    console.log('Supabase query returned:', {
-      recordsFound: data?.length || 0,
-      firstRecord: data?.[0] || null
+    console.log('All records:', records);
+
+    // Manual filtering to see what records exist
+    const matchingRecord = records?.find(record => {
+      const matches = 
+        record.user_id === queryParams.user_id &&
+        record.age === queryParams.age &&
+        record.current_savings === queryParams.current_savings &&
+        record.monthly_savings === queryParams.monthly_savings &&
+        record.investment_horizon === queryParams.investment_horizon &&
+        record.financial_goal === queryParams.financial_goal &&
+        record.has_emergency_fund === queryParams.has_emergency_fund &&
+        record.needs_money_during_horizon === queryParams.needs_money_during_horizon;
+
+      console.log('Comparing with record:', {
+        recordId: record.id,
+        matches,
+        recordValues: {
+          user_id: `${typeof record.user_id}: ${record.user_id}`,
+          age: `${typeof record.age}: ${record.age}`,
+          current_savings: `${typeof record.current_savings}: ${record.current_savings}`,
+          monthly_savings: `${typeof record.monthly_savings}: ${record.monthly_savings}`,
+          investment_horizon: `${typeof record.investment_horizon}: ${record.investment_horizon}`,
+          financial_goal: `${typeof record.financial_goal}: ${record.financial_goal}`,
+          has_emergency_fund: `${typeof record.has_emergency_fund}: ${record.has_emergency_fund}`,
+          needs_money_during_horizon: `${typeof record.needs_money_during_horizon}: ${record.needs_money_during_horizon}`
+        },
+        queryParams: {
+          user_id: `${typeof queryParams.user_id}: ${queryParams.user_id}`,
+          age: `${typeof queryParams.age}: ${queryParams.age}`,
+          current_savings: `${typeof queryParams.current_savings}: ${queryParams.current_savings}`,
+          monthly_savings: `${typeof queryParams.monthly_savings}: ${queryParams.monthly_savings}`,
+          investment_horizon: `${typeof queryParams.investment_horizon}: ${queryParams.investment_horizon}`,
+          financial_goal: `${typeof queryParams.financial_goal}: ${queryParams.financial_goal}`,
+          has_emergency_fund: `${typeof queryParams.has_emergency_fund}: ${queryParams.has_emergency_fund}`,
+          needs_money_during_horizon: `${typeof queryParams.needs_money_during_horizon}: ${queryParams.needs_money_during_horizon}`
+        }
+      });
+
+      return matches;
     });
 
-    // Return the first matching record if any exists
-    return data && data.length > 0 ? data[0] : null;
+    console.log('Matching record found:', matchingRecord);
+    return matchingRecord || null;
 
   } catch (err) {
-    console.error('Database error:', err);
+    console.error('Database error:', {
+      error: err,
+      message: err instanceof Error ? err.message : 'Unknown error',
+      stack: err instanceof Error ? err.stack : undefined
+    });
     return null;
   }
+}
+
+// Modify the transformAllocationData function
+function transformAllocationData(rawData: any) {
+  console.log('transformAllocationData input:', rawData);
+  
+  // If rawData is a string, try to parse it
+  let dataToProcess = rawData;
+  if (typeof rawData === 'string') {
+    try {
+      dataToProcess = JSON.parse(rawData);
+    } catch (e) {
+      console.error('Failed to parse rawData string:', e);
+    }
+  }
+
+  // If we have an object with allocation property, use that
+  if (dataToProcess?.allocation) {
+    dataToProcess = dataToProcess.allocation;
+  }
+
+  if (!Array.isArray(dataToProcess)) {
+    console.error('Invalid allocation data format:', dataToProcess);
+    return [];
+  }
+
+  const colorMap: { [key: string]: string } = {
+    'Equity': '#2563eb',
+    'Mutual Funds': '#7c3aed',
+    'Bonds': '#059669',
+    'Real Estate': '#dc2626',
+    'Gold': '#eab308',
+    'Cash': '#64748b'
+  };
+
+  const transformed = dataToProcess.map(item => ({
+    name: item.name || item.category,
+    value: Number(item.value || item.percentage),
+    color: item.color || colorMap[item.name?.split(' ')[0]] || colorMap[item.category?.split(' ')[0]] || '#94a3b8'
+  }));
+
+  console.log('Transformed allocation data:', transformed);
+  return transformed;
 }
 
 export default function InvestmentPage() {
@@ -95,6 +209,8 @@ export default function InvestmentPage() {
     needs_money_during_horizon: 'N' as 'Y' | 'N'
   })
   const [userName, setUserName] = useState('')
+  const [chartKey, setChartKey] = useState(0);
+  const [isDataReady, setIsDataReady] = useState(false);
 
   // Fix the useEffect dependency warning
   useEffect(() => {
@@ -145,48 +261,25 @@ export default function InvestmentPage() {
   useEffect(() => {
     async function fetchSavedInvestment() {
       try {
-        // Get current Firebase user
-        const user = auth.currentUser
-        if (!user) {
-          setIsLoading(false)
-          return
-        }
+        const user = auth.currentUser;
+        if (!user) return;
 
-        // Fetch the latest record for this user
         const { data, error } = await supabase
           .from('investment_records')
           .select('*')
           .eq('user_id', user.uid)
           .order('created_at', { ascending: false })
           .limit(1)
-          .single()
+          .single();
 
-        if (error) throw error
-        
-        if (data) {
-          // Set form data
-          setFormData({
-            name: data.name,
-            age: data.age.toString(),
-            current_savings: data.current_savings.toString(),
-            monthly_savings: data.monthly_savings.toString(),
-            investment_horizon_years: data.investment_horizon.toString(),
-            financial_goal: data.financial_goal,
-            has_emergency_fund: data.has_emergency_fund,
-            needs_money_during_horizon: data.needs_money_during_horizon
-          });
-          
-          if (data.allocation) {
-            setAllocation(data.allocation);
-            setShowChart(true);
-          }
-          
-          setSavedRecord(data);
+        if (error) throw error;
+
+        if (data?.allocation) {
+          console.log('Raw allocation data:', data.allocation);
+          updateAllocation(data.allocation);
         }
       } catch (error) {
-        console.error('Error fetching saved investment:', error)
-      } finally {
-        setIsLoading(false)
+        console.error('Error fetching saved investment:', error);
       }
     }
 
@@ -215,7 +308,7 @@ export default function InvestmentPage() {
     checkConnection();
   }, []); // Empty dependency array since we only want to check connection once
 
-  // Modify handleCalculate to remove count checks
+  // Modify handleCalculate to include more logging
   const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -223,14 +316,22 @@ export default function InvestmentPage() {
 
     try {
       if (!auth.currentUser) {
+        console.log('No user logged in, redirecting to login page');
         sessionStorage.setItem('formData', JSON.stringify(formData));
         sessionStorage.setItem('returnUrl', window.location.pathname);
         router.push('/login');
         return;
       }
 
-      // Proceed directly to portfolio generation
-      await generatePortfolio();
+      const existingRecord = await checkExistingRecord(formData, auth.currentUser.uid);
+
+      if (existingRecord?.allocation) {
+        console.log('Found existing allocation:', existingRecord.allocation);
+        updateAllocation(existingRecord.allocation);
+      } else {
+        console.log('No existing record found, generating new portfolio');
+        await generatePortfolio();
+      }
 
     } catch (error) {
       console.error('HandleCalculate error:', error);
@@ -241,51 +342,52 @@ export default function InvestmentPage() {
     }
   };
 
-  // Separate function for portfolio generation
+  // Modify the generatePortfolio function
   const generatePortfolio = async () => {
     try {
-      const userName = auth.currentUser.displayName || 
-                      auth.currentUser.email?.split('@')[0] || 
-                      'Anonymous User';
-
-      const apiFormData = {
-        userId: auth.currentUser.uid,
-        name: userName,
-        age: formData.age,
-        current_savings: formData.current_savings,
-        monthly_savings: formData.monthly_savings,
-        investment_horizon_years: formData.investment_horizon_years,
+      // Create API request data from formData
+      const apiRequestData = {
+        userId: auth.currentUser?.uid,
+        name: auth.currentUser?.displayName || 'Anonymous',
+        age: parseInt(formData.age),
+        current_savings: parseFloat(formData.current_savings),
+        monthly_savings: parseFloat(formData.monthly_savings),
+        investment_horizon_years: parseInt(formData.investment_horizon_years),
         financial_goal: formData.financial_goal,
         has_emergency_fund: formData.has_emergency_fund,
         needs_money_during_horizon: formData.needs_money_during_horizon
       };
+
+      console.log('Sending data to API:', apiRequestData);
 
       const response = await fetch('/api/calculate-allocation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(apiFormData)
+        body: JSON.stringify(apiRequestData)
       });
 
-      const responseText = await response.text();
-      let data;
-      
-      try {
-        data = JSON.parse(responseText);
-      } catch (e) {
-        console.error('JSON Parse Error:', e);
-        throw new Error('Failed to parse API response');
-      }
+      const data = await response.json();
+      console.log('API Response data:', data);
 
       if (data.allocation) {
-        setAllocation(data.allocation);
-        setShowChart(true);
+        console.log('Processing allocation data:', data.allocation);
+        const transformedData = transformAllocationData(data.allocation);
+        
+        if (transformedData.length > 0) {
+          console.log('Setting allocation with transformed data:', transformedData);
+          setAllocation(transformedData);
+          setShowChart(true);
+          setChartKey(prev => prev + 1);
+        } else {
+          console.error('Transformed data is empty');
+        }
 
         // Save to Supabase
         const finalSaveData = {
-          user_id: auth.currentUser.uid,
-          name: userName,
+          user_id: auth.currentUser?.uid,
+          name: auth.currentUser?.displayName || 'Anonymous',
           age: parseInt(formData.age),
           current_savings: parseFloat(formData.current_savings),
           monthly_savings: parseFloat(formData.monthly_savings),
@@ -300,9 +402,13 @@ export default function InvestmentPage() {
           .from('investment_records')
           .insert([finalSaveData]);
 
-        if (supabaseError) throw supabaseError;
+        if (supabaseError) {
+          console.error('Supabase insert error:', supabaseError);
+          throw supabaseError;
+        }
       }
     } catch (error) {
+      console.error('Error in generatePortfolio:', error);
       throw error;
     }
   };
@@ -325,7 +431,8 @@ export default function InvestmentPage() {
           .select('*')
           .eq('user_id', auth.currentUser.uid)
           .order('created_at', { ascending: false })
-          .limit(1);
+          .limit(1)
+          .single();
 
         if (error) {
           console.error('Supabase query error:', error);
@@ -333,21 +440,20 @@ export default function InvestmentPage() {
         }
 
         // If there's a latest record, set the form data
-        if (data && data.length > 0) {
-          const latestRecord = data[0];
+        if (data) {
           setFormData({
-            name: latestRecord.name,
-            age: latestRecord.age.toString(),
-            current_savings: latestRecord.current_savings.toString(),
-            monthly_savings: latestRecord.monthly_savings.toString(),
-            investment_horizon_years: latestRecord.investment_horizon.toString(),
-            financial_goal: latestRecord.financial_goal,
-            has_emergency_fund: latestRecord.has_emergency_fund,
-            needs_money_during_horizon: latestRecord.needs_money_during_horizon
+            name: data.name,
+            age: data.age.toString(),
+            current_savings: data.current_savings.toString(),
+            monthly_savings: data.monthly_savings.toString(),
+            investment_horizon_years: data.investment_horizon.toString(),
+            financial_goal: data.financial_goal,
+            has_emergency_fund: data.has_emergency_fund,
+            needs_money_during_horizon: data.needs_money_during_horizon
           });
 
-          if (latestRecord.allocation) {
-            setAllocation(latestRecord.allocation);
+          if (data.allocation) {
+            setAllocation(data.allocation);
             setShowChart(true);
           }
         }
@@ -518,6 +624,55 @@ export default function InvestmentPage() {
     }
   }
 
+  const updateAllocation = (newAllocation: any[]) => {
+    setIsDataReady(false); // Reset ready state
+    const transformedData = transformAllocationData(newAllocation);
+    console.log('Setting transformed allocation:', transformedData);
+    setAllocation(transformedData);
+    setShowChart(true);
+  };
+
+  // Add this useEffect to handle allocation updates
+  useEffect(() => {
+    if (allocation.length > 0) {
+      console.log('Allocation updated, setting data ready...');
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        setIsDataReady(true);
+        setChartKey(prev => prev + 1);
+      }, 100);
+    }
+  }, [allocation]);
+
+  // Add this effect to handle initial data load
+  useEffect(() => {
+    const loadInitialData = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('investment_records')
+          .select('*')
+          .eq('user_id', user.uid)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error) throw error;
+
+        if (data?.allocation) {
+          console.log('Loading initial allocation data');
+          updateAllocation(data.allocation);
+        }
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      }
+    };
+
+    loadInitialData();
+  }, []); // Run once on mount
+
   return (
     <div id="investment-page-container" className="min-h-screen bg-white">
       <Header />
@@ -663,9 +818,9 @@ export default function InvestmentPage() {
             {isLoading ? (
               <p>Calculating your allocation...</p>
             ) : showChart && allocation.length > 0 ? (
-              <>
+              <div key={chartKey}>
                 <PieChart data={allocation} />
-              </>
+              </div>
             ) : (
               <p>Fill out the form and calculate to see your allocation</p>
             )}
