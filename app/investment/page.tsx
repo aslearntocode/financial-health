@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, FormEvent } from "react"
 import { PieChart } from "@/components/PieChart"
 import Header from "@/components/Header"
 import { Button } from "@/components/ui/button"
