@@ -16,7 +16,7 @@ import {
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/firebase"
 import { supabase } from '@/app/lib/supabaseClient'
-import { testSupabaseConnection } from '@/lib/supabase'
+import { testSupabaseConnection } from '@/lib/supabase-utils'
 
 interface InvestmentRecord {
   stocks: number
@@ -39,7 +39,7 @@ interface FormData {
   needs_money_during_horizon: 'Y' | 'N'
 }
 
-export async function testSupabaseConnection() {
+async function testSupabaseConnection() {
   try {
     const { data, error } = await supabase
       .from('investment_records')
