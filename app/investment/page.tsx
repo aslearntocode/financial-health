@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/firebase"
+import { User } from 'firebase/auth'
 import { supabase } from '@/app/lib/supabaseClient'
 import { testSupabaseConnection } from '@/lib/supabase-utils'
 
@@ -26,6 +27,15 @@ interface InvestmentRecord {
   user_id: string
   has_emergency_fund: 'Y' | 'N'
   needs_money_during_horizon: 'Y' | 'N'
+  allocation?: any
+  id?: string
+  age?: number
+  current_savings?: number
+  monthly_savings?: number
+  investment_horizon?: number
+  financial_goal?: string
+  created_at?: string
+  name?: string
 }
 
 interface FormData {
@@ -173,25 +183,28 @@ function transformAllocationData(rawData: any) {
 
 export default function InvestmentPage() {
   const router = useRouter()
+  const [user, setUser] = useState<User | null>(auth.currentUser)
   const [showChart, setShowChart] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isAuthReady, setIsAuthReady] = useState(false)
-  const [savedRecord, setSavedRecord] = useState<any>(null)
+  const [savedRecord, setSavedRecord] = useState<InvestmentRecord | null>(null)
   const [allocation, setAllocation] = useState<Array<{ name: string; value: number; color: string }>>([])
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     age: '',
     current_savings: '',
     monthly_savings: '',
     investment_horizon_years: '',
     financial_goal: '',
-    has_emergency_fund: 'N' as 'Y' | 'N',
-    needs_money_during_horizon: 'N' as 'Y' | 'N'
+    has_emergency_fund: 'N',
+    needs_money_during_horizon: 'N'
   })
   const [userName, setUserName] = useState('')
-  const [chartKey, setChartKey] = useState(0);
-  const [isDataReady, setIsDataReady] = useState(false);
+  const [chartKey, setChartKey] = useState(0)
+  const [isDataReady, setIsDataReady] = useState(false)
+  const [isFromCache, setIsFromCache] = useState(false)
+  const [chartData, setChartData] = useState<any>(null)
 
   // Fix the useEffect dependency warning
   useEffect(() => {
