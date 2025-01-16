@@ -15,16 +15,8 @@ import {
 } from "@/components/ui/select"
 import { useRouter } from "next/navigation"
 import { auth } from "@/lib/firebase"
-import { saveInvestmentData } from '@/lib/db'
-import { supabase, testSupabaseConnection } from '../../lib/supabase'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog"
+import { supabase } from '../../lib/supabase'
+import { testSupabaseConnection } from '@/lib/supabase'
 
 interface InvestmentRecord {
   stocks: number
@@ -36,15 +28,7 @@ interface InvestmentRecord {
   needs_money_during_horizon: 'Y' | 'N'
 }
 
-// Add type for Supabase error
-type PostgrestError = {
-  code?: string;
-  message?: string;
-  details?: string;
-};
-
-// Modify the checkExistingRecord function to be more precise
-async function checkExistingRecord(formData: any, userId: string) {
+async function checkExistingRecord(formData: Record<string, string | number>, userId: string) {
   try {
     // Format the values for comparison
     const searchParams = {
@@ -97,6 +81,8 @@ export default function InvestmentPage() {
   const [showChart, setShowChart] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isAuthReady, setIsAuthReady] = useState(false)
+  const [savedRecord, setSavedRecord] = useState<any>(null)
   const [allocation, setAllocation] = useState<Array<{ name: string; value: number; color: string }>>([])
   const [formData, setFormData] = useState({
     name: '',
@@ -108,33 +94,26 @@ export default function InvestmentPage() {
     has_emergency_fund: 'N' as 'Y' | 'N',
     needs_money_during_horizon: 'N' as 'Y' | 'N'
   })
-  const [savedRecord, setSavedRecord] = useState<InvestmentRecord | null>(null)
   const [userName, setUserName] = useState('')
-  const [isAuthReady, setIsAuthReady] = useState(false)
 
-  // Add debug log for render
-  console.log('Current state:', { showChart, isLoading, error, allocation })
-
-  // Add click handler for the entire page
+  // Fix the useEffect dependency warning
   useEffect(() => {
     const handlePageClick = () => {
-      if (!auth.currentUser) {
-        // Save current form data
+      const currentUser = auth.currentUser
+      if (!currentUser) {
         sessionStorage.setItem('formData', JSON.stringify(formData))
         sessionStorage.setItem('returnUrl', window.location.pathname)
         router.push('/login')
       }
     }
 
-    // Add click listener to the page container
     const pageContainer = document.getElementById('investment-page-container')
     pageContainer?.addEventListener('click', handlePageClick)
 
-    // Cleanup listener on unmount
     return () => {
       pageContainer?.removeEventListener('click', handlePageClick)
     }
-  }, [auth.currentUser, formData, router])
+  }, [formData, router])
 
   // Load saved data when component mounts
   useEffect(() => {
@@ -234,7 +213,7 @@ export default function InvestmentPage() {
       console.log('Supabase connection status:', isConnected);
     }
     checkConnection();
-  }, []);
+  }, []); // Empty dependency array since we only want to check connection once
 
   // Modify handleCalculate to remove count checks
   const handleCalculate = async (e: React.FormEvent) => {
@@ -382,15 +361,15 @@ export default function InvestmentPage() {
 
     // Add auth state listener
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      setIsAuthReady(true);
+      setIsAuthReady(true)
       if (user) {
-        checkInitialCount();
+        checkInitialCount()
       }
-    });
+    })
 
     // Cleanup subscription
-    return () => unsubscribe();
-  }, []); // Empty dependency array since we're using auth.onAuthStateChanged
+    return () => unsubscribe()
+  }, []) // Empty dependency array since we're using auth.onAuthStateChanged
 
   return (
     <div id="investment-page-container" className="min-h-screen bg-white">

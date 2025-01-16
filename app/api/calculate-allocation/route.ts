@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server'
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const formData = await request.json()
-    console.log('1. Received form data:', formData)
+    const data = await req.json()
+    console.log('1. Received form data:', data)
 
     // Build query parameters
     const queryParams = new URLSearchParams({
-      name: formData.name,
-      age: formData.age.toString(),
-      current_savings: formData.current_savings.toString(),
-      monthly_savings: formData.monthly_savings.toString(),
-      investment_horizon_years: formData.investment_horizon_years.toString(),
-      financial_goal: formData.financial_goal.toLowerCase()
+      name: data.name,
+      age: data.age.toString(),
+      current_savings: data.current_savings.toString(),
+      monthly_savings: data.monthly_savings.toString(),
+      investment_horizon_years: data.investment_horizon_years.toString(),
+      financial_goal: data.financial_goal.toLowerCase()
     })
 
     const url = `http://172.210.82.112:5001/api/portfolio-recommendation?${queryParams.toString()}`

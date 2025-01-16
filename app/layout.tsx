@@ -1,15 +1,11 @@
-import type { Metadata } from "next";
-import { Inter } from 'next/font/google'
-import "./globals.css";
-import Testimonials from '@/components/Testimonials'
-import Footer from '@/components/Footer'
-
-const inter = Inter({ subsets: ['latin'] })
+import './globals.css'
+import type { Metadata } from 'next'
+import Header from '@/components/Header'
 
 export const metadata: Metadata = {
-  title: "Financial HealthAdvisor",
-  description: "Get personalized investment portfolio recommendations based on your profile",
-};
+  title: 'Financial Health',
+  description: 'Your financial health companion',
+}
 
 export default function RootLayout({
   children,
@@ -18,10 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        {children}
-        <Footer />
-      </body>
+      <body>{children}</body>
     </html>
   )
 }
