@@ -17,7 +17,7 @@ const articles: Article[] = [
   {
     id: '1',
     title: "Understanding Mutual Funds: A Beginner's Guide",
-    description: "Learn the basics of mutual funds, how they work, and why they're a popular investment choice.",
+    description: "Learn the basics of mutual funds, how they work, and why they're a popular investment choice for both new and experienced investors.",
     category: 'Mutual Funds',
     readTime: '5 min read',
     link: '/learning-center/mutual-funds/beginners-guide'
@@ -25,7 +25,7 @@ const articles: Article[] = [
   {
     id: '2',
     title: 'Types of Mutual Funds: Which One is Right for You?',
-    description: 'Explore different types of mutual funds and how to choose the best one for your investment goals.',
+    description: 'Explore different types of mutual funds and how to choose the best one for your investment goals. Compare options to make informed decisions.',
     category: 'Mutual Funds',
     readTime: '7 min read',
     link: '/learning-center/mutual-funds/types'
@@ -33,7 +33,7 @@ const articles: Article[] = [
   {
     id: '3',
     title: 'Introduction to Stock Market Investing',
-    description: 'Get started with stock market basics, understanding indices, and fundamental analysis.',
+    description: 'Get started with stock market basics, understanding indices, and fundamental analysis. Learn how to build a strong investment foundation.',
     category: 'Equity',
     readTime: '6 min read',
     link: '/learning-center/equity/intro'
@@ -41,10 +41,26 @@ const articles: Article[] = [
   {
     id: '4',
     title: 'Fixed Deposits vs. Debt Funds',
-    description: 'Compare traditional FDs with debt mutual funds to make informed investment decisions.',
+    description: 'Compare traditional FDs with debt mutual funds to make informed investment decisions. Understand the pros and cons of each option.',
     category: 'Fixed Deposits',
     readTime: '4 min read',
     link: '/learning-center/fixed-deposits/comparison'
+  },
+  {
+    id: '5',
+    title: 'REITs: A Guide to Real Estate Investment Trusts',
+    description: 'Understand how REITs work, their benefits, and how to invest in them. Learn about this accessible way to invest in real estate markets.',
+    category: 'Real Estate',
+    readTime: '10 min read',
+    link: '/learning-center/real-estate/reits'
+  },
+  {
+    id: '6',
+    title: 'A Comprehensive Guide to REIT Investments in India',
+    description: 'Discover how to invest in Indian REITs, understand their structure, benefits, and risks. Learn about professional real estate investment options.',
+    category: 'Real Estate',
+    readTime: '8 min read',
+    link: '/learning-center/real-estate/reit-guide'
   }
 ]
 
@@ -83,20 +99,20 @@ function LearningCenter() {
           </div>
 
           {/* Articles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {filteredArticles.map(article => (
               <Link href={article.link} key={article.id}>
-                <div className="border rounded-lg p-4 hover:shadow-lg transition-shadow">
-                  <div className="text-xs font-medium text-blue-600 mb-1">
+                <div className="border rounded-lg p-6 hover:shadow-lg transition-shadow h-full flex flex-col">
+                  <div className="text-sm font-medium text-blue-600 mb-2">
                     {article.category}
                   </div>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-3">
                     {article.title}
                   </h2>
-                  <p className="text-sm text-gray-600 mb-3">
+                  <p className="text-base text-gray-600 mb-4 flex-grow">
                     {article.description}
                   </p>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-sm text-gray-500">
                     {article.readTime}
                   </div>
                 </div>
