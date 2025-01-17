@@ -24,7 +24,9 @@ export async function POST(req: Request) {
       current_savings: data.current_savings.toString(),
       monthly_savings: data.monthly_savings.toString(),
       investment_horizon_years: data.investment_horizon_years.toString(),
-      financial_goal: data.financial_goal.toLowerCase()
+      financial_goal: data.financial_goal.toLowerCase(),
+      has_emergency_fund: data.has_emergency_fund.toLowerCase(),
+      needs_money_during_horizon: data.needs_money_during_horizon.toLowerCase()
     })
 
     const url = `http://172.210.82.112:5001/api/portfolio-recommendation?${queryParams.toString()}`
@@ -37,14 +39,43 @@ export async function POST(req: Request) {
       }
     })
 
+    // Add error handling for non-200 responses
+    if (!recommendationResponse.ok) {
+      const errorText = await recommendationResponse.text()
+      console.error('API Error:', errorText)
+      return NextResponse.json(
+        { error: `API Error: ${errorText}` },
+        { status: recommendationResponse.status }
+      )
+    }
+
     const responseText = await recommendationResponse.text()
     console.log('3. Raw response:', responseText)
 
-    const rawData = JSON.parse(responseText)
+    // Add try-catch for JSON parsing
+    let rawData
+    try {
+      rawData = JSON.parse(responseText)
+    } catch (parseError) {
+      console.error('JSON Parse Error:', parseError, 'Response:', responseText)
+      return NextResponse.json(
+        { error: 'Invalid JSON response from API' },
+        { status: 500 }
+      )
+    }
+
     console.log('4. Parsed data:', rawData)
 
-    // Use the chartData directly from the API response
-    const chartData = (rawData as ApiResponse).chartData.map((item: ChartDataItem) => ({
+    // Validate the response structure
+    if (!rawData || !Array.isArray(rawData.chartData)) {
+      console.error('Invalid data structure:', rawData)
+      return NextResponse.json(
+        { error: 'Invalid data structure received from API' },
+        { status: 500 }
+      )
+    }
+
+    const chartData = rawData.chartData.map((item: ChartDataItem) => ({
       name: item.category,
       value: item.percentage,
       color: item.fill || getColorForCategory(item.category)
