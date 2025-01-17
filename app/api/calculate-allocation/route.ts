@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       needs_money_during_horizon: data.needs_money_during_horizon.toLowerCase()
     })
 
-    const url = `http://172.210.82.112:5001/api/portfolio-recommendation?${queryParams.toString()}`
+    const url = `http://172.210.82.112:5000/api/portfolio-recommendation?${queryParams.toString()}`
     console.log('2. Calling URL:', url)
 
     const recommendationResponse = await fetch(url, {
