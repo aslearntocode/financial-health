@@ -28,18 +28,13 @@ const ChartContext = React.createContext<ChartContextValue>({
   config: {},
 })
 
-interface ChartContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-  config: ChartConfig
+interface ChartProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactElement
 }
 
-export function ChartContainer({
-  config,
-  children,
-  className,
-  ...props
-}: ChartContainerProps) {
+export function Chart({ children, className, ...props }: ChartProps) {
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={{ config: {} }}>
       <div className={cn("", className)} {...props}>
         <ResponsiveContainer width="100%" height="100%">
           {children}
@@ -49,11 +44,14 @@ export function ChartContainer({
   )
 }
 
-interface ChartTooltipProps<T> extends Omit<TooltipProps<T, string>, "content"> {
+interface ChartTooltipProps<T extends string | number | Array<string | number>> extends Omit<TooltipProps<T, string>, "content"> {
   content?: React.ReactNode
 }
 
-export function ChartTooltip<T>({ content, ...props }: ChartTooltipProps<T>) {
+export function ChartTooltip<T extends string | number | Array<string | number>>({ 
+  content, 
+  ...props 
+}: ChartTooltipProps<T>) {
   if (!content) {
     return null
   }

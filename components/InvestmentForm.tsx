@@ -53,10 +53,10 @@ export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      age: "",
-      currentSavings: "",
-      monthlySavings: "",
-      investmentHorizon: "",
+      age: 0,
+      currentSavings: 0,
+      monthlySavings: 0,
+      investmentHorizon: 0,
       financialGoal: "",
     },
   })
