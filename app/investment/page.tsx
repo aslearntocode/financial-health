@@ -36,6 +36,7 @@ interface InvestmentRecord {
   financial_goal?: string
   created_at?: string
   name?: string
+  has_investment_experience: 'Y' | 'N'
 }
 
 interface FormData {
@@ -47,6 +48,17 @@ interface FormData {
   financial_goal: string
   has_emergency_fund: 'Y' | 'N'
   needs_money_during_horizon: 'Y' | 'N'
+  has_investment_experience: 'Y' | 'N'
+}
+
+interface AllocationResponse {
+  chartData: Array<{
+    category: string;
+    fill: string;
+    percentage: number;
+  }>;
+  full_response: string;
+  totalPercentage: number;
 }
 
 async function checkExistingRecord(formData: FormData, userId: string) {
@@ -68,7 +80,8 @@ async function checkExistingRecord(formData: FormData, userId: string) {
       investment_horizon: parseInt(formData.investment_horizon_years),
       financial_goal: formData.financial_goal,
       has_emergency_fund: formData.has_emergency_fund,
-      needs_money_during_horizon: formData.needs_money_during_horizon
+      needs_money_during_horizon: formData.needs_money_during_horizon,
+      has_investment_experience: formData.has_investment_experience
     };
 
     console.log('Querying Supabase with params:', queryParams);
@@ -95,7 +108,8 @@ async function checkExistingRecord(formData: FormData, userId: string) {
         record.investment_horizon === queryParams.investment_horizon &&
         record.financial_goal === queryParams.financial_goal &&
         record.has_emergency_fund === queryParams.has_emergency_fund &&
-        record.needs_money_during_horizon === queryParams.needs_money_during_horizon;
+        record.needs_money_during_horizon === queryParams.needs_money_during_horizon &&
+        record.has_investment_experience === queryParams.has_investment_experience;
 
       console.log('Comparing with record:', {
         recordId: record.id,
@@ -108,7 +122,8 @@ async function checkExistingRecord(formData: FormData, userId: string) {
           investment_horizon: `${typeof record.investment_horizon}: ${record.investment_horizon}`,
           financial_goal: `${typeof record.financial_goal}: ${record.financial_goal}`,
           has_emergency_fund: `${typeof record.has_emergency_fund}: ${record.has_emergency_fund}`,
-          needs_money_during_horizon: `${typeof record.needs_money_during_horizon}: ${record.needs_money_during_horizon}`
+          needs_money_during_horizon: `${typeof record.needs_money_during_horizon}: ${record.needs_money_during_horizon}`,
+          has_investment_experience: `${typeof record.has_investment_experience}: ${record.has_investment_experience}`
         },
         queryParams: {
           user_id: `${typeof queryParams.user_id}: ${queryParams.user_id}`,
@@ -118,7 +133,8 @@ async function checkExistingRecord(formData: FormData, userId: string) {
           investment_horizon: `${typeof queryParams.investment_horizon}: ${queryParams.investment_horizon}`,
           financial_goal: `${typeof queryParams.financial_goal}: ${queryParams.financial_goal}`,
           has_emergency_fund: `${typeof queryParams.has_emergency_fund}: ${queryParams.has_emergency_fund}`,
-          needs_money_during_horizon: `${typeof queryParams.needs_money_during_horizon}: ${queryParams.needs_money_during_horizon}`
+          needs_money_during_horizon: `${typeof queryParams.needs_money_during_horizon}: ${queryParams.needs_money_during_horizon}`,
+          has_investment_experience: `${typeof queryParams.has_investment_experience}: ${queryParams.has_investment_experience}`
         }
       });
 
@@ -181,6 +197,43 @@ function transformAllocationData(rawData: any) {
   return transformed;
 }
 
+// Update the extractRiskScore function
+function extractRiskScore(fullResponse: string): number {
+  try {
+    if (!fullResponse) {
+      console.log('No full response provided');
+      return 0;
+    }
+    
+    console.log('Full response:', fullResponse);
+    
+    // Parse the full response string
+    const responses = fullResponse.split('\n\n');
+    console.log('Split responses:', responses);
+    
+    const riskResponse = responses.find(resp => resp.includes('"Risk"'));
+    console.log('Risk response found:', riskResponse);
+    
+    if (!riskResponse) {
+      console.log('No risk response found');
+      return 0;
+    }
+    
+    const riskJson = JSON.parse(riskResponse);
+    console.log('Parsed risk JSON:', riskJson);
+    
+    return riskJson.Risk || 0;
+  } catch (error) {
+    console.error('Error extracting risk score:', error);
+    console.error('Error details:', {
+      error: error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    return 0;
+  }
+}
+
 export default function InvestmentPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(auth.currentUser)
@@ -198,7 +251,8 @@ export default function InvestmentPage() {
     investment_horizon_years: '',
     financial_goal: '',
     has_emergency_fund: 'N',
-    needs_money_during_horizon: 'N'
+    needs_money_during_horizon: 'N',
+    has_investment_experience: 'N'
   })
   const [userName, setUserName] = useState('')
   const [chartKey, setChartKey] = useState(0)
@@ -336,7 +390,7 @@ export default function InvestmentPage() {
     }
   };
 
-  // Modify the generatePortfolio function
+  // Update the generatePortfolio function
   const generatePortfolio = async () => {
     try {
       // Create API request data from formData
@@ -349,9 +403,11 @@ export default function InvestmentPage() {
         investment_horizon_years: parseInt(formData.investment_horizon_years),
         financial_goal: formData.financial_goal,
         has_emergency_fund: formData.has_emergency_fund,
-        needs_money_during_horizon: formData.needs_money_during_horizon
+        needs_money_during_horizon: formData.needs_money_during_horizon,
+        has_investment_experience: formData.has_investment_experience
       };
 
+      // Log the data being sent to API
       console.log('Sending data to API:', apiRequestData);
 
       const response = await fetch('/api/calculate-allocation', {
@@ -362,8 +418,14 @@ export default function InvestmentPage() {
         body: JSON.stringify(apiRequestData)
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        throw new Error(errorText);
+      }
+
       const data = await response.json();
-      console.log('API Response data:', data);
+      console.log('API Response:', data);
 
       if (data.allocation) {
         console.log('Processing allocation data:', data.allocation);
@@ -389,17 +451,28 @@ export default function InvestmentPage() {
           financial_goal: formData.financial_goal,
           has_emergency_fund: formData.has_emergency_fund,
           needs_money_during_horizon: formData.needs_money_during_horizon,
+          has_investment_experience: formData.has_investment_experience,
           allocation: data.allocation
         };
 
-        const { error: supabaseError } = await supabase
+        console.log('Attempting to save to Supabase:', finalSaveData);
+
+        const { data: insertedData, error: supabaseError } = await supabase
           .from('investment_records')
           .insert([finalSaveData]);
 
         if (supabaseError) {
-          console.error('Supabase insert error:', supabaseError);
+          console.error('Supabase insert error:', {
+            error: supabaseError,
+            message: supabaseError.message,
+            details: supabaseError.details,
+            hint: supabaseError.hint,
+            code: supabaseError.code
+          });
           throw supabaseError;
         }
+
+        console.log('Successfully saved to Supabase:', insertedData);
       }
     } catch (error) {
       console.error('Error in generatePortfolio:', error);
@@ -443,7 +516,8 @@ export default function InvestmentPage() {
             investment_horizon_years: data.investment_horizon.toString(),
             financial_goal: data.financial_goal,
             has_emergency_fund: data.has_emergency_fund,
-            needs_money_during_horizon: data.needs_money_during_horizon
+            needs_money_during_horizon: data.needs_money_during_horizon,
+            has_investment_experience: data.has_investment_experience
           });
 
           if (data.allocation) {
@@ -508,7 +582,8 @@ export default function InvestmentPage() {
         investment_horizon: parseInt(formData.get('investment_horizon_years') as string),
         financial_goal: formData.get('financial_goal') as string,
         has_emergency_fund: formData.get('has_emergency_fund') as string,
-        needs_money_during_horizon: formData.get('needs_money_during_horizon') as string
+        needs_money_during_horizon: formData.get('needs_money_during_horizon') as string,
+        has_investment_experience: formData.get('has_investment_experience') as string
       }
 
       console.log('Current form values:', currentValues)
@@ -522,7 +597,8 @@ export default function InvestmentPage() {
           record.investment_horizon === currentValues.investment_horizon &&
           record.financial_goal === currentValues.financial_goal &&
           record.has_emergency_fund === currentValues.has_emergency_fund &&
-          record.needs_money_during_horizon === currentValues.needs_money_during_horizon
+          record.needs_money_during_horizon === currentValues.needs_money_during_horizon &&
+          record.has_investment_experience === currentValues.has_investment_experience
 
         console.log('Comparing with record:', {
           recordId: record.id,
@@ -534,7 +610,8 @@ export default function InvestmentPage() {
             investment_horizon: `${typeof record.investment_horizon}: ${record.investment_horizon}`,
             financial_goal: `${typeof record.financial_goal}: ${record.financial_goal}`,
             has_emergency_fund: `${typeof record.has_emergency_fund}: ${record.has_emergency_fund}`,
-            needs_money_during_horizon: `${typeof record.needs_money_during_horizon}: ${record.needs_money_during_horizon}`
+            needs_money_during_horizon: `${typeof record.needs_money_during_horizon}: ${record.needs_money_during_horizon}`,
+            has_investment_experience: `${typeof record.has_investment_experience}: ${record.has_investment_experience}`
           },
           currentValues: {
             age: `${typeof currentValues.age}: ${currentValues.age}`,
@@ -543,7 +620,8 @@ export default function InvestmentPage() {
             investment_horizon: `${typeof currentValues.investment_horizon}: ${currentValues.investment_horizon}`,
             financial_goal: `${typeof currentValues.financial_goal}: ${currentValues.financial_goal}`,
             has_emergency_fund: `${typeof currentValues.has_emergency_fund}: ${currentValues.has_emergency_fund}`,
-            needs_money_during_horizon: `${typeof currentValues.needs_money_during_horizon}: ${currentValues.needs_money_during_horizon}`
+            needs_money_during_horizon: `${typeof currentValues.needs_money_during_horizon}: ${currentValues.needs_money_during_horizon}`,
+            has_investment_experience: `${typeof currentValues.has_investment_experience}: ${currentValues.has_investment_experience}`
           }
         })
 
@@ -666,6 +744,8 @@ export default function InvestmentPage() {
 
     loadInitialData();
   }, []); // Run once on mount
+
+  console.log('Chart data being passed:', chartData);
 
   return (
     <div id="investment-page-container" className="min-h-screen bg-white">
@@ -800,6 +880,26 @@ export default function InvestmentPage() {
                 </Select>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="has_investment_experience">Do you have experience investing in equity market?</Label>
+                <Select 
+                  value={formData.has_investment_experience}
+                  onValueChange={(value: 'Y' | 'N') => {
+                    console.log('Investment experience selection:', value);
+                    setFormData(prev => ({ ...prev, has_investment_experience: value }));
+                  }}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select yes or no" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Y">Yes</SelectItem>
+                    <SelectItem value="N">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? 'Calculating...' : 'Calculate Allocation'}
               </Button>
@@ -812,8 +912,34 @@ export default function InvestmentPage() {
             {isLoading ? (
               <p>Calculating your allocation...</p>
             ) : showChart && allocation.length > 0 ? (
-              <div key={chartKey}>
-                <PieChart data={allocation} />
+              <div>
+                <div key={chartKey} className="cursor-pointer" onClick={() => router.push('/investment-details')}>
+                  <PieChart data={allocation} />
+                </div>
+                
+                {/* Add the new information section */}
+                <div className="mt-6 space-y-4 text-sm">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h3 className="font-semibold text-blue-800 mb-2">Portfolio Risk Score</h3>
+                    <p className="text-blue-700">
+                      Your portfolio risk score is: {extractRiskScore(chartData?.full_response || '')} out of 10
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-yellow-50 rounded-lg">
+                    <h3 className="font-semibold text-yellow-800 mb-2">Things to consider</h3>
+                    <p className="text-yellow-700">
+                      Balancing your portfolio is extremely critical. Consider regenerating your portfolio:
+                    </p>
+                    <ul className="list-disc list-inside mt-2 text-yellow-700">
+                      <li>Every 3 months</li>
+                      <li>After significant life events such as marriage, salary change, or the birth of a child</li>
+                    </ul>
+                    <p className="text-yellow-700">
+                    Click on the pie chart above to see detailed investment recommendations for each category.
+                    </p>
+                  </div>
+                </div>
               </div>
             ) : (
               <p>Fill out the form and calculate to see your allocation</p>

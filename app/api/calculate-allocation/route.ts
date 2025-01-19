@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const data = await req.json()
     console.log('1. Received form data:', data)
 
-    // Build query parameters
+    // Build query parameters with the new field
     const queryParams = new URLSearchParams({
       name: data.name,
       age: data.age.toString(),
@@ -26,7 +26,8 @@ export async function POST(req: Request) {
       investment_horizon_years: data.investment_horizon_years.toString(),
       financial_goal: data.financial_goal.toLowerCase(),
       has_emergency_fund: data.has_emergency_fund.toLowerCase(),
-      needs_money_during_horizon: data.needs_money_during_horizon.toLowerCase()
+      needs_money_during_horizon: data.needs_money_during_horizon.toLowerCase(),
+      has_investment_experience: data.has_investment_experience.toLowerCase()
     })
 
     const url = `http://172.210.82.112:5000/api/portfolio-recommendation?${queryParams.toString()}`
