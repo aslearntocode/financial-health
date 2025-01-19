@@ -84,7 +84,10 @@ export async function POST(req: Request) {
 
     console.log('5. Transformed chart data:', chartData)
 
-    return NextResponse.json({ allocation: chartData })
+    return NextResponse.json({ 
+      allocation: chartData,
+      risk_score: rawData.risk_score || 0  // Add risk_score to response
+    })
 
   } catch (error) {
     console.error('Error in calculate-allocation:', error)

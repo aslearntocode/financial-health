@@ -37,6 +37,7 @@ interface InvestmentRecord {
   created_at?: string
   name?: string
   has_investment_experience: 'Y' | 'N'
+  risk_score: number
 }
 
 interface FormData {
@@ -59,6 +60,18 @@ interface AllocationResponse {
   }>;
   full_response: string;
   totalPercentage: number;
+}
+
+interface ChartDataItem {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface ChartState {
+  allocation: ChartDataItem[];
+  risk_score: number;
+  full_response: string;
 }
 
 async function checkExistingRecord(formData: FormData, userId: string) {
@@ -197,36 +210,67 @@ function transformAllocationData(rawData: any) {
   return transformed;
 }
 
-// Update the extractRiskScore function
-function extractRiskScore(fullResponse: string): number {
+// Update the extractRiskScore function with more logging
+function extractRiskScore(data: any): number {
+  console.log('Raw data received in extractRiskScore:', data);
+  
   try {
-    if (!fullResponse) {
-      console.log('No full response provided');
+    // If no data provided
+    if (!data) {
+      console.log('No data provided to extractRiskScore');
       return 0;
     }
-    
-    console.log('Full response:', fullResponse);
-    
-    // Parse the full response string
-    const responses = fullResponse.split('\n\n');
-    console.log('Split responses:', responses);
-    
-    const riskResponse = responses.find(resp => resp.includes('"Risk"'));
-    console.log('Risk response found:', riskResponse);
-    
-    if (!riskResponse) {
-      console.log('No risk response found');
-      return 0;
+
+    // If data is an object
+    if (typeof data === 'object' && data !== null) {
+      console.log('Data is an object with properties:', Object.keys(data));
+      
+      // Check for direct risk_score
+      if ('risk_score' in data) {
+        console.log('Found risk_score:', data.risk_score);
+        return data.risk_score;
+      }
+
+      // Check full_response
+      if (data.full_response) {
+        console.log('Found full_response:', data.full_response);
+        try {
+          const responses = data.full_response.split('\n\n');
+          console.log('Split responses:', responses);
+          
+          const riskResponse = responses.find(resp => resp.includes('"Risk"'));
+          console.log('Risk response found:', riskResponse);
+          
+          if (riskResponse) {
+            const riskJson = JSON.parse(riskResponse);
+            console.log('Parsed risk JSON:', riskJson);
+            return riskJson.Risk;
+          }
+        } catch (e) {
+          console.error('Error parsing full_response:', e);
+        }
+      }
     }
-    
-    const riskJson = JSON.parse(riskResponse);
-    console.log('Parsed risk JSON:', riskJson);
-    
-    return riskJson.Risk || 0;
+
+    // If data is a string
+    if (typeof data === 'string') {
+      console.log('Data is a string:', data);
+      try {
+        const parsed = JSON.parse(data);
+        console.log('Parsed string data:', parsed);
+        if (parsed.risk_score) {
+          return parsed.risk_score;
+        }
+      } catch (e) {
+        console.error('Error parsing string data:', e);
+      }
+    }
+
+    console.log('No risk score found in data');
+    return 0;
   } catch (error) {
-    console.error('Error extracting risk score:', error);
-    console.error('Error details:', {
-      error: error,
+    console.error('Error in extractRiskScore:', {
+      error,
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined
     });
@@ -243,6 +287,7 @@ export default function InvestmentPage() {
   const [isAuthReady, setIsAuthReady] = useState(false)
   const [savedRecord, setSavedRecord] = useState<InvestmentRecord | null>(null)
   const [allocation, setAllocation] = useState<Array<{ name: string; value: number; color: string }>>([])
+  const [riskScore, setRiskScore] = useState<number>(0)
   const [formData, setFormData] = useState<FormData>({
     name: '',
     age: '',
@@ -258,7 +303,11 @@ export default function InvestmentPage() {
   const [chartKey, setChartKey] = useState(0)
   const [isDataReady, setIsDataReady] = useState(false)
   const [isFromCache, setIsFromCache] = useState(false)
-  const [chartData, setChartData] = useState<any>(null)
+  const [chartData, setChartData] = useState<ChartState>({
+    allocation: [],
+    risk_score: 0,
+    full_response: ''
+  });
 
   // Fix the useEffect dependency warning
   useEffect(() => {
@@ -324,7 +373,7 @@ export default function InvestmentPage() {
 
         if (data?.allocation) {
           console.log('Raw allocation data:', data.allocation);
-          updateAllocation(data.allocation);
+          updateAllocation(data.allocation, data.risk_score);
         }
       } catch (error) {
         console.error('Error fetching saved investment:', error);
@@ -371,19 +420,41 @@ export default function InvestmentPage() {
         return;
       }
 
-      const existingRecord = await checkExistingRecord(formData, auth.currentUser.uid);
+      try {
+        const existingRecord = await checkExistingRecord(formData, auth.currentUser.uid);
+        console.log('Existing record check result:', existingRecord);
 
-      if (existingRecord?.allocation) {
-        console.log('Found existing allocation:', existingRecord.allocation);
-        updateAllocation(existingRecord.allocation);
-      } else {
-        console.log('No existing record found, generating new portfolio');
-        await generatePortfolio();
+        if (existingRecord?.allocation) {
+          console.log('Found existing allocation:', existingRecord.allocation);
+          updateAllocation(existingRecord.allocation, existingRecord.risk_score);
+        } else {
+          console.log('No existing record found, generating new portfolio');
+          await generatePortfolio();
+        }
+      } catch (innerError) {
+        console.error('Error during portfolio calculation:', {
+          error: innerError,
+          message: innerError instanceof Error ? innerError.message : 'Unknown error',
+          stack: innerError instanceof Error ? innerError.stack : undefined
+        });
+        throw new Error(innerError instanceof Error ? innerError.message : 'Failed to process investment data');
       }
 
     } catch (error) {
-      console.error('HandleCalculate error:', error);
-      setError(error instanceof Error ? error.message : 'Failed to calculate allocation');
+      console.error('HandleCalculate error:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      let errorMessage = 'Failed to calculate allocation';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        errorMessage = JSON.stringify(error);
+      }
+      
+      setError(errorMessage);
       setShowChart(false);
     } finally {
       setIsLoading(false);
@@ -407,7 +478,6 @@ export default function InvestmentPage() {
         has_investment_experience: formData.has_investment_experience
       };
 
-      // Log the data being sent to API
       console.log('Sending data to API:', apiRequestData);
 
       const response = await fetch('/api/calculate-allocation', {
@@ -420,62 +490,68 @@ export default function InvestmentPage() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('API Error Response:', errorText);
-        throw new Error(errorText);
+        console.error('API Response Error:', errorText);
+        throw new Error(`Failed to fetch allocation data: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('API Response:', data);
+      console.log('Raw API Response:', data);
 
-      if (data.allocation) {
-        console.log('Processing allocation data:', data.allocation);
-        const transformedData = transformAllocationData(data.allocation);
-        
-        if (transformedData.length > 0) {
-          console.log('Setting allocation with transformed data:', transformedData);
-          setAllocation(transformedData);
-          setShowChart(true);
-          setChartKey(prev => prev + 1);
-        } else {
-          console.error('Transformed data is empty');
-        }
-
-        // Save to Supabase
-        const finalSaveData = {
-          user_id: auth.currentUser?.uid,
-          name: auth.currentUser?.displayName || 'Anonymous',
-          age: parseInt(formData.age),
-          current_savings: parseFloat(formData.current_savings),
-          monthly_savings: parseFloat(formData.monthly_savings),
-          investment_horizon: parseInt(formData.investment_horizon_years),
-          financial_goal: formData.financial_goal,
-          has_emergency_fund: formData.has_emergency_fund,
-          needs_money_during_horizon: formData.needs_money_during_horizon,
-          has_investment_experience: formData.has_investment_experience,
-          allocation: data.allocation
-        };
-
-        console.log('Attempting to save to Supabase:', finalSaveData);
-
-        const { data: insertedData, error: supabaseError } = await supabase
-          .from('investment_records')
-          .insert([finalSaveData]);
-
-        if (supabaseError) {
-          console.error('Supabase insert error:', {
-            error: supabaseError,
-            message: supabaseError.message,
-            details: supabaseError.details,
-            hint: supabaseError.hint,
-            code: supabaseError.code
-          });
-          throw supabaseError;
-        }
-
-        console.log('Successfully saved to Supabase:', insertedData);
+      // Validate the response structure
+      if (!data || !data.allocation || !Array.isArray(data.allocation)) {
+        console.error('Invalid API response structure:', data);
+        throw new Error('Invalid response structure from API');
       }
+
+      // Transform the allocation data
+      const transformedAllocation = data.allocation.map((item: any) => ({
+        name: item.name || item.category,
+        value: parseFloat(item.value || item.percentage) || 0,
+        color: item.color || item.fill || getColorForCategory(item.name || item.category)
+      }));
+
+      console.log('Transformed allocation:', transformedAllocation);
+
+      // Update the UI with the new allocation
+      updateAllocation(transformedAllocation, data.risk_score);
+
+      // Prepare data for Supabase
+      const finalSaveData = {
+        user_id: auth.currentUser?.uid,
+        name: auth.currentUser?.displayName || 'Anonymous',
+        age: parseInt(formData.age),
+        current_savings: parseFloat(formData.current_savings),
+        monthly_savings: parseFloat(formData.monthly_savings),
+        investment_horizon: parseInt(formData.investment_horizon_years),
+        financial_goal: formData.financial_goal,
+        has_emergency_fund: formData.has_emergency_fund,
+        needs_money_during_horizon: formData.needs_money_during_horizon,
+        has_investment_experience: formData.has_investment_experience,
+        allocation: transformedAllocation, // Use transformed allocation
+        risk_score: data.risk_score || 0
+      };
+
+      console.log('Attempting to save to Supabase:', finalSaveData);
+
+      const { data: insertedData, error: supabaseError } = await supabase
+        .from('investment_records')
+        .insert([finalSaveData])
+        .select();
+
+      if (supabaseError) {
+        console.error('Supabase insert error:', supabaseError);
+        throw new Error(`Failed to save data: ${supabaseError.message}`);
+      }
+
+      console.log('Successfully saved to Supabase:', insertedData);
+
     } catch (error) {
-      console.error('Error in generatePortfolio:', error);
+      console.error('Error in generatePortfolio:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        type: typeof error
+      });
       throw error;
     }
   };
@@ -673,6 +749,8 @@ export default function InvestmentPage() {
           ...currentValues,
           name: user.displayName || 'Anonymous',
           allocation: data.chartData,
+          risk_score: data.risk_score,
+          full_response: data.full_response,
           created_at: new Date().toISOString()
         }])
 
@@ -696,11 +774,14 @@ export default function InvestmentPage() {
     }
   }
 
-  const updateAllocation = (newAllocation: any[]) => {
-    setIsDataReady(false); // Reset ready state
+  const updateAllocation = (newAllocation: any[], newRiskScore?: number) => {
+    setIsDataReady(false);
     const transformedData = transformAllocationData(newAllocation);
     console.log('Setting transformed allocation:', transformedData);
     setAllocation(transformedData);
+    if (newRiskScore !== undefined) {
+      setRiskScore(newRiskScore);
+    }
     setShowChart(true);
   };
 
@@ -735,7 +816,7 @@ export default function InvestmentPage() {
 
         if (data?.allocation) {
           console.log('Loading initial allocation data');
-          updateAllocation(data.allocation);
+          updateAllocation(data.allocation, data.risk_score);
         }
       } catch (error) {
         console.error('Error loading initial data:', error);
@@ -922,7 +1003,7 @@ export default function InvestmentPage() {
                   <div className="p-4 bg-blue-50 rounded-lg">
                     <h3 className="font-semibold text-blue-800 mb-2">Portfolio Risk Score</h3>
                     <p className="text-blue-700">
-                      Your portfolio risk score is: {extractRiskScore(chartData?.full_response || '')} out of 10
+                      Your portfolio risk score is: {riskScore} out of 10
                     </p>
                   </div>
 
