@@ -4,61 +4,70 @@ import Header from "@/components/Header"
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 bg-gray-50 py-12 px-4">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <section className="space-y-4">
-            <h1 className="text-3xl font-bold text-blue-700">About Us</h1>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              We are a team of passionate financial experts and technology enthusiasts who believe that everyone deserves access to smart investment opportunities. Our mission is to help people make informed decisions about where to put their hard-earned savings.
-            </p>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-blue-600">Our Mission</h2>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              In today&apos;s complex financial landscape, making investment decisions can be overwhelming. We&apos;re here to simplify that journey by providing clear, unbiased information and tools to help you grow your wealth sustainably.
-            </p>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-blue-600">What We Offer</h2>
-            <ul className="list-disc list-inside space-y-2 text-lg text-gray-700">
-              <li>Expert analysis of investment opportunities</li>
-              <li>Educational resources for financial literacy</li>
-              <li>Personalized investment strategies</li>
-              <li>Regular market insights and updates</li>
-              <li>Secure platform for managing investments</li>
-            </ul>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-blue-600">Our Values</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="p-4 bg-white rounded-lg shadow-sm">
-                <h3 className="text-xl font-medium text-blue-600 mb-2">Transparency</h3>
-                <p className="text-gray-600">We believe in complete honesty about risks and opportunities in investments.</p>
-              </div>
-              <div className="p-4 bg-white rounded-lg shadow-sm">
-                <h3 className="text-xl font-medium text-blue-600 mb-2">Education</h3>
-                <p className="text-gray-600">We empower our users with knowledge to make informed financial decisions.</p>
-              </div>
-              <div className="p-4 bg-white rounded-lg shadow-sm">
-                <h3 className="text-xl font-medium text-blue-600 mb-2">Security</h3>
-                <p className="text-gray-600">Your financial security and data protection are our top priorities.</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-2xl font-semibold text-blue-600">Join Us</h2>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              Whether you&apos;re just starting your investment journey or looking to optimize your portfolio, we&apos;re here to help. Join our community of informed investors and take control of your financial future.
-            </p>
-          </section>
+    <div>
+      {/* Blue section with fixed height */}
+      <div className="bg-[#2563eb] h-[400px]">
+        <Header />
+        
+        {/* Hero Section */}
+        <div className="text-center text-white pt-20 px-4">
+          
+          <p className="text-3xl max-w-3xl mx-auto">
+            Welcome to Financial Health, where smart investing meets precision and personalization.
+          </p>
         </div>
-      </main>
+      </div>
+
+      {/* Content Section */}
+      <div className="max-w-4xl mx-auto px-4 py-12 -mt-20 bg-white rounded-lg shadow-lg">
+        <div className="prose prose-lg max-w-none">
+          <p className="lead">
+            Our mission is simple: to empower individuals like you to make informed, confident decisions about your financial future. In a world where investment choices can often feel overwhelming, we are here to guide you toward the right financial instruments—without human biases, and with the help of cutting-edge AI technology.
+          </p>
+
+          <h2 className="text-2xl font-bold mt-8 mb-4">The Problem</h2>
+          <p>
+            Navigating the world of investments is complex. From choosing the right mix of mutual funds, bonds, stocks, and alternative assets, to ensuring your portfolio aligns with your long-term goals, the sheer number of options and advice out there can be paralyzing. Worse, human biases often cloud investment decisions, whether they come from emotions, subjective experiences, or outdated strategies.
+          </p>
+
+          <h2 className="text-2xl font-bold mt-8 mb-4">Our Solution</h2>
+          <p>
+            At Financial Health, we leverage the power of AI to provide you with unbiased, data-driven insights on how to distribute your portfolio across different financial instruments. Our platform offers personalized guidance to help you understand how much you should invest in each asset class, all based on your unique financial goals, risk tolerance, and time horizon.
+          </p>
+          <p>
+            We don't just stop at asset allocation—we go further. Once you understand the "how much," we suggest specific investment opportunities like mutual funds, bonds, and more, to make sure your money is placed in the right instruments at the right time. With our system, you get an investment plan that is tailored to you—without the clutter or confusion.
+          </p>
+
+          <h2 className="text-2xl font-bold mt-8 mb-4">Why We Do It</h2>
+          <p>
+            Our founder, Abhinav, knows firsthand the challenges of investing. An IIT Bombay graduate with an MBA from UNC Chapel Hill, Abhinav has spent over 15 years in the banking industry, working with some of the world's leading financial institutions. Despite this extensive experience, he struggled with making the right investment choices, often feeling overwhelmed by conflicting advice and constantly evolving markets.
+          </p>
+          <p>
+            This personal struggle inspired the creation of financialhealth.co.in —a platform where data, not bias, drives investment recommendations. With AI, we aim to remove the guesswork and empower you to make better financial decisions, based on your individual needs and circumstances.
+          </p>
+
+          <h2 className="text-2xl font-bold mt-8 mb-4">Our Approach</h2>
+          <ul className="list-disc pl-6 space-y-4">
+            <li>
+              <strong>Personalized Financial Guidance:</strong> We understand that every individual's financial situation is unique. Our AI-powered system assesses your risk profile, goals, and investment horizon to recommend a portfolio allocation that works best for you.
+            </li>
+            <li>
+              <strong>Unbiased Recommendations:</strong> Say goodbye to conflicting advice from human advisors with hidden interests. Our platform only suggests the best financial instruments, based on data, historical performance, and your personal preferences.
+            </li>
+            <li>
+              <strong>Continuous Learning:</strong> Our AI evolves with market changes, so your portfolio is always aligned with the latest trends and conditions. Whether you're a conservative investor or a more aggressive one, we adapt and provide real-time recommendations to optimize your returns.
+            </li>
+          </ul>
+
+          <h2 className="text-2xl font-bold mt-8 mb-4">Join Us on Our Journey</h2>
+          <p>
+            At Financial Health, we believe that financial literacy and smart investing should be accessible to everyone, regardless of background or experience. Whether you're just starting your investment journey or looking to optimize an existing portfolio, we're here to guide you every step of the way.
+          </p>
+          <p className="font-medium text-lg mt-6">
+            Together, we can take the guesswork out of investing and build a secure, prosperous future.
+          </p>
+        </div>
+      </div>
     </div>
   )
 } 
