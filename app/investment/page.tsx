@@ -18,6 +18,7 @@ import { auth } from "@/lib/firebase"
 import { User } from 'firebase/auth'
 import { supabase } from '@/app/lib/supabaseClient'
 import { testSupabaseConnection } from '@/lib/supabase-utils'
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 
 interface InvestmentRecord {
   stocks: number
@@ -69,9 +70,14 @@ interface ChartDataItem {
 }
 
 interface ChartState {
-  allocation: ChartDataItem[];
+  allocation: Array<{
+    name: string;
+    value: number;
+    color: string;
+  }>;
   risk_score: number;
-  full_response: string;
+  risk_value: number;
+  expected_return: number;
 }
 
 async function checkExistingRecord(formData: FormData, userId: string) {
@@ -238,7 +244,7 @@ function extractRiskScore(data: any): number {
           const responses = data.full_response.split('\n\n');
           console.log('Split responses:', responses);
           
-          const riskResponse = responses.find(resp => resp.includes('"Risk"'));
+          const riskResponse = responses.find((resp:any) => resp.includes('"Risk"'));
           console.log('Risk response found:', riskResponse);
           
           if (riskResponse) {
@@ -306,106 +312,48 @@ export default function InvestmentPage() {
   const [chartData, setChartData] = useState<ChartState>({
     allocation: [],
     risk_score: 0,
-    full_response: ''
+    risk_value: 0,
+    expected_return: 0
   });
 
-  // Fix the useEffect dependency warning
+  // Update useEffect for auth state changes
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        // Update form data with user's name when they log in
+        setFormData(prevData => ({
+          ...prevData,
+          name: currentUser.displayName || ''
+        }));
+        setUserName(currentUser.displayName || ''); // Also update userName state
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Modify the click handler to show Google sign-in explicitly
   useEffect(() => {
     const handlePageClick = () => {
-      const currentUser = auth.currentUser
+      const currentUser = auth.currentUser;
       if (!currentUser) {
-        sessionStorage.setItem('formData', JSON.stringify(formData))
-        sessionStorage.setItem('returnUrl', window.location.pathname)
-        router.push('/login')
+        sessionStorage.setItem('formData', JSON.stringify(formData));
+        sessionStorage.setItem('returnUrl', window.location.pathname);
+        // Force account selection by adding specific parameters to the URL
+        router.push('/login?prompt=select_account');
       }
-    }
+    };
 
-    const pageContainer = document.getElementById('investment-page-container')
-    pageContainer?.addEventListener('click', handlePageClick)
+    const pageContainer = document.getElementById('investment-page-container');
+    pageContainer?.addEventListener('click', handlePageClick);
 
     return () => {
-      pageContainer?.removeEventListener('click', handlePageClick)
-    }
-  }, [formData, router])
+      pageContainer?.removeEventListener('click', handlePageClick);
+    };
+  }, [formData]);
 
-  // Load saved data when component mounts
-  useEffect(() => {
-    try {
-      // Load saved form data and allocation from localStorage
-      const savedFormData = localStorage.getItem('investmentFormData');
-      const savedAllocation = localStorage.getItem('investmentAllocation');
-      
-      console.log('Loading saved data:', { savedFormData, savedAllocation });
-      
-      if (savedFormData) {
-        const parsedFormData = JSON.parse(savedFormData);
-        console.log('Setting form data:', parsedFormData);
-        setFormData(parsedFormData);
-      }
-      
-      if (savedAllocation) {
-        const parsedAllocation = JSON.parse(savedAllocation);
-        console.log('Setting allocation:', parsedAllocation);
-        setAllocation(parsedAllocation);
-        setShowChart(true);
-      }
-    } catch (error) {
-      console.error('Error loading saved data:', error);
-    }
-  }, []); // Run once when component mounts
-
-  // Add this effect to fetch saved record when component mounts
-  useEffect(() => {
-    async function fetchSavedInvestment() {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const { data, error } = await supabase
-          .from('investment_records')
-          .select('*')
-          .eq('user_id', user.uid)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (error) throw error;
-
-        if (data?.allocation) {
-          console.log('Raw allocation data:', data.allocation);
-          updateAllocation(data.allocation, data.risk_score);
-        }
-      } catch (error) {
-        console.error('Error fetching saved investment:', error);
-      }
-    }
-
-    fetchSavedInvestment()
-  }, []) // Run once when component mounts
-
-  // Add useEffect to get and set user's name from Firebase auth
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        // Get the user's name from Firebase auth
-        const displayName = user.displayName || user.email?.split('@')[0] || ''
-        setUserName(displayName)
-      }
-    })
-
-    return () => unsubscribe()
-  }, [])
-
-  // Add this effect at the top of your component
-  useEffect(() => {
-    async function checkConnection() {
-      const isConnected = await testSupabaseConnection();
-      console.log('Supabase connection status:', isConnected);
-    }
-    checkConnection();
-  }, []); // Empty dependency array since we only want to check connection once
-
-  // Modify handleCalculate to include more logging
+  // Modify handleCalculate to save to database
   const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -420,41 +368,80 @@ export default function InvestmentPage() {
         return;
       }
 
-      try {
-        const existingRecord = await checkExistingRecord(formData, auth.currentUser.uid);
-        console.log('Existing record check result:', existingRecord);
+      const requestPayload = {
+        userId: auth.currentUser.uid,
+        name: auth.currentUser.displayName || 'Anonymous',
+        age: parseInt(formData.age),
+        current_savings: parseFloat(formData.current_savings),
+        monthly_savings: parseFloat(formData.monthly_savings),
+        investment_horizon_years: parseInt(formData.investment_horizon_years),
+        financial_goal: formData.financial_goal,
+        has_emergency_fund: formData.has_emergency_fund,
+        needs_money_during_horizon: formData.needs_money_during_horizon,
+        has_investment_experience: formData.has_investment_experience
+      };
 
-        if (existingRecord?.allocation) {
-          console.log('Found existing allocation:', existingRecord.allocation);
-          updateAllocation(existingRecord.allocation, existingRecord.risk_score);
-        } else {
-          console.log('No existing record found, generating new portfolio');
-          await generatePortfolio();
-        }
-      } catch (innerError) {
-        console.error('Error during portfolio calculation:', {
-          error: innerError,
-          message: innerError instanceof Error ? innerError.message : 'Unknown error',
-          stack: innerError instanceof Error ? innerError.stack : undefined
-        });
-        throw new Error(innerError instanceof Error ? innerError.message : 'Failed to process investment data');
+      console.log('Sending request with payload:', requestPayload);
+
+      const response = await fetch('/api/calculate-allocation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestPayload)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        throw new Error(`API call failed: ${errorText}`);
       }
+
+      const responseData = await response.json();
+      console.log('API Response:', responseData);
+
+      const transformedData: ChartState = {
+        allocation: responseData.allocation.map((item: any) => ({
+          name: item.name,
+          value: item.value,
+          color: item.color
+        })),
+        risk_score: responseData.risk_score,
+        risk_value: responseData.risk_score,
+        expected_return: responseData.expected_return
+      };
+
+      // Save to database
+      if (auth.currentUser) {
+        const { error: saveError } = await supabase
+          .from('investment_records')
+          .insert([{
+            user_id: auth.currentUser.uid,
+            name: auth.currentUser.displayName || 'Anonymous',
+            age: parseInt(formData.age),
+            current_savings: parseFloat(formData.current_savings),
+            monthly_savings: parseFloat(formData.monthly_savings),
+            investment_horizon: parseInt(formData.investment_horizon_years),
+            financial_goal: formData.financial_goal,
+            has_emergency_fund: formData.has_emergency_fund,
+            needs_money_during_horizon: formData.needs_money_during_horizon,
+            has_investment_experience: formData.has_investment_experience,
+            allocation: transformedData.allocation,
+            risk_score: transformedData.risk_score,
+            risk_value: transformedData.risk_value,
+            expected_return: transformedData.expected_return,
+            created_at: new Date().toISOString()
+          }]);
+
+        if (saveError) {
+          console.error('Error saving to database:', saveError);
+        }
+      }
+
+      setChartData(transformedData);
+      setShowChart(true);
 
     } catch (error) {
-      console.error('HandleCalculate error:', {
-        error,
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      
-      let errorMessage = 'Failed to calculate allocation';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'object' && error !== null) {
-        errorMessage = JSON.stringify(error);
-      }
-      
-      setError(errorMessage);
+      console.error('HandleCalculate error:', error);
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
       setShowChart(false);
     } finally {
       setIsLoading(false);
@@ -494,56 +481,42 @@ export default function InvestmentPage() {
         throw new Error(`Failed to fetch allocation data: ${errorText}`);
       }
 
-      const data = await response.json();
-      console.log('Raw API Response:', data);
+      const responseData = await response.json();
+      console.log('Raw API response:', responseData);
 
-      // Validate the response structure
-      if (!data || !data.allocation || !Array.isArray(data.allocation)) {
-        console.error('Invalid API response structure:', data);
-        throw new Error('Invalid response structure from API');
-      }
+      // Parse the full_response string to get risk and expected return
+      const fullResponseString = responseData.full_response
+        .replace(/```json\n|\n```/g, '') // Remove markdown formatting
+        .split('\n')
+        .filter(Boolean); // Remove empty lines
 
-      // Transform the allocation data
-      const transformedAllocation = data.allocation.map((item: any) => ({
-        name: item.name || item.category,
-        value: parseFloat(item.value || item.percentage) || 0,
-        color: item.color || item.fill || getColorForCategory(item.name || item.category)
-      }));
+      console.log('Split response:', fullResponseString);
 
-      console.log('Transformed allocation:', transformedAllocation);
+      // The second line contains the risk and expected return
+      const metricsData = JSON.parse(fullResponseString[1]);
+      console.log('Metrics data:', metricsData);
 
-      // Update the UI with the new allocation
-      updateAllocation(transformedAllocation, data.risk_score);
+      // Extract risk and expected return values
+      const riskValue = Number(metricsData.risk || 0);
+      const expectedReturn = Number(metricsData.expected_return?.replace('%', '') || 0);
 
-      // Prepare data for Supabase
-      const finalSaveData = {
-        user_id: auth.currentUser?.uid,
-        name: auth.currentUser?.displayName || 'Anonymous',
-        age: parseInt(formData.age),
-        current_savings: parseFloat(formData.current_savings),
-        monthly_savings: parseFloat(formData.monthly_savings),
-        investment_horizon: parseInt(formData.investment_horizon_years),
-        financial_goal: formData.financial_goal,
-        has_emergency_fund: formData.has_emergency_fund,
-        needs_money_during_horizon: formData.needs_money_during_horizon,
-        has_investment_experience: formData.has_investment_experience,
-        allocation: transformedAllocation, // Use transformed allocation
-        risk_score: data.risk_score || 0
+      console.log('Extracted metrics:', { riskValue, expectedReturn });
+
+      // Transform the chart data
+      const transformedData: ChartState = {
+        allocation: responseData.allocation.map((item: any) => ({
+          name: item.name,
+          value: item.value,
+          color: item.color
+        })),
+        risk_score: riskValue,
+        risk_value: riskValue,
+        expected_return: expectedReturn
       };
 
-      console.log('Attempting to save to Supabase:', finalSaveData);
-
-      const { data: insertedData, error: supabaseError } = await supabase
-        .from('investment_records')
-        .insert([finalSaveData])
-        .select();
-
-      if (supabaseError) {
-        console.error('Supabase insert error:', supabaseError);
-        throw new Error(`Failed to save data: ${supabaseError.message}`);
-      }
-
-      console.log('Successfully saved to Supabase:', insertedData);
+      console.log('Final transformed data:', transformedData);
+      setChartData(transformedData);
+      setShowChart(true);
 
     } catch (error) {
       console.error('Error in generatePortfolio:', {
@@ -556,70 +529,54 @@ export default function InvestmentPage() {
     }
   };
 
-  // Modify the useEffect for initial count check
+  // Update the useEffect that loads saved data
   useEffect(() => {
-    const checkInitialCount = async () => {
-      try {
-        // Wait for auth to be ready
-        if (!auth.currentUser) {
-          console.log('No user logged in');
-          return;
-        }
-
-        console.log('Checking count for user:', auth.currentUser.uid);
-        
-        // Query to get the latest record
-        const { data, error } = await supabase
-          .from('investment_records')
-          .select('*')
-          .eq('user_id', auth.currentUser.uid)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (error) {
-          console.error('Supabase query error:', error);
-          return;
-        }
-
-        // If there's a latest record, set the form data
-        if (data) {
-          setFormData({
-            name: data.name,
-            age: data.age.toString(),
-            current_savings: data.current_savings.toString(),
-            monthly_savings: data.monthly_savings.toString(),
-            investment_horizon_years: data.investment_horizon.toString(),
-            financial_goal: data.financial_goal,
-            has_emergency_fund: data.has_emergency_fund,
-            needs_money_during_horizon: data.needs_money_during_horizon,
-            has_investment_experience: data.has_investment_experience
-          });
-
-          if (data.allocation) {
-            setAllocation(data.allocation);
-            setShowChart(true);
-          }
-        }
-
-      } catch (error) {
-        console.error('Error checking initial count:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // Add auth state listener
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setIsAuthReady(true)
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      setUser(user);
       if (user) {
-        checkInitialCount()
-      }
-    })
+        try {
+          const { data: latestRecord } = await supabase
+            .from('investment_records')
+            .select('*')
+            .eq('user_id', user.uid)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
 
-    // Cleanup subscription
-    return () => unsubscribe()
-  }, []) // Empty dependency array since we're using auth.onAuthStateChanged
+          if (latestRecord) {
+            // Update form data
+            setFormData({
+              name: latestRecord.name || '',
+              age: latestRecord.age?.toString() || '',
+              current_savings: latestRecord.current_savings?.toString() || '',
+              monthly_savings: latestRecord.monthly_savings?.toString() || '',
+              investment_horizon_years: latestRecord.investment_horizon?.toString() || '',
+              financial_goal: latestRecord.financial_goal || '',
+              has_emergency_fund: latestRecord.has_emergency_fund || 'N',
+              needs_money_during_horizon: latestRecord.needs_money_during_horizon || 'N',
+              has_investment_experience: latestRecord.has_investment_experience || 'N'
+            });
+
+            // Update chart data with all metrics
+            if (latestRecord.allocation) {
+              const transformedData: ChartState = {
+                allocation: latestRecord.allocation,
+                risk_score: latestRecord.risk_score || 0,
+                risk_value: latestRecord.risk_score || 0,
+                expected_return: latestRecord.expected_return || 0
+              };
+              setChartData(transformedData);
+              setShowChart(true);
+            }
+          }
+        } catch (error) {
+          console.error('Error loading latest record:', error);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -748,9 +705,10 @@ export default function InvestmentPage() {
         .insert([{
           ...currentValues,
           name: user.displayName || 'Anonymous',
-          allocation: data.chartData,
+          allocation: data.allocation,
           risk_score: data.risk_score,
-          full_response: data.full_response,
+          risk_value: data.risk_value,
+          expected_return: data.expected_return,
           created_at: new Date().toISOString()
         }])
 
@@ -758,7 +716,7 @@ export default function InvestmentPage() {
         console.error('Error storing allocation:', insertError)
       }
 
-      setChartData(data.chartData)
+      setChartData(data)
       setIsFromCache(false)
       setIsLoading(false)
 
@@ -998,27 +956,51 @@ export default function InvestmentPage() {
                   <PieChart data={allocation} />
                 </div>
                 
-                {/* Add the new information section */}
-                <div className="mt-6 space-y-4 text-sm">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h3 className="font-semibold text-blue-800 mb-2">Portfolio Risk Score</h3>
-                    <p className="text-blue-700">
-                      Your portfolio risk score is: {riskScore} out of 10
-                    </p>
-                  </div>
+              
 
-                  <div className="p-4 bg-yellow-50 rounded-lg">
-                    <h3 className="font-semibold text-yellow-800 mb-2">Things to consider</h3>
-                    <p className="text-yellow-700">
-                      Balancing your portfolio is extremely critical. Consider regenerating your portfolio:
-                    </p>
-                    <ul className="list-disc list-inside mt-2 text-yellow-700">
-                      <li>Every 3 months</li>
-                      <li>After significant life events such as marriage, salary change, or the birth of a child</li>
-                    </ul>
-                    <p className="text-yellow-700">
-                    Click on the pie chart above to see detailed investment recommendations for each category.
-                    </p>
+                <div className="mt-6 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Risk Level Card */}
+                    <div className="p-6 bg-blue-50 rounded-lg shadow-sm border border-blue-100">
+                      <h3 className="font-semibold text-blue-800 text-lg mb-3 flex items-center">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Risk Level
+                      </h3>
+                      <div className="flex items-baseline">
+                        <p className="text-blue-700 text-3xl font-bold">
+                          {chartData.risk_value || 0}
+                        </p>
+                        <p className="text-blue-600 ml-2 text-lg">
+                          out of 10
+                        </p>
+                      </div>
+                      <p className="text-blue-600 text-sm mt-2">
+                        Based on your investment preferences and financial goals
+                      </p>
+                    </div>
+
+                    {/* Expected Return Card */}
+                    <div className="p-6 bg-green-50 rounded-lg shadow-sm border border-green-100">
+                      <h3 className="font-semibold text-green-800 text-lg mb-3 flex items-center">
+                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                        </svg>
+                        Expected Annual Return
+                      </h3>
+                      <div className="flex items-baseline">
+                        <p className="text-green-700 text-3xl font-bold">
+                          {chartData.expected_return || 0}
+                        </p>
+                        <p className="text-green-600 ml-1 text-2xl">
+                          %
+                        </p>
+                      </div>
+                      <p className="text-green-600 text-sm mt-2">
+                        Historical average based on similar portfolio compositions
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

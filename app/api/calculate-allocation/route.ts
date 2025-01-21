@@ -53,10 +53,12 @@ export async function POST(req: Request) {
     const responseText = await recommendationResponse.text()
     console.log('3. Raw response:', responseText)
 
-    // Add try-catch for JSON parsing
     let rawData
     try {
       rawData = JSON.parse(responseText)
+      // Remove unwanted fields
+      delete rawData.risk
+      delete rawData.totalPercentage
     } catch (parseError) {
       console.error('JSON Parse Error:', parseError, 'Response:', responseText)
       return NextResponse.json(
@@ -67,7 +69,6 @@ export async function POST(req: Request) {
 
     console.log('4. Parsed data:', rawData)
 
-    // Validate the response structure
     if (!rawData || !Array.isArray(rawData.chartData)) {
       console.error('Invalid data structure:', rawData)
       return NextResponse.json(
@@ -84,10 +85,52 @@ export async function POST(req: Request) {
 
     console.log('5. Transformed chart data:', chartData)
 
-    return NextResponse.json({ 
+    // Extract metrics from full_response with updated parsing
+    let risk_score = 0
+    let expected_return = 0
+
+    if (rawData.full_response) {
+      try {
+        const fullResponseString = rawData.full_response
+          .replace(/```json\n|\n```/g, '')
+          .split('\n')
+          .filter(Boolean)
+
+        console.log('Parsed response strings:', fullResponseString);
+
+        // Find the risk and expected return from the array of strings
+        for (const line of fullResponseString) {
+          try {
+            // Remove the % symbol before parsing
+            const cleanLine = line.replace(/%/g, '');
+            const obj = JSON.parse(cleanLine);
+            
+            if (obj.risk !== undefined) {
+              risk_score = Number(obj.risk);
+            }
+            if (obj.expected_return !== undefined) {
+              expected_return = Number(obj.expected_return);
+            }
+          } catch (e) {
+            console.error('Error parsing line:', line, e);
+          }
+        }
+
+        console.log('Extracted metrics:', { risk_score, expected_return });
+      } catch (parseError) {
+        console.error('Error parsing metrics:', parseError)
+      }
+    }
+
+    const response = { 
       allocation: chartData,
-      risk_score: rawData.risk_score || 0  // Add risk_score to response
-    })
+      risk_score,
+      expected_return
+    };
+
+    console.log('Final response:', response);
+
+    return NextResponse.json(response);
 
   } catch (error) {
     console.error('Error in calculate-allocation:', error)
