@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabaseClient';
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
   const [formData, setFormData] = useState({
     full_name: '',
     phone_number: '',
@@ -19,17 +19,17 @@ export default function Profile() {
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    if (user) {
+    if (currentUser) {
       fetchUserData();
     }
-  }, [user]);
+  }, [currentUser]);
 
   const fetchUserData = async () => {
     try {
       const { data, error } = await supabase
         .from('User_data')
         .select('*')
-        .eq('user_id', user?.uid)
+        .eq('user_id', currentUser?.uid)
         .single();
 
       if (error) throw error;
@@ -61,8 +61,8 @@ export default function Profile() {
       const { error } = await supabase
         .from('User_data')
         .upsert({
-          user_id: user?.uid,
-          user_email: user?.email,
+          user_id: currentUser?.uid,
+          user_email: currentUser?.email,
           ...formData,
           updated_at: new Date().toISOString()
         }, {

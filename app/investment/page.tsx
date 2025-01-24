@@ -761,13 +761,18 @@ export default function InvestmentPage() {
     }
   }, [allocation]);
 
-  // Add this effect to handle initial data load
+  // Update this useEffect for better error handling and auth state management
   useEffect(() => {
     const loadInitialData = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
       try {
+        // Wait for auth to be ready
+        const user = auth.currentUser;
+        if (!user) {
+          console.log('No user logged in, skipping initial data load');
+          return;
+        }
+
+        console.log('Loading data for user:', user.uid);
         const { data, error } = await supabase
           .from('investment_records')
           .select('*')
@@ -776,19 +781,45 @@ export default function InvestmentPage() {
           .limit(1)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // No data found - this is okay for new users
+            console.log('No existing investment records found for user');
+            return;
+          }
+          // Log other errors
+          console.error('Supabase error:', error);
+          throw error;
+        }
 
         if (data?.allocation) {
-          console.log('Loading initial allocation data');
+          console.log('Found existing allocation data:', data);
           updateAllocation(data.allocation, data.risk_score);
         }
       } catch (error) {
-        console.error('Error loading initial data:', error);
+        if (error instanceof Error) {
+          console.error('Error loading initial data:', error.message);
+        } else {
+          console.error('Unknown error loading initial data:', error);
+        }
       }
     };
 
-    loadInitialData();
-  }, []); // Run once on mount
+    // Set up auth state listener
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        console.log('Auth state changed - user logged in:', user.uid);
+        loadInitialData();
+      } else {
+        console.log('Auth state changed - no user');
+        setAllocation([]);
+        setShowChart(false);
+      }
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
+  }, []); // Empty dependency array since we want this to run once on mount
 
   console.log('Chart data being passed:', chartData);
 
