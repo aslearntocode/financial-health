@@ -17,20 +17,20 @@ type SavedDashboard = {
 
 export default function DashboardDropdown() {
   const [dashboards, setDashboards] = useState<SavedDashboard[]>([]);
-  const { auth } = useAuth();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
-    if (auth.currentUser) {
+    if (currentUser) {
       loadSavedDashboards();
     }
-  }, [auth.currentUser]);
+  }, [currentUser]);
 
   const loadSavedDashboards = async () => {
     try {
       const { data, error } = await supabase
         .from('saved_dashboards')
         .select('*')
-        .eq('user_id', auth.currentUser?.uid)
+        .eq('user_id', currentUser?.uid)
         .order('created_at', { ascending: false })
         .limit(5); // Limit to last 5 dashboards
 
