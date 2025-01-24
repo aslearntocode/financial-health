@@ -76,7 +76,6 @@ interface ChartState {
     color: string;
   }>;
   risk_score: number;
-  risk_value: number;
   expected_return: number;
 }
 
@@ -312,7 +311,6 @@ export default function InvestmentPage() {
   const [chartData, setChartData] = useState<ChartState>({
     allocation: [],
     risk_score: 0,
-    risk_value: 0,
     expected_return: 0
   });
 
@@ -368,6 +366,9 @@ export default function InvestmentPage() {
         return;
       }
 
+      // Log the form data before sending
+      console.log('Form data being submitted:', formData);
+
       const requestPayload = {
         userId: auth.currentUser.uid,
         name: auth.currentUser.displayName || 'Anonymous',
@@ -381,7 +382,7 @@ export default function InvestmentPage() {
         has_investment_experience: formData.has_investment_experience
       };
 
-      console.log('Sending request with payload:', requestPayload);
+      console.log('API request payload:', requestPayload);
 
       const response = await fetch('/api/calculate-allocation', {
         method: 'POST',
@@ -398,49 +399,57 @@ export default function InvestmentPage() {
       const responseData = await response.json();
       console.log('API Response:', responseData);
 
-      const transformedData: ChartState = {
-        allocation: responseData.allocation.map((item: any) => ({
-          name: item.name,
-          value: item.value,
-          color: item.color
-        })),
-        risk_score: responseData.risk_score,
-        risk_value: responseData.risk_score,
-        expected_return: responseData.expected_return
+      // Explicitly define only the fields we want to save
+      const dbRecord = {
+        user_id: auth.currentUser.uid,
+        name: auth.currentUser.displayName || 'Anonymous',
+        age: parseInt(formData.age),
+        current_savings: parseFloat(formData.current_savings),
+        monthly_savings: parseFloat(formData.monthly_savings),
+        investment_horizon: parseInt(formData.investment_horizon_years),
+        financial_goal: formData.financial_goal,
+        has_emergency_fund: formData.has_emergency_fund,
+        needs_money_during_horizon: formData.needs_money_during_horizon,
+        has_investment_experience: formData.has_investment_experience,
+        // Make sure allocation is stringified if it's an object
+        allocation: Array.isArray(responseData.allocation) ? responseData.allocation : JSON.stringify(responseData.allocation),
+        risk_score: Number(responseData.risk_score),
+        expected_return: Number(responseData.expected_return),
+        created_at: new Date().toISOString()
       };
 
-      // Save to database
-      if (auth.currentUser) {
-        const { error: saveError } = await supabase
-          .from('investment_records')
-          .insert([{
-            user_id: auth.currentUser.uid,
-            name: auth.currentUser.displayName || 'Anonymous',
-            age: parseInt(formData.age),
-            current_savings: parseFloat(formData.current_savings),
-            monthly_savings: parseFloat(formData.monthly_savings),
-            investment_horizon: parseInt(formData.investment_horizon_years),
-            financial_goal: formData.financial_goal,
-            has_emergency_fund: formData.has_emergency_fund,
-            needs_money_during_horizon: formData.needs_money_during_horizon,
-            has_investment_experience: formData.has_investment_experience,
-            allocation: transformedData.allocation,
-            risk_score: transformedData.risk_score,
-            risk_value: transformedData.risk_value,
-            expected_return: transformedData.expected_return,
-            created_at: new Date().toISOString()
-          }]);
+      console.log('Attempting to save record to Supabase:', dbRecord);
 
-        if (saveError) {
-          console.error('Error saving to database:', saveError);
-        }
+      // Try inserting without the select
+      const { error: saveError } = await supabase
+        .from('investment_records')
+        .insert(dbRecord);
+
+      if (saveError) {
+        console.error('Detailed Supabase error:', {
+          code: saveError.code,
+          message: saveError.message,
+          details: saveError.details,
+          hint: saveError.hint
+        });
+        throw saveError;
       }
 
-      setChartData(transformedData);
+      console.log('Successfully saved to Supabase:', responseData);
+
+      setChartData({
+        allocation: responseData.allocation,
+        risk_score: responseData.risk_score,
+        expected_return: responseData.expected_return
+      });
       setShowChart(true);
 
     } catch (error) {
-      console.error('HandleCalculate error:', error);
+      console.error('HandleCalculate error:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
       setError(error instanceof Error ? error.message : 'An unexpected error occurred');
       setShowChart(false);
     } finally {
@@ -510,7 +519,6 @@ export default function InvestmentPage() {
           color: item.color
         })),
         risk_score: riskValue,
-        risk_value: riskValue,
         expected_return: expectedReturn
       };
 
@@ -562,7 +570,6 @@ export default function InvestmentPage() {
               const transformedData: ChartState = {
                 allocation: latestRecord.allocation,
                 risk_score: latestRecord.risk_score || 0,
-                risk_value: latestRecord.risk_score || 0,
                 expected_return: latestRecord.expected_return || 0
               };
               setChartData(transformedData);
@@ -707,7 +714,6 @@ export default function InvestmentPage() {
           name: user.displayName || 'Anonymous',
           allocation: data.allocation,
           risk_score: data.risk_score,
-          risk_value: data.risk_value,
           expected_return: data.expected_return,
           created_at: new Date().toISOString()
         }])
@@ -950,13 +956,11 @@ export default function InvestmentPage() {
             <h2 className="text-2xl font-bold mb-4">Your Investment Allocation</h2>
             {isLoading ? (
               <p>Calculating your allocation...</p>
-            ) : showChart && allocation.length > 0 ? (
+            ) : showChart && chartData.allocation && chartData.allocation.length > 0 ? (
               <div>
                 <div key={chartKey} className="cursor-pointer" onClick={() => router.push('/investment-details')}>
-                  <PieChart data={allocation} />
+                  <PieChart data={chartData.allocation} />
                 </div>
-                
-              
 
                 <div className="mt-6 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -969,8 +973,8 @@ export default function InvestmentPage() {
                         Risk Level
                       </h3>
                       <div className="flex items-baseline">
-                        <p className="text-blue-700 text-3xl font-bold">
-                          {chartData.risk_value || 0}
+                        <p className="text-blue-600 text-3xl font-bold">
+                          {chartData.risk_score?.toFixed(0)}
                         </p>
                         <p className="text-blue-600 ml-2 text-lg">
                           out of 10
@@ -991,7 +995,7 @@ export default function InvestmentPage() {
                       </h3>
                       <div className="flex items-baseline">
                         <p className="text-green-700 text-3xl font-bold">
-                          {chartData.expected_return || 0}
+                          {chartData.expected_return?.toFixed(1)}
                         </p>
                         <p className="text-green-600 ml-1 text-2xl">
                           %
@@ -1003,6 +1007,14 @@ export default function InvestmentPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Add debug information
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg text-sm">
+                  <p>Debug Info:</p>
+                  <pre className="overflow-auto">
+                    {JSON.stringify(chartData, null, 2)}
+                  </pre>
+                </div> */}
               </div>
             ) : (
               <p>Fill out the form and calculate to see your allocation</p>
