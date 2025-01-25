@@ -5,9 +5,27 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
+// Add interface definitions at the top of the file
+interface MutualFund {
+  fund_name: string;
+  fund_house: string;
+  category: string;
+  fund_manager: string;
+  min_investment: number;
+  expense_ratio: number;
+  returns_3yr: number;
+  returns_5yr: number;
+  risk_level: 'High' | 'Moderate' | 'Low';
+  rationale: string;
+}
+
+interface FundsData {
+  recommendations: MutualFund[];
+}
+
 export default function MutualFundsPage() {
   const router = useRouter()
-  const [funds, setFunds] = useState<any>(null)
+  const [funds, setFunds] = useState<FundsData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [isSaving, setIsSaving] = useState<boolean>(false)
@@ -195,7 +213,7 @@ export default function MutualFundsPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {funds?.recommendations?.map((fund, index) => (
+                {funds?.recommendations?.map((fund: MutualFund, index: number) => (
                   <div key={index} className="bg-gray-50 rounded-lg p-6 hover:shadow-lg transition-shadow">
                     <div className="flex items-start justify-between">
                       <div>
