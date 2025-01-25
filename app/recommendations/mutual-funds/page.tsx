@@ -7,10 +7,10 @@ import { supabase } from '@/lib/supabase'
 
 export default function MutualFundsPage() {
   const router = useRouter()
-  const [funds, setFunds] = useState(null)
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
+  const [funds, setFunds] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [isSaving, setIsSaving] = useState<boolean>(false)
 
   const fetchLatestInvestmentData = async (userId: string) => {
     try {
@@ -40,11 +40,13 @@ export default function MutualFundsPage() {
   const fetchMutualFunds = async () => {
     try {
       setLoading(true)
+      setError(null)
       
       // Get current user
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
+        setError('Please log in to continue')
         router.push('/login')
         return
       }
@@ -59,6 +61,7 @@ export default function MutualFundsPage() {
         .single()
 
       if (fetchError || !investmentData) {
+        setError('Please complete your investment profile first')
         router.push('/investment')
         return
       }
