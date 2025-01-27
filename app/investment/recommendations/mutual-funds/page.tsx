@@ -92,9 +92,9 @@ export default function MutualFundsPage() {
             category: fund.category,
             fund_manager: fund.fund_manager,
             min_investment: fund.min_investment,
-            expense_ratio: parseFloat(fund.expense_ratio),
-            returns_3yr: parseFloat(fund.returns_3yr),
-            returns_5yr: parseFloat(fund.returns_5yr),
+            expense_ratio: fund.expense_ratio,
+            returns_3yr: typeof fund.returns_3yr === 'string' ? parseFloat(fund.returns_3yr) : fund.returns_3yr,
+            returns_5yr: typeof fund.returns_5yr === 'string' ? parseFloat(fund.returns_5yr) : fund.returns_5yr,
             risk_level: fund.risk_level,
             rationale: fund.rationale
           }))
