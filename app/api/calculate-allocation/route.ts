@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const data = await req.json()
     console.log('1. Received form data:', data)
 
-    // Build query parameters with the new field
+    // Build query parameters - ensure approximate_debt is properly formatted
     const queryParams = new URLSearchParams({
       name: data.name,
       age: data.age.toString(),
@@ -25,9 +25,10 @@ export async function POST(req: Request) {
       monthly_savings: data.monthly_savings.toString(),
       investment_horizon_years: data.investment_horizon_years.toString(),
       financial_goal: data.financial_goal.toLowerCase(),
-      has_emergency_fund: data.has_emergency_fund.toLowerCase(),
       needs_money_during_horizon: data.needs_money_during_horizon.toLowerCase(),
-      has_investment_experience: data.has_investment_experience.toLowerCase()
+      has_investment_experience: data.has_investment_experience.toLowerCase(),
+      // Ensure approximate_debt is a valid number and convert to string
+      approximate_debt: (parseFloat(data.approximate_debt) || 0).toString()
     })
 
     const url = `http://172.210.82.112:5000/api/portfolio-recommendation?${queryParams.toString()}`

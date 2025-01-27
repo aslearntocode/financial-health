@@ -26,7 +26,6 @@ interface InvestmentRecord {
   cash: number
   real_estate: number
   user_id: string
-  has_emergency_fund: 'Y' | 'N'
   needs_money_during_horizon: 'Y' | 'N'
   allocation?: any
   id?: string
@@ -39,6 +38,7 @@ interface InvestmentRecord {
   name?: string
   has_investment_experience: 'Y' | 'N'
   risk_score: number
+  approximate_debt: number
 }
 
 interface FormData {
@@ -48,7 +48,7 @@ interface FormData {
   monthly_savings: string
   investment_horizon_years: string
   financial_goal: string
-  has_emergency_fund: 'Y' | 'N'
+  approximate_debt: string
   needs_money_during_horizon: 'Y' | 'N'
   has_investment_experience: 'Y' | 'N'
 }
@@ -92,7 +92,7 @@ async function checkExistingRecord(formData: FormData, userId: string) {
       monthly_savings: parseFloat(formData.monthly_savings),
       investment_horizon: parseInt(formData.investment_horizon_years),
       financial_goal: formData.financial_goal,
-      has_emergency_fund: formData.has_emergency_fund,
+      approximate_debt: parseFloat(formData.approximate_debt),
       needs_money_during_horizon: formData.needs_money_during_horizon,
       has_investment_experience: formData.has_investment_experience
     };
@@ -121,7 +121,7 @@ async function checkExistingRecord(formData: FormData, userId: string) {
         record.monthly_savings === searchParams.monthly_savings &&
         record.investment_horizon === searchParams.investment_horizon &&
         record.financial_goal === searchParams.financial_goal &&
-        record.has_emergency_fund === searchParams.has_emergency_fund &&
+        record.approximate_debt === searchParams.approximate_debt &&
         record.needs_money_during_horizon === searchParams.needs_money_during_horizon &&
         record.has_investment_experience === searchParams.has_investment_experience;
 
@@ -134,7 +134,7 @@ async function checkExistingRecord(formData: FormData, userId: string) {
           monthly_savings: record.monthly_savings,
           investment_horizon: record.investment_horizon,
           financial_goal: record.financial_goal,
-          has_emergency_fund: record.has_emergency_fund,
+          approximate_debt: record.approximate_debt,
           needs_money_during_horizon: record.needs_money_during_horizon,
           has_investment_experience: record.has_investment_experience
         },
@@ -281,7 +281,7 @@ export default function InvestmentPage() {
     monthly_savings: '',
     investment_horizon_years: '',
     financial_goal: '',
-    has_emergency_fund: 'N',
+    approximate_debt: '',
     needs_money_during_horizon: 'N',
     has_investment_experience: 'N'
   })
@@ -386,7 +386,7 @@ export default function InvestmentPage() {
         monthly_savings: parseFloat(formData.monthly_savings),
         investment_horizon_years: parseInt(formData.investment_horizon_years),
         financial_goal: formData.financial_goal,
-        has_emergency_fund: formData.has_emergency_fund,
+        approximate_debt: parseFloat(formData.approximate_debt),
         needs_money_during_horizon: formData.needs_money_during_horizon,
         has_investment_experience: formData.has_investment_experience
       };
@@ -417,7 +417,7 @@ export default function InvestmentPage() {
         monthly_savings: parseFloat(formData.monthly_savings),
         investment_horizon: parseInt(formData.investment_horizon_years),
         financial_goal: formData.financial_goal,
-        has_emergency_fund: formData.has_emergency_fund,
+        approximate_debt: parseFloat(formData.approximate_debt),
         needs_money_during_horizon: formData.needs_money_during_horizon,
         has_investment_experience: formData.has_investment_experience,
         // Make sure allocation is stringified if it's an object
@@ -478,7 +478,7 @@ export default function InvestmentPage() {
         monthly_savings: parseFloat(formData.monthly_savings),
         investment_horizon_years: parseInt(formData.investment_horizon_years),
         financial_goal: formData.financial_goal,
-        has_emergency_fund: formData.has_emergency_fund,
+        approximate_debt: parseFloat(formData.approximate_debt),
         needs_money_during_horizon: formData.needs_money_during_horizon,
         has_investment_experience: formData.has_investment_experience
       };
@@ -569,7 +569,7 @@ export default function InvestmentPage() {
               monthly_savings: latestRecord.monthly_savings?.toString() || '',
               investment_horizon_years: latestRecord.investment_horizon?.toString() || '',
               financial_goal: latestRecord.financial_goal || '',
-              has_emergency_fund: latestRecord.has_emergency_fund || 'N',
+              approximate_debt: latestRecord.approximate_debt || '',
               needs_money_during_horizon: latestRecord.needs_money_during_horizon || 'N',
               has_investment_experience: latestRecord.has_investment_experience || 'N'
             });
@@ -610,7 +610,7 @@ export default function InvestmentPage() {
         monthly_savings: parseFloat(formData.monthly_savings),
         investment_horizon_years: parseInt(formData.investment_horizon_years),
         financial_goal: formData.financial_goal,
-        has_emergency_fund: formData.has_emergency_fund,
+        approximate_debt: parseFloat(formData.approximate_debt),
         needs_money_during_horizon: formData.needs_money_during_horizon,
         has_investment_experience: formData.has_investment_experience
       };
@@ -643,7 +643,7 @@ export default function InvestmentPage() {
         monthly_savings: parseFloat(formData.monthly_savings),
         investment_horizon: parseInt(formData.investment_horizon_years),
         financial_goal: formData.financial_goal,
-        has_emergency_fund: formData.has_emergency_fund,
+        approximate_debt: parseFloat(formData.approximate_debt),
         needs_money_during_horizon: formData.needs_money_during_horizon,
         has_investment_experience: formData.has_investment_experience,
         allocation: responseData.allocation,
@@ -830,7 +830,7 @@ export default function InvestmentPage() {
           monthly_savings: parseFloat(formData.monthly_savings),
           investment_horizon: parseInt(formData.investment_horizon_years),
           financial_goal: formData.financial_goal,
-          has_emergency_fund: formData.has_emergency_fund,
+          approximate_debt: parseFloat(formData.approximate_debt),
           needs_money_during_horizon: formData.needs_money_during_horizon,
           has_investment_experience: formData.has_investment_experience,
           risk_score: chartData.risk_score,
@@ -944,23 +944,15 @@ export default function InvestmentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="has_emergency_fund">Do you have emergency funds equivalent to 6 months of your income?</Label>
-                <Select 
-                  value={formData.has_emergency_fund}
-                  onValueChange={(value: 'Y' | 'N') => {
-                    console.log('Emergency fund selection:', value);
-                    setFormData(prev => ({ ...prev, has_emergency_fund: value }));
-                  }}
+                <Label htmlFor="approximate_debt">How much approximate debt do you have?</Label>
+                <Input
+                  id="approximate_debt"
+                  type="number"
+                  placeholder="Enter your approximate debt amount"
+                  value={formData.approximate_debt}
+                  onChange={(e) => setFormData({ ...formData, approximate_debt: e.target.value })}
                   required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select yes or no" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Y">Yes</SelectItem>
-                    <SelectItem value="N">No</SelectItem>
-                  </SelectContent>
-                </Select>
+                />
               </div>
 
               <div className="space-y-2">
