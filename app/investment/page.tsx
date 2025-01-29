@@ -814,17 +814,46 @@ export default function InvestmentPage() {
 
   const handleMutualFundClick = async () => {
     try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        throw new Error('User not authenticated')
+      setIsLoading(true);
+      
+      if (!auth.currentUser) {
+        throw new Error('Please log in to get recommendations');
       }
 
-      // Save current investment data to Supabase if not already saved
-      const { data, error } = await supabase
-        .from('investment_records')
-        .upsert({
-          user_id: user.id,
+      try {
+        const requestData = {
+          name: auth.currentUser.displayName || 'Investor',
+          age: formData.age,
+          current_savings: formData.current_savings,
+          monthly_savings: formData.monthly_savings,
+          investment_horizon_years: formData.investment_horizon_years,
+          financial_goal: formData.financial_goal,
+          approximate_debt: formData.approximate_debt,
+          needs_money_during_horizon: formData.needs_money_during_horizon,
+          has_investment_experience: formData.has_investment_experience
+        };
+        
+        console.log('Attempting API call with data:', requestData);
+
+        const response = await fetch('/api/mutual-funds', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestData)
+        });
+
+        const result = await response.json();
+        console.log('API Response Data:', result);
+
+        if (!response.ok || result.status === 'error') {
+          throw new Error(result.message || 'Failed to fetch recommendations');
+        }
+
+        // Prepare data for Supabase with minimal required fields
+        const supabaseRecord = {
+          user_id: auth.currentUser.uid,
+          user_name: auth.currentUser.displayName || 'Anonymous',
           age: parseInt(formData.age),
           current_savings: parseFloat(formData.current_savings),
           monthly_savings: parseFloat(formData.monthly_savings),
@@ -833,19 +862,69 @@ export default function InvestmentPage() {
           approximate_debt: parseFloat(formData.approximate_debt),
           needs_money_during_horizon: formData.needs_money_during_horizon,
           has_investment_experience: formData.has_investment_experience,
-          risk_score: chartData.risk_score,
-          allocation: chartData.allocation
-        })
+          recommendations: result.data
+        };
 
-      if (error) throw error
+        console.log('Attempting to save to Supabase with record:', supabaseRecord);
 
-      // Navigate to mutual funds page
-      router.push('/recommendations/mutual-funds')
+        // Try inserting without RLS checks
+        const { data: savedRecord, error: saveError } = await supabase
+          .from('mutual_fund_recommendations')
+          .insert(supabaseRecord)
+          .select()
+          .single();
+
+        if (saveError) {
+          console.error('Detailed Supabase error:', {
+            code: saveError.code,
+            message: saveError.message,
+            details: saveError.details,
+            hint: saveError.hint,
+            errorObject: saveError
+          });
+          
+          // Log the current auth state
+          const { data: authData } = await supabase.auth.getSession();
+          console.log('Current Supabase auth state:', authData);
+          
+          throw new Error(`Database error: ${saveError.message}`);
+        }
+
+        console.log('Successfully saved to Supabase:', savedRecord);
+
+        // Store recommendations in localStorage and navigate
+        localStorage.setItem('mf_recommendations', JSON.stringify(result.data));
+        router.push('/recommendations/mutual-funds');
+
+      } catch (fetchError) {
+        console.error('Operation failed:', {
+          error: fetchError,
+          message: fetchError.message,
+          stack: fetchError.stack,
+          type: fetchError.name,
+          fullError: JSON.stringify(fetchError, null, 2)
+        });
+        throw fetchError;
+      }
+
     } catch (error) {
-      console.error('Error saving investment data:', error)
-      // Handle error appropriately
+      console.error('Mutual Fund Recommendation Error:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        type: typeof error,
+        fullError: JSON.stringify(error, null, 2)
+      });
+      
+      setError(
+        error instanceof Error 
+          ? `Failed to get recommendations: ${error.message}` 
+          : 'Failed to get mutual fund recommendations. Please try again.'
+      );
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div id="investment-page-container" className="min-h-screen bg-white">
@@ -1058,12 +1137,12 @@ export default function InvestmentPage() {
                   {/* Investment Options Grid */}
                   <div className="mt-8">
                     <div className="text-center mb-4 p-4 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg text-sm">
-                      To get specific recommendations and understand how to invest in those, click on the financial instruments below
+                      To get specific recommendations, click on the financial instruments below
                     </div>
                     
                     <div className="grid grid-cols-5 gap-4">
                       <button 
-                        onClick={() => router.push('/recommendations/mutual-funds')}
+                        onClick={handleMutualFundClick}
                         className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
                       >
                         MUTUAL FUNDS
