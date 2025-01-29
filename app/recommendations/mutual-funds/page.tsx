@@ -91,7 +91,7 @@ export default function MutualFundRecommendations() {
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-4xl font-bold mb-2 text-gray-900">Recommended Mutual Funds</h1>
-        <p className="text-gray-600 mb-8">Personalized investment recommendations based on your profile</p>
+        <p className="text-gray-600 font-bold mb-8">Select 2 to 3 Mutual Funds from Varied Risk Categories</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {recommendations.map((fund, index) => (

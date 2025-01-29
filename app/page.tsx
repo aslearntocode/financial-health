@@ -88,27 +88,29 @@ export default function Home() {
             href="/investment"
             className="inline-block rounded-md bg-black px-6 py-2.5 text-base font-semibold text-white hover:bg-gray-800"
           >
-            Get Started
+            Get Your Personalized Investment Allocation Dashboard
           </Link>
         </div>
       </div>
 
       {/* Dashboard Image */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Image
-          src="/dashboard3.png"
-          alt="Investment Dashboard Preview"
-          width={900}
-          height={450}
-          priority
-          className="rounded-lg shadow-2xl w-full h-auto"
-        />
+        <div className="relative">
+          <Image
+            src="/HomePageDashboard.png"
+            alt="Investment Dashboard Preview"
+            width={900}
+            height={450}
+            priority
+            className="rounded-lg shadow-2xl w-full h-auto blur-[1px]"
+          />
+        </div>
       </div>
 
       {/* Sliding Sections Container */}
       <div className="relative overflow-hidden mb-16">
         {/* Why Distribution Matters Section */}
-        <div className={`transition-all duration-1000 ${
+        <div className={`transition-all duration-3000 ${
           activeSection === 'distribution' 
             ? 'translate-x-0 opacity-100' 
             : '-translate-x-full opacity-0'
@@ -150,7 +152,7 @@ export default function Home() {
         </div>
 
         {/* What We Offer Section */}
-        <div className={`transition-all duration-1000 ${
+        <div className={`transition-all duration-3000 ${
           activeSection === 'offer' 
             ? 'translate-x-0 opacity-100' 
             : 'translate-x-full opacity-0'
@@ -183,7 +185,7 @@ export default function Home() {
                   </p>
                   <ul className="text-gray-600 space-y-2">
                     <li>• &quot;Invest 30% of your monthly savings into a balanced mutual fund portfolio.&quot;</li>
-                    <li>• &quot;Increase your emergency fund to cover six months of expenses.&quot;</li>
+                    <li>• &quot;Suggest the Mutual Funds, Stocks etc. based on your risk appetite.&quot;</li>
                   </ul>
                 </div>
 
