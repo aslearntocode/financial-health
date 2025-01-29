@@ -222,7 +222,98 @@ export default function Home() {
         <div className="h-[650px]" />
       </div>
 
-      {/* Updated Testimonials Section */}
+      {/* Pricing Section - New Addition */}
+      <div className="bg-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12">Choose Your Plan</h2>
+          <div className="flex justify-center gap-8 flex-wrap">
+            {/* Basic Plan */}
+            <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100 w-full max-w-sm">
+              <div className="text-sm font-semibold text-gray-600 mb-4">For Beginners</div>
+              <h3 className="text-2xl font-bold mb-4">Basic</h3>
+              <div className="mb-8">
+                <span className="text-4xl font-bold">₹999</span>
+                <span className="text-gray-600">/half-yearly</span>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Generate a personalized investment allocation dashboard
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Get recommendations on Mutual Funds based on your risk appetite
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Generate up to 3 portfolios in six months
+                </li>
+                
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Chat Support
+                </li>
+              </ul>
+              <button className="w-full bg-gray-900 text-white rounded-md py-3 font-semibold hover:bg-gray-800 transition-colors">
+                Get Started
+              </button>
+            </div>
+
+            {/* Premium Plan */}
+            <div className="bg-white p-8 rounded-lg shadow-lg border-2 border-blue-600 w-full max-w-sm relative">
+              <div className="absolute -top-3 right-8 bg-yellow-500 text-black text-sm font-semibold px-3 py-1 rounded-full">
+                Recommended
+              </div>
+              <div className="text-sm font-semibold text-gray-600 mb-4">For Investors</div>
+              <h3 className="text-2xl font-bold mb-4">Premium</h3>
+              <div className="mb-8">
+                <span className="text-4xl font-bold">₹1199</span>
+                <span className="text-gray-600">/half-yearly</span>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Generate a personalized investment allocation dashboard
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Get recommendations on Mutual Funds, Stocks, Bonds etc. based on your risk appetite
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Generate up to 5 portfolios in six months
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  Chat Support
+                </li>
+                
+              </ul>
+              <button className="w-full bg-blue-600 text-white rounded-md py-3 font-semibold hover:bg-blue-700 transition-colors">
+                Get Started
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Testimonials Section */}
       <div className="py-16 mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
