@@ -55,7 +55,7 @@ export const PieChart: React.FC<PieChartProps> = ({ data }) => {
   return (
     <div className="flex flex-col items-center">
       <p className="text-center mb-6 max-w-[600px] text-gray-700 font-medium leading-relaxed italic bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100">
-        Allocate your lumpsum savings in the proposed allocation and for monthly savings, start SIPs to invest proportinally in the instruments advised below.
+        Allocate your lumpsum savings in the proposed allocation and for monthly savings, start SIPs to invest proportinally.
       </p>
       <div 
         className="w-[470px] h-[470px] cursor-pointer relative group hover:scale-[1.02] transition-all duration-300"

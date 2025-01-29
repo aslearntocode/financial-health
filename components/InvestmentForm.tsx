@@ -103,7 +103,7 @@ export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-2">
         <FormField
           control={form.control}
           name="name"
@@ -165,7 +165,7 @@ export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
           name="currentSavings"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Current Savings ($)</FormLabel>
+              <FormLabel>Current Savings Uptil Now (in INR)</FormLabel>
               <FormControl>
                 <Input type="number" placeholder="10000" {...field} />
               </FormControl>
@@ -179,7 +179,7 @@ export function InvestmentForm({ onSubmit }: InvestmentFormProps) {
           name="monthlySavings"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Monthly Savings ($)</FormLabel>
+              <FormLabel>Monthly Savings Going Forward (in INR)</FormLabel>
               <FormControl>
                 <Input type="number" placeholder="500" {...field} />
               </FormControl>

@@ -850,8 +850,8 @@ export default function InvestmentPage() {
   return (
     <div id="investment-page-container" className="min-h-screen bg-white">
       <Header />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {/* Form Section */}
           <div className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold mb-6">Investment Profile</h2>
@@ -1012,76 +1012,87 @@ export default function InvestmentPage() {
               <p>Calculating your allocation...</p>
             ) : showChart && chartData.allocation && chartData.allocation.length > 0 ? (
               <div>
-                <div key={chartKey} className="cursor-pointer" onClick={() => router.push('/investment-details')}>
+                <div key={chartKey} className="pointer-events-none">
                   <PieChart data={chartData.allocation} />
                 </div>
 
-                <div className="mt-6 space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="mt-6 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Risk Level Card */}
-                    <div className="p-6 bg-blue-50 rounded-lg shadow-sm border border-blue-100">
-                      <h3 className="font-semibold text-blue-800 text-lg mb-3 flex items-center">
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-4 bg-blue-50 rounded-lg shadow-sm border border-blue-100">
+                      <h3 className="font-semibold text-blue-800 text-base mb-2 flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         Risk Level
                       </h3>
                       <div className="flex items-baseline">
-                        <p className="text-blue-600 text-3xl font-bold">
+                        <p className="text-blue-600 text-2xl font-bold">
                           {chartData.risk_score?.toFixed(0)}
                         </p>
-                        <p className="text-blue-600 ml-2 text-lg">
+                        <p className="text-blue-600 ml-2 text-sm">
                           out of 10
                         </p>
                       </div>
-                      <p className="text-blue-600 text-sm mt-2">
-                        Based on your investment preferences and financial goals
-                      </p>
                     </div>
 
                     {/* Expected Return Card */}
-                    <div className="p-6 bg-green-50 rounded-lg shadow-sm border border-green-100">
-                      <h3 className="font-semibold text-green-800 text-lg mb-3 flex items-center">
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-4 bg-green-50 rounded-lg shadow-sm border border-green-100">
+                      <h3 className="font-semibold text-green-800 text-base mb-2 flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                         </svg>
                         Expected Annual Return
                       </h3>
                       <div className="flex items-baseline">
-                        <p className="text-green-700 text-3xl font-bold">
+                        <p className="text-green-700 text-2xl font-bold">
                           {chartData.expected_return?.toFixed(1)}
                         </p>
-                        <p className="text-green-600 ml-1 text-2xl">
+                        <p className="text-green-600 ml-1 text-base">
                           %
                         </p>
                       </div>
-                      <p className="text-green-600 text-sm mt-2">
-                        Historical average based on similar portfolio compositions
-                      </p>
                     </div>
                   </div>
 
-                  {/* Mutual Fund Recommendation Link */}
-                  <div className="mt-8 text-center">
-                    <button
-                      onClick={handleMutualFundClick}
-                      className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
-                    >
-                      <span>Click Here to Get Mutual Fund Recommendations</span>
-                      <svg 
-                        className="ml-2 w-5 h-5" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
+                  {/* Investment Options Grid */}
+                  <div className="mt-8">
+                    <div className="text-center mb-4 p-4 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg text-sm">
+                      To get specific recommendations and understand how to invest in those, click on the financial instruments below
+                    </div>
+                    
+                    <div className="grid grid-cols-5 gap-4">
+                      <button 
+                        onClick={() => router.push('/recommendations/mutual-funds')}
+                        className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
                       >
-                        <path 
-                          strokeLinecap="round" 
-                          strokeLinejoin="round" 
-                          strokeWidth={2} 
-                          d="M13 7l5 5m0 0l-5 5m5-5H6"
-                        />
-                      </svg>
-                    </button>
+                        MUTUAL FUNDS
+                      </button>
+                      <button 
+                        onClick={() => router.push('/recommendations/stocks')}
+                        className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                      >
+                        STOCKS
+                      </button>
+                      <button 
+                        onClick={() => router.push('/recommendations/bonds')}
+                        className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                      >
+                        BONDS
+                      </button>
+                      <button 
+                        onClick={() => router.push('/recommendations/fixed-deposit')}
+                        className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                      >
+                        FIXED DEPOSITS
+                      </button>
+                      <button 
+                        onClick={() => router.push('/recommendations/etf')}
+                        className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                      >
+                        ETF
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
