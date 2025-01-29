@@ -36,7 +36,16 @@ export default function MutualFundRecommendations() {
       }
 
       const parsedRecommendations = JSON.parse(storedRecommendations)
-      setRecommendations(parsedRecommendations)
+      
+      // Sort recommendations by risk level: High -> Medium -> Low
+      const sortedRecommendations = [...parsedRecommendations].sort((a, b) => {
+        const riskOrder = { 'High': 1, 'Medium': 2, 'Low': 3 }
+        const riskA = riskOrder[a.risk_level as keyof typeof riskOrder] || 4
+        const riskB = riskOrder[b.risk_level as keyof typeof riskOrder] || 4
+        return riskA - riskB
+      })
+
+      setRecommendations(sortedRecommendations)
       setLoading(false)
     } catch (err) {
       setError('Failed to load recommendations')
