@@ -820,6 +820,45 @@ export default function InvestmentPage() {
         throw new Error('Please log in to get recommendations');
       }
 
+      // First check if recommendations exist in Supabase
+      const { data: existingRecommendations, error: fetchError } = await supabase
+        .from('mutual_fund_recommendations')
+        .select('*')
+        .eq('user_id', auth.currentUser.uid)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (fetchError) {
+        console.error('Error fetching existing recommendations:', fetchError);
+        throw new Error('Failed to check existing recommendations');
+      }
+
+      // Check if form data matches existing recommendations
+      const shouldMakeNewRequest = !existingRecommendations?.length || 
+        existingRecommendations[0].age !== parseInt(formData.age) ||
+        existingRecommendations[0].current_savings !== parseFloat(formData.current_savings) ||
+        existingRecommendations[0].monthly_savings !== parseFloat(formData.monthly_savings) ||
+        existingRecommendations[0].investment_horizon !== parseInt(formData.investment_horizon_years) ||
+        existingRecommendations[0].financial_goal !== formData.financial_goal ||
+        existingRecommendations[0].approximate_debt !== parseFloat(formData.approximate_debt) ||
+        existingRecommendations[0].needs_money_during_horizon !== formData.needs_money_during_horizon ||
+        existingRecommendations[0].has_investment_experience !== formData.has_investment_experience;
+
+      // If recommendations exist with same data and are from today, use them
+      if (!shouldMakeNewRequest && existingRecommendations && existingRecommendations.length > 0) {
+        const latestRecommendation = existingRecommendations[0];
+        const recommendationDate = new Date(latestRecommendation.created_at);
+        const today = new Date();
+        
+        if (recommendationDate.toDateString() === today.toDateString()) {
+          console.log('Using existing recommendations - same data from today');
+          localStorage.setItem('mf_recommendations', JSON.stringify(latestRecommendation.recommendations));
+          router.push('/recommendations/mutual-funds');
+          return;
+        }
+      }
+
+      // Make new API call if data is different or recommendations are old
       try {
         const requestData = {
           name: auth.currentUser.displayName || 'Investor',
@@ -833,7 +872,7 @@ export default function InvestmentPage() {
           has_investment_experience: formData.has_investment_experience
         };
         
-        console.log('Attempting API call with data:', requestData);
+        console.log('Making new API call - data changed or new day:', requestData);
 
         const response = await fetch('/api/mutual-funds', {
           method: 'POST',
@@ -850,7 +889,7 @@ export default function InvestmentPage() {
           throw new Error(result.message || 'Failed to fetch recommendations');
         }
 
-        // Prepare data for Supabase with minimal required fields
+        // Save to Supabase
         const supabaseRecord = {
           user_id: auth.currentUser.uid,
           user_name: auth.currentUser.displayName || 'Anonymous',
@@ -865,36 +904,19 @@ export default function InvestmentPage() {
           recommendations: result.data
         };
 
-        console.log('Attempting to save to Supabase with record:', supabaseRecord);
-
-        const { data: savedRecord, error: saveError } = await supabase
+        const { error: saveError } = await supabase
           .from('mutual_fund_recommendations')
-          .insert(supabaseRecord)
-          .select()
-          .single();
+          .insert(supabaseRecord);
 
         if (saveError) {
-          console.error('Detailed Supabase error:', {
-            code: saveError.code,
-            message: saveError.message,
-            details: saveError.details,
-            hint: saveError.hint,
-            errorObject: saveError
-          });
-          
-          const { data: authData } = await supabase.auth.getSession();
-          console.log('Current Supabase auth state:', authData);
-          
+          console.error('Error saving to Supabase:', saveError);
           throw new Error(`Database error: ${saveError.message}`);
         }
-
-        console.log('Successfully saved to Supabase:', savedRecord);
 
         localStorage.setItem('mf_recommendations', JSON.stringify(result.data));
         router.push('/recommendations/mutual-funds');
 
       } catch (error) {
-        // Type guard for Error objects
         if (error instanceof Error) {
           console.error('Operation failed:', {
             error,
