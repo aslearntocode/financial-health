@@ -867,7 +867,6 @@ export default function InvestmentPage() {
 
         console.log('Attempting to save to Supabase with record:', supabaseRecord);
 
-        // Try inserting without RLS checks
         const { data: savedRecord, error: saveError } = await supabase
           .from('mutual_fund_recommendations')
           .insert(supabaseRecord)
@@ -883,7 +882,6 @@ export default function InvestmentPage() {
             errorObject: saveError
           });
           
-          // Log the current auth state
           const { data: authData } = await supabase.auth.getSession();
           console.log('Current Supabase auth state:', authData);
           
@@ -892,26 +890,30 @@ export default function InvestmentPage() {
 
         console.log('Successfully saved to Supabase:', savedRecord);
 
-        // Store recommendations in localStorage and navigate
         localStorage.setItem('mf_recommendations', JSON.stringify(result.data));
         router.push('/recommendations/mutual-funds');
 
-      } catch (fetchError) {
-        console.error('Operation failed:', {
-          error: fetchError,
-          message: fetchError.message,
-          stack: fetchError.stack,
-          type: fetchError.name,
-          fullError: JSON.stringify(fetchError, null, 2)
-        });
-        throw fetchError;
+      } catch (error) {
+        // Type guard for Error objects
+        if (error instanceof Error) {
+          console.error('Operation failed:', {
+            error,
+            message: error.message,
+            stack: error.stack,
+            type: error.name,
+            fullError: JSON.stringify(error, Object.getOwnPropertyNames(error))
+          });
+        } else {
+          console.error('Operation failed with unknown error:', error);
+        }
+        throw error;
       }
 
     } catch (error) {
       console.error('Mutual Fund Recommendation Error:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
         type: typeof error,
         fullError: JSON.stringify(error, null, 2)
       });
