@@ -384,7 +384,7 @@ export default function Home() {
               <ul className="space-y-2">
                 <li>
                   <a 
-                    href="https://youtube.com/@financialhealth" 
+                    href="https://www.youtube.com/@FHAI-InvCredit" 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="text-gray-400 hover:text-white flex items-center gap-2"
@@ -410,7 +410,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a 
-                    href="https://instagram.com/financialhealth" 
+                    href="https://instagram.com/fhainvcredit" 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="text-gray-400 hover:text-white flex items-center gap-2"
