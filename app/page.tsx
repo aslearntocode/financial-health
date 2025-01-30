@@ -223,8 +223,19 @@ export default function Home() {
       </div>
 
       {/* Pricing Section - New Addition */}
-      <div className="bg-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="bg-white py-16 relative">
+        {/* Beta Testing Overlay */}
+        <div className="absolute inset-0 bg-gray-900/50 z-10 flex items-center justify-center">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-lg shadow-xl max-w-2xl mx-4 text-center">
+            <h3 className="text-2xl font-bold mb-2">🎉 Free During Beta Testing!</h3>
+            <p className="text-lg">
+              We're currently in beta and offering all premium features completely free. 
+              Try it out and share your valuable feedback with us.
+            </p>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative opacity-50">
           <h2 className="text-3xl font-bold text-center mb-12">Choose Your Plan</h2>
           <div className="flex justify-center gap-8 flex-wrap">
             {/* Basic Plan */}
