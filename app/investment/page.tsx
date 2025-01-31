@@ -561,7 +561,7 @@ export default function InvestmentPage() {
             .single();
 
           if (latestRecord) {
-            // Update form data
+            // Update form data - ensure approximate_debt is converted to string
             setFormData({
               name: latestRecord.name || '',
               age: latestRecord.age?.toString() || '',
@@ -569,7 +569,7 @@ export default function InvestmentPage() {
               monthly_savings: latestRecord.monthly_savings?.toString() || '',
               investment_horizon_years: latestRecord.investment_horizon?.toString() || '',
               financial_goal: latestRecord.financial_goal || '',
-              approximate_debt: latestRecord.approximate_debt || '',
+              approximate_debt: latestRecord.approximate_debt?.toString() || '', // Convert to string
               needs_money_during_horizon: latestRecord.needs_money_during_horizon || 'N',
               has_investment_experience: latestRecord.has_investment_experience || 'N'
             });
