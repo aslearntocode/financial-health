@@ -6,15 +6,35 @@ import { User } from "firebase/auth"
 import { ProfileDropdown } from "./ProfileDropdown"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { supabase } from "@/lib/supabase"
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [hasRecommendationAccess, setHasRecommendationAccess] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setUser(user)
+      if (user?.uid) {
+        try {
+          const { data, error } = await supabase
+            .from('mutual_fund_recommendations')
+            .select('*')
+            .eq('user_id', user.uid)
+            .order('created_at', { ascending: false })
+            .limit(1)
+          
+          console.log('Supabase response:', { data, error, uid: user.uid })
+          setHasRecommendationAccess(Boolean(data && data.length > 0))
+        } catch (err) {
+          console.error('Error fetching recommendations:', err)
+          setHasRecommendationAccess(false)
+        }
+      } else {
+        setHasRecommendationAccess(false)
+      }
     })
 
     return () => unsubscribe()
@@ -22,7 +42,7 @@ export default function Header() {
 
   return (
     <header className="bg-gradient-to-r from-blue-600 to-blue-700 w-full overflow-x-hidden">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="max-w-7xl mx-auto px-1 sm:px-2 lg:px-2">
         <div className="flex justify-between h-16 items-center w-full">
           <div className="flex items-center">
             <button
@@ -46,22 +66,27 @@ export default function Header() {
               </svg>
             </button>
 
-            <div className="hidden md:flex space-x-8 ml-8">
-              <Link href="/" className="text-white hover:text-white/90 whitespace-nowrap">
+            <div className="hidden md:flex items-center space-x-8 ml-8">
+              <Link href="/" className="text-white hover:text-white/90 py-2">
                 Home
               </Link>
-              <Link href="/about" className="text-white hover:text-white/90 whitespace-nowrap">
+              <Link href="/about" className="text-white hover:text-white/90 py-2">
                 About Us
               </Link>
-              <Link href="/investment" className="text-white hover:text-white/90 whitespace-nowrap">
+              <Link href="/investment" className="text-white hover:text-white/90 py-2">
                 Investment
               </Link>
-              <Link href="/credit" className="text-white hover:text-white/90 whitespace-nowrap">
+              {hasRecommendationAccess && (
+                <Link href="/recommendations/mutual-funds" className="text-white hover:text-white/90 py-2">
+                  Mutual Funds Recommendation
+                </Link>
+              )}
+              <Link href="/credit" className="text-white hover:text-white/90 py-2">
                 Credit
               </Link>
-              <Link href="/learning-center" className="text-white hover:text-white/90 whitespace-nowrap">
+              {/* <Link href="/learning-center" className="text-white hover:text-white/90 py-2">
                 Learning Center
-              </Link>
+              </Link> */}
             </div>
           </div>
 
@@ -90,12 +115,17 @@ export default function Header() {
               <Link href="/investment" className="text-white hover:text-white/90 px-2 py-1">
                 Investment
               </Link>
+              {hasRecommendationAccess && (
+                <Link href="/recommendations/mutual-funds" className="text-white hover:text-white/90 px-2 py-1">
+                  Mutual Funds Recommendation
+                </Link>
+              )}
               <Link href="/credit" className="text-white hover:text-white/90 px-2 py-1">
                 Credit
               </Link>
-              <Link href="/learning-center" className="text-white hover:text-white/90 px-2 py-1">
+              {/* <Link href="/learning-center" className="text-white hover:text-white/90 px-2 py-1">
                 Learning Center
-              </Link>
+              </Link> */}
             </div>
           </div>
         )}
