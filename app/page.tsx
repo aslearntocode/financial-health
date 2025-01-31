@@ -75,7 +75,7 @@ export default function Home() {
       <Header />
       
       {/* Hero Section */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
         <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4">
           Your Financial Blueprint, Tailored Just for You
         </h1>

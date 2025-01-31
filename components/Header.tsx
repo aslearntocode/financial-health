@@ -7,6 +7,7 @@ import { ProfileDropdown } from "./ProfileDropdown"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
+import Image from 'next/image'
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null)
@@ -45,6 +46,16 @@ export default function Header() {
       <nav className="max-w-7xl mx-auto px-1 sm:px-2 lg:px-2">
         <div className="flex justify-between h-16 items-center w-full">
           <div className="flex items-center">
+            <Link href="/" className="flex items-center">
+              <Image 
+                src="/BlueLogo.png" 
+                alt="Brand Logo" 
+                height={112} 
+                width={112} 
+                className="mr-4" 
+              />
+            </Link>
+            
             <button
               className="md:hidden p-2 text-white"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
