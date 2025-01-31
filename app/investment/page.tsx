@@ -914,7 +914,7 @@ export default function InvestmentPage() {
         }
 
         localStorage.setItem('mf_recommendations', JSON.stringify(result.data));
-        router.push('/recommendations/mutual-funds');
+        router.push('/recommendations');
 
       } catch (error) {
         if (error instanceof Error) {
