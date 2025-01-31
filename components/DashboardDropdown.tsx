@@ -3,13 +3,13 @@ import { useRouter } from 'next/navigation';
 import { ProfileEdit } from './ProfileEdit';
 
 export default function DashboardDropdown() {
-  const { signOut } = useAuth();
+  const { auth } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {
     try {
-      await signOut();
-      router.push('/'); // Redirect to home page after sign out
+      await auth.signOut();
+      router.push('/login');
     } catch (error) {
       console.error('Error signing out:', error);
     }

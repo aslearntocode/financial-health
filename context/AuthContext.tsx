@@ -5,11 +5,13 @@ import { auth } from '@/lib/firebase';
 export type AuthContextType = {
   currentUser: User | null;
   loading: boolean;
+  auth: typeof auth;
 };
 
 export const AuthContext = createContext<AuthContextType>({
   currentUser: null,
   loading: true,
+  auth: auth,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -28,6 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     currentUser,
     loading,
+    auth,
   };
 
   return (
