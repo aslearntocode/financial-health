@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { useSupabaseClient } from '@supabase/auth-helpers-react'
+import { supabase } from '@/lib/supabase'
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -34,7 +34,6 @@ type ProfileFormValues = z.infer<typeof profileSchema>
 export function ProfileEdit() {
   const [isOpen, setIsOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const supabase = useSupabaseClient()
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
