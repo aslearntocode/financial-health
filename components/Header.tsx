@@ -89,7 +89,7 @@ export default function Header() {
               </Link>
               {hasRecommendationAccess && (
                 <Link href="/recommendations/mutual-funds" className="text-white hover:text-white/90 py-2">
-                  Mutual Funds Recommendation
+                  MF Dashboard
                 </Link>
               )}
               <Link href="/credit" className="text-white hover:text-white/90 py-2">
@@ -128,7 +128,7 @@ export default function Header() {
               </Link>
               {hasRecommendationAccess && (
                 <Link href="/recommendations/mutual-funds" className="text-white hover:text-white/90 px-2 py-1">
-                  Mutual Funds Recommendation
+                  MF Dashboard
                 </Link>
               )}
               <Link href="/credit" className="text-white hover:text-white/90 px-2 py-1">
