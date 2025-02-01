@@ -952,19 +952,36 @@ export default function InvestmentPage() {
         throw new Error('Please log in to get recommendations');
       }
 
+      // Define default values as strings
+      const defaultValues = {
+        name: 'Anonymous',
+        age: '30',
+        current_savings: '0',
+        monthly_savings: '0',
+        investment_horizon: '5',
+        financial_goal: 'Growth',
+        approximate_debt: '0',
+        needs_money_during_horizon: 'N' as const,
+        has_investment_experience: 'N' as const
+      };
+
+      // Create current form data object for comparison
+      const currentFormData = {
+        age: parseInt(formData.age || defaultValues.age),
+        current_savings: parseFloat(formData.current_savings || defaultValues.current_savings),
+        monthly_savings: parseFloat(formData.monthly_savings || defaultValues.monthly_savings),
+        investment_horizon: parseInt(formData.investment_horizon_years || defaultValues.investment_horizon),
+        financial_goal: formData.financial_goal || defaultValues.financial_goal,
+        approximate_debt: parseFloat(formData.approximate_debt || defaultValues.approximate_debt),
+        needs_money_during_horizon: formData.needs_money_during_horizon || defaultValues.needs_money_during_horizon,
+        has_investment_experience: formData.has_investment_experience || defaultValues.has_investment_experience
+      };
+
       // First check if recommendations exist in Supabase
-      const { data: existingRecommendations, error: fetchError } = await supabase
+      const { data: existingRec, error: fetchError } = await supabase
         .from('stock_recommendations')
         .select('*')
         .eq('user_id', auth.currentUser.uid)
-        .eq('age', formData.age || 30)
-        .eq('current_savings', formData.current_savings || 0)
-        .eq('monthly_savings', formData.monthly_savings || 0)
-        .eq('investment_horizon', formData.investment_horizon_years || 5)
-        .eq('financial_goal', formData.financial_goal || 'Growth')
-        .eq('approximate_debt', formData.approximate_debt || 0)
-        .eq('needs_money_during_horizon', formData.needs_money_during_horizon || false)
-        .eq('has_investment_experience', formData.has_investment_experience || false)
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -973,25 +990,39 @@ export default function InvestmentPage() {
         throw new Error('Failed to check existing recommendations');
       }
 
-      if (existingRecommendations && existingRecommendations.length > 0) {
-        // Use existing recommendations
+      // Check if form data has changed from last saved data
+      const shouldMakeNewRequest = !existingRec?.length || existingRec.some(rec => {
+        return (
+          rec.age !== currentFormData.age ||
+          rec.current_savings !== currentFormData.current_savings ||
+          rec.monthly_savings !== currentFormData.monthly_savings ||
+          rec.investment_horizon !== currentFormData.investment_horizon ||
+          rec.financial_goal !== currentFormData.financial_goal ||
+          rec.approximate_debt !== currentFormData.approximate_debt ||
+          rec.needs_money_during_horizon !== currentFormData.needs_money_during_horizon ||
+          rec.has_investment_experience !== currentFormData.has_investment_experience
+        );
+      });
+
+      if (existingRec?.length && !shouldMakeNewRequest) {
         console.log('Using existing recommendations');
-        return router.push(`/recommendations/stocks?id=${existingRecommendations[0].id}`);
+        router.push(`/recommendations/stocks?id=${existingRec[0].id}`);
+        return;
       }
 
-      // If no existing recommendations, get new ones
+      // If no existing recommendations or data changed, get new ones
       console.log('Getting new recommendations');
       const requestData = {
         userId: auth.currentUser.uid,
-        name: formData.name || 'Anonymous',
-        age: parseInt(formData.age || 30),
-        current_savings: parseFloat(formData.current_savings || 0),
-        monthly_savings: parseFloat(formData.monthly_savings || 0),
-        investment_horizon_years: parseInt(formData.investment_horizon_years || 5),
-        financial_goal: formData.financial_goal || 'Growth',
-        approximate_debt: parseFloat(formData.approximate_debt || 0),
-        needs_money_during_horizon: formData.needs_money_during_horizon || false,
-        has_investment_experience: formData.has_investment_experience || false,
+        name: formData.name || defaultValues.name,
+        age: parseInt(formData.age || defaultValues.age),
+        current_savings: parseFloat(formData.current_savings || defaultValues.current_savings),
+        monthly_savings: parseFloat(formData.monthly_savings || defaultValues.monthly_savings),
+        investment_horizon_years: parseInt(formData.investment_horizon_years || defaultValues.investment_horizon),
+        financial_goal: formData.financial_goal || defaultValues.financial_goal,
+        approximate_debt: parseFloat(formData.approximate_debt || defaultValues.approximate_debt),
+        needs_money_during_horizon: formData.needs_money_during_horizon || defaultValues.needs_money_during_horizon,
+        has_investment_experience: formData.has_investment_experience || defaultValues.has_investment_experience
       };
 
       // Get recommendations from API
@@ -1015,15 +1046,15 @@ export default function InvestmentPage() {
         .from('stock_recommendations')
         .insert({
           user_id: auth.currentUser.uid,
-          user_name: formData.name || 'Anonymous',
-          age: parseInt(formData.age || 30),
-          current_savings: parseFloat(formData.current_savings || 0),
-          monthly_savings: parseFloat(formData.monthly_savings || 0),
-          investment_horizon: parseInt(formData.investment_horizon_years || 5),
-          financial_goal: formData.financial_goal || 'Growth',
-          approximate_debt: parseFloat(formData.approximate_debt || 0),
-          needs_money_during_horizon: formData.needs_money_during_horizon || false,
-          has_investment_experience: formData.has_investment_experience || false,
+          user_name: auth.currentUser.displayName || defaultValues.name,
+          age: parseInt(formData.age || defaultValues.age),
+          current_savings: parseFloat(formData.current_savings || defaultValues.current_savings),
+          monthly_savings: parseFloat(formData.monthly_savings || defaultValues.monthly_savings),
+          investment_horizon: parseInt(formData.investment_horizon_years || defaultValues.investment_horizon),
+          financial_goal: formData.financial_goal || defaultValues.financial_goal,
+          approximate_debt: parseFloat(formData.approximate_debt || defaultValues.approximate_debt),
+          needs_money_during_horizon: formData.needs_money_during_horizon || defaultValues.needs_money_during_horizon,
+          has_investment_experience: formData.has_investment_experience || defaultValues.has_investment_experience,
           recommendations: result.data,
           created_at: new Date().toISOString()
         })
