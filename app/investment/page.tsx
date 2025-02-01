@@ -49,8 +49,8 @@ interface FormData {
   investment_horizon_years: string
   financial_goal: string
   approximate_debt: string
-  needs_money_during_horizon: 'Y' | 'N'
-  has_investment_experience: 'Y' | 'N'
+  needs_money_during_horizon: string
+  has_investment_experience: string
 }
 
 interface AllocationResponse {
@@ -820,14 +820,14 @@ export default function InvestmentPage() {
         throw new Error('Please log in to get recommendations');
       }
 
-      // Create current form data object for comparison
+      // Create current form data object for comparison with proper type handling
       const currentFormData = {
-        age: parseInt(formData.age || '30'),  // Convert default to string
-        current_savings: parseFloat(formData.current_savings || '0'),
-        monthly_savings: parseFloat(formData.monthly_savings || '0'),
-        investment_horizon: parseInt(formData.investment_horizon_years || '5'),
+        age: parseInt(String(formData.age || '30')),
+        current_savings: parseFloat(String(formData.current_savings || '0')),
+        monthly_savings: parseFloat(String(formData.monthly_savings || '0')),
+        investment_horizon: parseInt(String(formData.investment_horizon_years || '5')),
         financial_goal: formData.financial_goal || 'Growth',
-        approximate_debt: parseFloat(formData.approximate_debt || '0'),
+        approximate_debt: parseFloat(String(formData.approximate_debt || '0')),
         needs_money_during_horizon: formData.needs_money_during_horizon || 'N',
         has_investment_experience: formData.has_investment_experience || 'N'
       };
@@ -871,12 +871,12 @@ export default function InvestmentPage() {
       const requestData = {
         userId: auth.currentUser.uid,
         name: formData.name || 'Anonymous',
-        age: parseInt(formData.age || '30'),  // Convert to string
-        current_savings: parseFloat(formData.current_savings || '0'),  // Convert to string
-        monthly_savings: parseFloat(formData.monthly_savings || '0'),  // Convert to string
-        investment_horizon_years: parseInt(formData.investment_horizon_years || '5'),  // Convert to string
+        age: parseInt(String(formData.age || '30')),
+        current_savings: parseFloat(String(formData.current_savings || '0')),
+        monthly_savings: parseFloat(String(formData.monthly_savings || '0')),
+        investment_horizon_years: parseInt(String(formData.investment_horizon_years || '5')),
         financial_goal: formData.financial_goal || 'Growth',
-        approximate_debt: parseFloat(formData.approximate_debt || '0'),  // Convert to string
+        approximate_debt: parseFloat(String(formData.approximate_debt || '0')),
         needs_money_during_horizon: formData.needs_money_during_horizon || 'N',
         has_investment_experience: formData.has_investment_experience || 'N'
       };
@@ -902,12 +902,12 @@ export default function InvestmentPage() {
         .insert({
           user_id: auth.currentUser.uid,
           user_name: auth.currentUser.displayName || 'Anonymous',
-          age: parseInt(formData.age || '30'),  // Convert to string
-          current_savings: parseFloat(formData.current_savings || '0'),  // Convert to string
-          monthly_savings: parseFloat(formData.monthly_savings || '0'),  // Convert to string
-          investment_horizon: parseInt(formData.investment_horizon_years || '5'),  // Convert to string
+          age: parseInt(String(formData.age || '30')),
+          current_savings: parseFloat(String(formData.current_savings || '0')),
+          monthly_savings: parseFloat(String(formData.monthly_savings || '0')),
+          investment_horizon: parseInt(String(formData.investment_horizon_years || '5')),
           financial_goal: formData.financial_goal || 'Growth',
-          approximate_debt: parseFloat(formData.approximate_debt || '0'),  // Convert to string
+          approximate_debt: parseFloat(String(formData.approximate_debt || '0')),
           needs_money_during_horizon: formData.needs_money_during_horizon || 'N',
           has_investment_experience: formData.has_investment_experience || 'N',
           recommendations: result.data,
