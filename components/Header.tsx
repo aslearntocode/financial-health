@@ -42,7 +42,7 @@ export default function Header() {
           }
           setHasRecommendationAccess(Boolean(mfData?.length))
 
-          // Check for stock recommendations
+          // Check for stock recommendations - aligned with MF check
           const { data: stockData, error: stockError } = await supabaseClient
             .from('stock_recommendations')
             .select('id')
@@ -115,10 +115,9 @@ export default function Header() {
     }
 
     try {
-      // Get the latest stock recommendation from Supabase
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from('stock_recommendations')
-        .select('*')  // Select all fields to get complete data
+        .select('*')
         .eq('user_id', user.uid)
         .order('created_at', { ascending: false })
         .limit(1)

@@ -1,8 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/Header'
+import { auth } from "@/lib/firebase"
+import { supabase } from '@/lib/supabase'
 
 interface Stock {
   stock_name: string
@@ -19,36 +21,66 @@ interface Stock {
 }
 
 export default function StockRecommendations() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <StockRecommendationsContent />
+    </Suspense>
+  )
+}
+
+function StockRecommendationsContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [recommendations, setRecommendations] = useState<Stock[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    try {
-      const storedRecommendations = localStorage.getItem('stock_recommendations')
-      if (!storedRecommendations) {
-        router.push('/investment')
-        return
+    const fetchRecommendations = async () => {
+      try {
+        const user = auth.currentUser
+        if (!user) {
+          router.push('/login')
+          return
+        }
+
+        const recommendationId = searchParams.get('id')
+        if (!recommendationId) {
+          router.push('/investment')
+          return
+        }
+
+        const { data: recommendation, error } = await supabase
+          .from('stock_recommendations')
+          .select('recommendations')
+          .eq('id', recommendationId)
+          .eq('user_id', user.uid)
+          .single()
+
+        if (error) {
+          console.error('Error fetching recommendation:', error)
+          setError('Failed to load recommendations')
+          setLoading(false)
+          return
+        }
+
+        if (!recommendation) {
+          console.log('No recommendation found')
+          router.push('/investment')
+          return
+        }
+
+        setRecommendations(recommendation.recommendations)
+        setLoading(false)
+      } catch (err) {
+        console.error('Error:', err)
+        setError('Failed to load recommendations')
+        setLoading(false)
       }
-
-      const parsedRecommendations = JSON.parse(storedRecommendations)
-      
-      // Sort recommendations by risk level: High -> Medium -> Low
-      const sortedRecommendations = [...parsedRecommendations].sort((a, b) => {
-        const riskOrder = { 'High': 1, 'Medium': 2, 'Low': 3 }
-        const riskA = riskOrder[a.risk_level as keyof typeof riskOrder] || 4
-        const riskB = riskOrder[b.risk_level as keyof typeof riskOrder] || 4
-        return riskA - riskB
-      })
-
-      setRecommendations(sortedRecommendations)
-      setLoading(false)
-    } catch (err) {
-      setError('Failed to load recommendations')
-      setLoading(false)
     }
-  }, [])
+
+    fetchRecommendations()
+  }, [router, searchParams])
 
   if (loading) {
     return (
