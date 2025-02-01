@@ -965,8 +965,9 @@ export default function InvestmentPage() {
         has_investment_experience: 'N' as const
       };
 
-      // Create current form data object for comparison
+      // Create current form data object for comparison with proper type handling
       const currentFormData = {
+        name: formData.name || defaultValues.name,
         age: parseInt(formData.age || defaultValues.age),
         current_savings: parseFloat(formData.current_savings || defaultValues.current_savings),
         monthly_savings: parseFloat(formData.monthly_savings || defaultValues.monthly_savings),
@@ -986,7 +987,7 @@ export default function InvestmentPage() {
         .limit(1);
 
       if (fetchError) {
-        console.error('Error checking existing recommendations:', fetchError);
+        console.error('Error fetching existing recommendations:', fetchError);
         throw new Error('Failed to check existing recommendations');
       }
 
@@ -1005,13 +1006,11 @@ export default function InvestmentPage() {
       });
 
       if (existingRec?.length && !shouldMakeNewRequest) {
-        console.log('Using existing recommendations');
+        console.log('Using existing recommendations as form data unchanged:', existingRec[0]);
         router.push(`/recommendations/stocks?id=${existingRec[0].id}`);
         return;
       }
 
-      // If no existing recommendations or data changed, get new ones
-      console.log('Getting new recommendations');
       const requestData = {
         userId: auth.currentUser.uid,
         name: formData.name || defaultValues.name,
@@ -1025,7 +1024,6 @@ export default function InvestmentPage() {
         has_investment_experience: formData.has_investment_experience || defaultValues.has_investment_experience
       };
 
-      // Get recommendations from API
       const response = await fetch('/api/stocks', {
         method: 'POST',
         headers: {
@@ -1041,7 +1039,6 @@ export default function InvestmentPage() {
 
       const result = await response.json();
 
-      // Save new recommendations to Supabase
       const { data: savedRec, error: saveError } = await supabase
         .from('stock_recommendations')
         .insert({
@@ -1062,11 +1059,10 @@ export default function InvestmentPage() {
         .single();
 
       if (saveError) {
-        console.error('Error saving recommendations:', saveError);
+        console.error('Error saving to Supabase:', saveError);
         throw new Error('Failed to save recommendations');
       }
 
-      // Redirect to recommendations page with the new record ID
       router.push(`/recommendations/stocks?id=${savedRec.id}`);
 
     } catch (error) {
