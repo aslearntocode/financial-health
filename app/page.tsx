@@ -88,12 +88,53 @@ export default function Home() {
             href="/investment"
             className="inline-block rounded-md bg-black px-6 py-2.5 text-base font-semibold text-white hover:bg-gray-800"
           >
-            Get Your Personalized Investment Allocation Dashboard
+            Click Here to Get Your Personalized Fund Distribution Strategy
           </Link>
         </div>
       </div>
 
-      {/* Dashboard Image */}
+      {/* Steps Container */}
+      <div className="max-w-5xl mx-auto mt-12 mb-20">
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-10">How It Works - It's Just 3 Easy Steps</h2>
+        
+        <div className="grid md:grid-cols-3 gap-6 px-4">
+          {/* Step 1 */}
+          <div className="bg-blue-50 rounded-xl p-6 text-center transition-transform hover:scale-105 duration-300">
+            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-white text-xl font-bold">1</span>
+            </div>
+            <h3 className="text-xl font-semibold text-blue-600 mb-3">Fill Investment Form</h3>
+            <p className="text-gray-600">
+              Complete the investment form to help us understand your financial health and goals
+            </p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="bg-blue-50 rounded-xl p-6 text-center transition-transform hover:scale-105 duration-300">
+            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-white text-xl font-bold">2</span>
+            </div>
+            <h3 className="text-xl font-semibold text-blue-600 mb-3">Get Fund Distribution</h3>
+            <p className="text-gray-600">
+              Generate a pie chart showing optimal distribution of your investments across different financial instruments. 
+              Additionally, you get to see the risk and expected returns of the suggested portfolio.
+            </p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="bg-blue-50 rounded-xl p-6 text-center transition-transform hover:scale-105 duration-300">
+            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-white text-xl font-bold">3</span>
+            </div>
+            <h3 className="text-xl font-semibold text-blue-600 mb-3">Start Your Journey</h3>
+            <p className="text-gray-600">
+              Get specific mutual funds and stocks recommendations to begin your wealth building journey
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Dashboard Image
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="relative">
           <Image
@@ -105,7 +146,7 @@ export default function Home() {
             className="rounded-lg shadow-2xl w-full h-auto blur-[1px]"
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Sliding Sections Container */}
       <div className="relative overflow-hidden mb-16">
@@ -181,7 +222,7 @@ export default function Home() {
                 <div className="bg-white p-8 rounded-lg shadow-md">
                   <h3 className="text-xl font-semibold mb-4">Actionable Insights</h3>
                   <p className="text-gray-600 mb-4">
-                    We don&apos;t just give you numbers—we provide easy-to-understand recommendations. For example:
+                    We don&apos;t just give you numbers—we provide easy-to-understand AI generated recommendations. For example:
                   </p>
                   <ul className="text-gray-600 space-y-2">
                     <li>• &quot;Invest 30% of your monthly savings into a balanced mutual fund portfolio.&quot;</li>

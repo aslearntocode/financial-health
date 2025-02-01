@@ -149,8 +149,8 @@ export default function Header() {
               <Image 
                 src="/BlueLogo.png" 
                 alt="Brand Logo" 
-                height={112} 
-                width={112} 
+                height={64} 
+                width={64} 
                 className="mr-4" 
               />
             </Link>
@@ -177,21 +177,20 @@ export default function Header() {
             </button>
 
             <div className="hidden md:flex items-center space-x-8 ml-8">
-              <Link href="/" className="text-white hover:text-white/90 py-2">
+              <Link href="/" className="text-white hover:text-white/90 py-2 text-lg">
                 Home
               </Link>
-              <Link href="/about" className="text-white hover:text-white/90 py-2">
+              <Link href="/about" className="text-white hover:text-white/90 py-2 text-lg">
                 About Us
               </Link>
-              <Link href="/investment" className="text-white hover:text-white/90 py-2">
+              <Link href="/investment" className="text-white hover:text-white/90 py-2 text-lg">
                 Investment
               </Link>
               {hasRecommendationAccess && (
                 <Button
                   variant="ghost"
                   onClick={handleMutualFundsDashboard}
-                  className="text-white"
-                  //  hover:text-white/90"
+                  className="text-white text-2xl hover:bg-transparent hover:text-white/90 px-0 text-lg"
                 >
                   MF Dashboard
                 </Button>
@@ -200,13 +199,12 @@ export default function Header() {
                 <Button
                   variant="ghost"
                   onClick={handleStocksDashboard}
-                  className="text-white"
-                  //  hover:text-white/90"
+                  className="text-white text-2xl hover:bg-transparent hover:text-white/90 px-0 text-lg"
                 >
                   Stocks Dashboard
                 </Button>
               )}
-              <Link href="/credit" className="text-white hover:text-white/90 py-2">
+              <Link href="/credit" className="text-white hover:text-white/90 py-2 text-lg">
                 Credit
               </Link>
               {/* <Link href="/learning-center" className="text-white hover:text-white/90 py-2">
