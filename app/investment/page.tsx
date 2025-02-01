@@ -49,8 +49,8 @@ interface FormData {
   investment_horizon_years: string
   financial_goal: string
   approximate_debt: string
-  needs_money_during_horizon: string
-  has_investment_experience: string
+  needs_money_during_horizon: 'Y' | 'N'
+  has_investment_experience: 'Y' | 'N'
 }
 
 interface AllocationResponse {
@@ -820,20 +820,22 @@ export default function InvestmentPage() {
         throw new Error('Please log in to get recommendations');
       }
 
-      // Ensure all default values are strings
+      // Define default values as strings
       const defaultValues = {
+        name: 'Anonymous',
         age: '30',
         current_savings: '0',
         monthly_savings: '0',
         investment_horizon: '5',
         financial_goal: 'Growth',
         approximate_debt: '0',
-        needs_money_during_horizon: 'N',
-        has_investment_experience: 'N'
+        needs_money_during_horizon: 'N' as const,
+        has_investment_experience: 'N' as const
       };
 
       // Create current form data object for comparison with proper type handling
       const currentFormData = {
+        name: formData.name || defaultValues.name,
         age: parseInt(formData.age || defaultValues.age),
         current_savings: parseFloat(formData.current_savings || defaultValues.current_savings),
         monthly_savings: parseFloat(formData.monthly_savings || defaultValues.monthly_savings),
@@ -881,7 +883,7 @@ export default function InvestmentPage() {
       console.log('Making new API call due to changed data or no existing recommendations');
       const requestData = {
         userId: auth.currentUser.uid,
-        name: formData.name || 'Anonymous',
+        name: formData.name || defaultValues.name,
         age: parseInt(formData.age || defaultValues.age),
         current_savings: parseFloat(formData.current_savings || defaultValues.current_savings),
         monthly_savings: parseFloat(formData.monthly_savings || defaultValues.monthly_savings),
@@ -912,7 +914,7 @@ export default function InvestmentPage() {
         .from('mutual_fund_recommendations')
         .insert({
           user_id: auth.currentUser.uid,
-          user_name: auth.currentUser.displayName || 'Anonymous',
+          user_name: auth.currentUser.displayName || defaultValues.name,
           age: parseInt(formData.age || defaultValues.age),
           current_savings: parseFloat(formData.current_savings || defaultValues.current_savings),
           monthly_savings: parseFloat(formData.monthly_savings || defaultValues.monthly_savings),
