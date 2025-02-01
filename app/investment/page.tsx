@@ -822,14 +822,14 @@ export default function InvestmentPage() {
 
       // Create current form data object for comparison
       const currentFormData = {
-        age: parseInt(formData.age),
-        current_savings: parseFloat(formData.current_savings),
-        monthly_savings: parseFloat(formData.monthly_savings),
-        investment_horizon: parseInt(formData.investment_horizon_years),
-        financial_goal: formData.financial_goal,
-        approximate_debt: parseFloat(formData.approximate_debt),
-        needs_money_during_horizon: formData.needs_money_during_horizon,
-        has_investment_experience: formData.has_investment_experience
+        age: parseInt(formData.age || '30'),  // Convert default to string
+        current_savings: parseFloat(formData.current_savings || '0'),
+        monthly_savings: parseFloat(formData.monthly_savings || '0'),
+        investment_horizon: parseInt(formData.investment_horizon_years || '5'),
+        financial_goal: formData.financial_goal || 'Growth',
+        approximate_debt: parseFloat(formData.approximate_debt || '0'),
+        needs_money_during_horizon: formData.needs_money_during_horizon || 'N',
+        has_investment_experience: formData.has_investment_experience || 'N'
       };
 
       // First check if recommendations exist in Supabase
