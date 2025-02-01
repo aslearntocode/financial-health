@@ -820,8 +820,20 @@ export default function InvestmentPage() {
         throw new Error('Please log in to get recommendations');
       }
 
+      // Create current form data object for comparison
+      const currentFormData = {
+        age: parseInt(formData.age),
+        current_savings: parseFloat(formData.current_savings),
+        monthly_savings: parseFloat(formData.monthly_savings),
+        investment_horizon: parseInt(formData.investment_horizon_years),
+        financial_goal: formData.financial_goal,
+        approximate_debt: parseFloat(formData.approximate_debt),
+        needs_money_during_horizon: formData.needs_money_during_horizon,
+        has_investment_experience: formData.has_investment_experience
+      };
+
       // First check if recommendations exist in Supabase
-      const { data: existingRecommendations, error: fetchError } = await supabase
+      const { data: existingRec, error: fetchError } = await supabase
         .from('mutual_fund_recommendations')
         .select('*')
         .eq('user_id', auth.currentUser.uid)
@@ -833,52 +845,33 @@ export default function InvestmentPage() {
         throw new Error('Failed to check existing recommendations');
       }
 
-      const shouldMakeNewRequest = () => {
-        if (!existingRecommendations || existingRecommendations.length === 0) return true;
-
-        const existingData = existingRecommendations[0];
-        
-        // Check if data is more than 3 months old
-        const createdAt = new Date(existingData.created_at);
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        
-        if (createdAt < threeMonthsAgo) return true;
-
-        // Check if any form data has changed
+      // Check if form data has changed from last saved data
+      const shouldMakeNewRequest = !existingRec?.length || existingRec.some(rec => {
         return (
-          existingData.age !== parseInt(formData.age) ||
-          existingData.current_savings !== parseFloat(formData.current_savings) ||
-          existingData.monthly_savings !== parseFloat(formData.monthly_savings) ||
-          existingData.investment_horizon !== parseInt(formData.investment_horizon_years) ||
-          existingData.financial_goal !== formData.financial_goal ||
-          existingData.approximate_debt !== parseFloat(formData.approximate_debt) ||
-          existingData.needs_money_during_horizon !== formData.needs_money_during_horizon ||
-          existingData.has_investment_experience !== formData.has_investment_experience
+          rec.age !== currentFormData.age ||
+          rec.current_savings !== currentFormData.current_savings ||
+          rec.monthly_savings !== currentFormData.monthly_savings ||
+          rec.investment_horizon !== currentFormData.investment_horizon ||
+          rec.financial_goal !== currentFormData.financial_goal ||
+          rec.approximate_debt !== currentFormData.approximate_debt ||
+          rec.needs_money_during_horizon !== currentFormData.needs_money_during_horizon ||
+          rec.has_investment_experience !== currentFormData.has_investment_experience
         );
-      };
+      });
 
-      if (!shouldMakeNewRequest()) {
-        // Use existing recommendations if data hasn't changed and isn't old
-        console.log('Using existing recommendations - data unchanged and recent');
-        localStorage.setItem('mf_recommendations', JSON.stringify(existingRecommendations[0].recommendations));
-        router.push('/recommendations/mutual-funds');
+      // If data hasn't changed, use existing recommendations
+      if (existingRec?.length && !shouldMakeNewRequest) {
+        console.log('Using existing recommendations as form data unchanged:', existingRec[0]);
+        router.push(`/recommendations/mutual-funds?id=${existingRec[0].id}`);
         return;
       }
 
-      // Make new API call if data changed or is old
-      console.log('Making new API call - data changed or outdated');
+      // If data has changed or no existing recommendations, make new API call
+      console.log('Making new API call due to changed data or no existing recommendations');
       const requestData = {
         userId: auth.currentUser.uid,
-        name: auth.currentUser.displayName || 'Investor',
-        age: parseInt(formData.age),
-        current_savings: parseFloat(formData.current_savings),
-        monthly_savings: parseFloat(formData.monthly_savings),
-        investment_horizon_years: parseInt(formData.investment_horizon_years),
-        financial_goal: formData.financial_goal,
-        approximate_debt: parseFloat(formData.approximate_debt),
-        needs_money_during_horizon: formData.needs_money_during_horizon,
-        has_investment_experience: formData.has_investment_experience
+        name: auth.currentUser.displayName || 'Anonymous',
+        ...currentFormData
       };
 
       const response = await fetch('/api/mutual-funds', {
@@ -897,35 +890,130 @@ export default function InvestmentPage() {
       const result = await response.json();
 
       // Save new recommendations to Supabase
-      const supabaseRecord = {
-        user_id: auth.currentUser.uid,
-        user_name: auth.currentUser.displayName || 'Anonymous',
-        age: parseInt(formData.age),
-        current_savings: parseFloat(formData.current_savings),
-        monthly_savings: parseFloat(formData.monthly_savings),
-        investment_horizon: parseInt(formData.investment_horizon_years),
-        financial_goal: formData.financial_goal,
-        approximate_debt: parseFloat(formData.approximate_debt),
-        needs_money_during_horizon: formData.needs_money_during_horizon,
-        has_investment_experience: formData.has_investment_experience,
-        recommendations: result.data,
-        created_at: new Date().toISOString()
-      };
-
-      const { error: saveError } = await supabase
+      const { data: savedRec, error: saveError } = await supabase
         .from('mutual_fund_recommendations')
-        .insert(supabaseRecord);
+        .insert({
+          user_id: auth.currentUser.uid,
+          user_name: auth.currentUser.displayName || 'Anonymous',
+          ...currentFormData,
+          recommendations: result.data,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
 
       if (saveError) {
         console.error('Error saving to Supabase:', saveError);
-        throw new Error(`Database error: ${saveError.message}`);
+        throw new Error('Failed to save recommendations');
       }
 
-      localStorage.setItem('mf_recommendations', JSON.stringify(result.data));
-      router.push('/recommendations/mutual-funds');
+      // Redirect to recommendations page with the new record ID
+      router.push(`/recommendations/mutual-funds?id=${savedRec.id}`);
 
     } catch (error) {
       console.error('Mutual Fund Recommendation Error:', error);
+      setError(error instanceof Error ? error.message : 'Failed to get recommendations');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStockClick = async () => {
+    try {
+      setIsLoading(true);
+      
+      if (!auth.currentUser) {
+        throw new Error('Please log in to get recommendations');
+      }
+
+      // First check if recommendations exist in Supabase
+      const { data: existingRecommendations, error: fetchError } = await supabase
+        .from('stock_recommendations')
+        .select('*')
+        .eq('user_id', auth.currentUser.uid)
+        .eq('age', formData.age || 30)
+        .eq('current_savings', formData.current_savings || 0)
+        .eq('monthly_savings', formData.monthly_savings || 0)
+        .eq('investment_horizon', formData.investment_horizon_years || 5)
+        .eq('financial_goal', formData.financial_goal || 'Growth')
+        .eq('approximate_debt', formData.approximate_debt || 0)
+        .eq('needs_money_during_horizon', formData.needs_money_during_horizon || false)
+        .eq('has_investment_experience', formData.has_investment_experience || false)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (fetchError) {
+        console.error('Error checking existing recommendations:', fetchError);
+        throw new Error('Failed to check existing recommendations');
+      }
+
+      if (existingRecommendations && existingRecommendations.length > 0) {
+        // Use existing recommendations
+        console.log('Using existing recommendations');
+        return router.push(`/recommendations/stocks?id=${existingRecommendations[0].id}`);
+      }
+
+      // If no existing recommendations, get new ones
+      console.log('Getting new recommendations');
+      const requestData = {
+        userId: auth.currentUser.uid,
+        name: formData.name || 'Anonymous',
+        age: parseInt(formData.age || 30),
+        current_savings: parseFloat(formData.current_savings || 0),
+        monthly_savings: parseFloat(formData.monthly_savings || 0),
+        investment_horizon_years: parseInt(formData.investment_horizon_years || 5),
+        financial_goal: formData.financial_goal || 'Growth',
+        approximate_debt: parseFloat(formData.approximate_debt || 0),
+        needs_money_during_horizon: formData.needs_money_during_horizon || false,
+        has_investment_experience: formData.has_investment_experience || false,
+      };
+
+      // Get recommendations from API
+      const response = await fetch('/api/stocks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch recommendations: ${errorText}`);
+      }
+
+      const result = await response.json();
+
+      // Save new recommendations to Supabase
+      const { data: savedRec, error: saveError } = await supabase
+        .from('stock_recommendations')
+        .insert({
+          user_id: auth.currentUser.uid,
+          user_name: formData.name || 'Anonymous',
+          age: parseInt(formData.age || 30),
+          current_savings: parseFloat(formData.current_savings || 0),
+          monthly_savings: parseFloat(formData.monthly_savings || 0),
+          investment_horizon: parseInt(formData.investment_horizon_years || 5),
+          financial_goal: formData.financial_goal || 'Growth',
+          approximate_debt: parseFloat(formData.approximate_debt || 0),
+          needs_money_during_horizon: formData.needs_money_during_horizon || false,
+          has_investment_experience: formData.has_investment_experience || false,
+          recommendations: result.data,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (saveError) {
+        console.error('Error saving recommendations:', saveError);
+        throw new Error('Failed to save recommendations');
+      }
+
+      // Redirect to recommendations page with the new record ID
+      router.push(`/recommendations/stocks?id=${savedRec.id}`);
+
+    } catch (error) {
+      console.error('Stock Recommendation Error:', error);
       setError(error instanceof Error ? error.message : 'Failed to get recommendations');
     } finally {
       setIsLoading(false);
@@ -1154,7 +1242,7 @@ export default function InvestmentPage() {
                         MUTUAL FUNDS
                       </button>
                       <button 
-                        onClick={() => router.push('/recommendations/stocks')}
+                        onClick={handleStockClick}
                         className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
                       >
                         STOCKS

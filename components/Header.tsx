@@ -8,11 +8,20 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import Image from 'next/image'
+import { createClient } from '@supabase/supabase-js'
+import { Button } from '@/components/ui/button'
+
+// Initialize Supabase client
+const supabaseClient = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [hasRecommendationAccess, setHasRecommendationAccess] = useState(false)
+  const [hasStockAccess, setHasStockAccess] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -20,26 +29,117 @@ export default function Header() {
       setUser(user)
       if (user?.uid) {
         try {
-          const { data, error } = await supabase
+          // Check for mutual fund recommendations
+          const { data: mfData, error: mfError } = await supabaseClient
             .from('mutual_fund_recommendations')
-            .select('*')
+            .select('id')
             .eq('user_id', user.uid)
             .order('created_at', { ascending: false })
             .limit(1)
-          
-          console.log('Supabase response:', { data, error, uid: user.uid })
-          setHasRecommendationAccess(Boolean(data && data.length > 0))
+
+          if (mfError) {
+            console.error('Error checking MF access:', mfError)
+          }
+          setHasRecommendationAccess(Boolean(mfData?.length))
+
+          // Check for stock recommendations
+          const { data: stockData, error: stockError } = await supabaseClient
+            .from('stock_recommendations')
+            .select('id')
+            .eq('user_id', user.uid)
+            .order('created_at', { ascending: false })
+            .limit(1)
+
+          if (stockError) {
+            console.error('Error checking stock access:', stockError)
+          }
+          setHasStockAccess(Boolean(stockData?.length))
         } catch (err) {
-          console.error('Error fetching recommendations:', err)
-          setHasRecommendationAccess(false)
+          console.error('Error checking recommendations:', err)
         }
       } else {
         setHasRecommendationAccess(false)
+        setHasStockAccess(false)
       }
     })
 
     return () => unsubscribe()
   }, [])
+
+  const handleMutualFundsDashboard = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    console.log('MF Dashboard clicked')
+
+    if (!user) {
+      console.log('No user, redirecting to login')
+      router.push('/login')
+      return
+    }
+
+    try {
+      // Get the latest recommendation from Supabase
+      const { data, error } = await supabase
+        .from('mutual_fund_recommendations')
+        .select('*')
+        .eq('user_id', user.uid)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      console.log('Latest MF recommendation query result:', { data, error })
+
+      if (error) throw error
+
+      if (data && data.length > 0) {
+        const latestRec = data[0]
+        console.log('Found MF recommendation:', latestRec)
+        // Remove localStorage.setItem and just redirect with the ID
+        router.push(`/recommendations/mutual-funds?id=${latestRec.id}`)
+      } else {
+        console.log('No MF recommendations found')
+        router.push('/investment')
+      }
+    } catch (error) {
+      console.error('Error fetching MF recommendations:', error)
+      router.push('/investment')
+    }
+  }
+
+  const handleStocksDashboard = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    console.log('Stocks Dashboard clicked')
+
+    if (!user) {
+      console.log('No user, redirecting to login')
+      router.push('/login')
+      return
+    }
+
+    try {
+      // Get the latest stock recommendation from Supabase
+      const { data, error } = await supabaseClient
+        .from('stock_recommendations')
+        .select('*')  // Select all fields to get complete data
+        .eq('user_id', user.uid)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      console.log('Latest stock recommendation query result:', { data, error })
+
+      if (error) throw error
+
+      if (data && data.length > 0) {
+        const latestRec = data[0]
+        console.log('Found stock recommendation:', latestRec)
+        router.push(`/recommendations/stocks?id=${latestRec.id}`)
+      } else {
+        console.log('No stock recommendations found')
+        router.push('/investment')
+      }
+    } catch (error) {
+      console.error('Error fetching stock recommendations:', error)
+      router.push('/investment')
+    }
+  }
 
   return (
     <header className="bg-gradient-to-r from-blue-600 to-blue-700 w-full overflow-x-hidden">
@@ -88,9 +188,24 @@ export default function Header() {
                 Investment
               </Link>
               {hasRecommendationAccess && (
-                <Link href="/recommendations/mutual-funds" className="text-white hover:text-white/90 py-2">
+                <Button
+                  variant="ghost"
+                  onClick={handleMutualFundsDashboard}
+                  className="text-white"
+                  //  hover:text-white/90"
+                >
                   MF Dashboard
-                </Link>
+                </Button>
+              )}
+              {hasStockAccess && (
+                <Button
+                  variant="ghost"
+                  onClick={handleStocksDashboard}
+                  className="text-white"
+                  //  hover:text-white/90"
+                >
+                  Stocks Dashboard
+                </Button>
               )}
               <Link href="/credit" className="text-white hover:text-white/90 py-2">
                 Credit
@@ -127,9 +242,22 @@ export default function Header() {
                 Investment
               </Link>
               {hasRecommendationAccess && (
-                <Link href="/recommendations/mutual-funds" className="text-white hover:text-white/90 px-2 py-1">
+                <Button
+                  variant="ghost"
+                  onClick={handleMutualFundsDashboard}
+                  className="text-white hover:text-white/90"
+                >
                   MF Dashboard
-                </Link>
+                </Button>
+              )}
+              {hasStockAccess && (
+                <Button
+                  variant="ghost"
+                  onClick={handleStocksDashboard}
+                  className="text-white hover:text-white/90"
+                >
+                  Stocks Dashboard
+                </Button>
               )}
               <Link href="/credit" className="text-white hover:text-white/90 px-2 py-1">
                 Credit
