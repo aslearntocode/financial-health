@@ -820,16 +820,28 @@ export default function InvestmentPage() {
         throw new Error('Please log in to get recommendations');
       }
 
+      // Ensure all default values are strings
+      const defaultValues = {
+        age: '30',
+        current_savings: '0',
+        monthly_savings: '0',
+        investment_horizon: '5',
+        financial_goal: 'Growth',
+        approximate_debt: '0',
+        needs_money_during_horizon: 'N',
+        has_investment_experience: 'N'
+      };
+
       // Create current form data object for comparison with proper type handling
       const currentFormData = {
-        age: parseInt(String(formData.age || '30')),
-        current_savings: parseFloat(String(formData.current_savings || '0')),
-        monthly_savings: parseFloat(String(formData.monthly_savings || '0')),
-        investment_horizon: parseInt(String(formData.investment_horizon_years || '5')),
-        financial_goal: formData.financial_goal || 'Growth',
-        approximate_debt: parseFloat(String(formData.approximate_debt || '0')),
-        needs_money_during_horizon: formData.needs_money_during_horizon || 'N',
-        has_investment_experience: formData.has_investment_experience || 'N'
+        age: parseInt(formData.age || defaultValues.age),
+        current_savings: parseFloat(formData.current_savings || defaultValues.current_savings),
+        monthly_savings: parseFloat(formData.monthly_savings || defaultValues.monthly_savings),
+        investment_horizon: parseInt(formData.investment_horizon_years || defaultValues.investment_horizon),
+        financial_goal: formData.financial_goal || defaultValues.financial_goal,
+        approximate_debt: parseFloat(formData.approximate_debt || defaultValues.approximate_debt),
+        needs_money_during_horizon: formData.needs_money_during_horizon || defaultValues.needs_money_during_horizon,
+        has_investment_experience: formData.has_investment_experience || defaultValues.has_investment_experience
       };
 
       // First check if recommendations exist in Supabase
@@ -859,7 +871,6 @@ export default function InvestmentPage() {
         );
       });
 
-      // If data hasn't changed, use existing recommendations
       if (existingRec?.length && !shouldMakeNewRequest) {
         console.log('Using existing recommendations as form data unchanged:', existingRec[0]);
         router.push(`/recommendations/mutual-funds?id=${existingRec[0].id}`);
@@ -871,14 +882,14 @@ export default function InvestmentPage() {
       const requestData = {
         userId: auth.currentUser.uid,
         name: formData.name || 'Anonymous',
-        age: parseInt(String(formData.age || '30')),
-        current_savings: parseFloat(String(formData.current_savings || '0')),
-        monthly_savings: parseFloat(String(formData.monthly_savings || '0')),
-        investment_horizon_years: parseInt(String(formData.investment_horizon_years || '5')),
-        financial_goal: formData.financial_goal || 'Growth',
-        approximate_debt: parseFloat(String(formData.approximate_debt || '0')),
-        needs_money_during_horizon: formData.needs_money_during_horizon || 'N',
-        has_investment_experience: formData.has_investment_experience || 'N'
+        age: parseInt(formData.age || defaultValues.age),
+        current_savings: parseFloat(formData.current_savings || defaultValues.current_savings),
+        monthly_savings: parseFloat(formData.monthly_savings || defaultValues.monthly_savings),
+        investment_horizon_years: parseInt(formData.investment_horizon_years || defaultValues.investment_horizon),
+        financial_goal: formData.financial_goal || defaultValues.financial_goal,
+        approximate_debt: parseFloat(formData.approximate_debt || defaultValues.approximate_debt),
+        needs_money_during_horizon: formData.needs_money_during_horizon || defaultValues.needs_money_during_horizon,
+        has_investment_experience: formData.has_investment_experience || defaultValues.has_investment_experience
       };
 
       const response = await fetch('/api/mutual-funds', {
@@ -902,14 +913,14 @@ export default function InvestmentPage() {
         .insert({
           user_id: auth.currentUser.uid,
           user_name: auth.currentUser.displayName || 'Anonymous',
-          age: parseInt(String(formData.age || '30')),
-          current_savings: parseFloat(String(formData.current_savings || '0')),
-          monthly_savings: parseFloat(String(formData.monthly_savings || '0')),
-          investment_horizon: parseInt(String(formData.investment_horizon_years || '5')),
-          financial_goal: formData.financial_goal || 'Growth',
-          approximate_debt: parseFloat(String(formData.approximate_debt || '0')),
-          needs_money_during_horizon: formData.needs_money_during_horizon || 'N',
-          has_investment_experience: formData.has_investment_experience || 'N',
+          age: parseInt(formData.age || defaultValues.age),
+          current_savings: parseFloat(formData.current_savings || defaultValues.current_savings),
+          monthly_savings: parseFloat(formData.monthly_savings || defaultValues.monthly_savings),
+          investment_horizon: parseInt(formData.investment_horizon_years || defaultValues.investment_horizon),
+          financial_goal: formData.financial_goal || defaultValues.financial_goal,
+          approximate_debt: parseFloat(formData.approximate_debt || defaultValues.approximate_debt),
+          needs_money_during_horizon: formData.needs_money_during_horizon || defaultValues.needs_money_during_horizon,
+          has_investment_experience: formData.has_investment_experience || defaultValues.has_investment_experience,
           recommendations: result.data,
           created_at: new Date().toISOString()
         })
@@ -921,7 +932,6 @@ export default function InvestmentPage() {
         throw new Error('Failed to save recommendations');
       }
 
-      // Redirect to recommendations page with the new record ID
       router.push(`/recommendations/mutual-funds?id=${savedRec.id}`);
 
     } catch (error) {
