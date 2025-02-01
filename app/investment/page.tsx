@@ -870,8 +870,15 @@ export default function InvestmentPage() {
       console.log('Making new API call due to changed data or no existing recommendations');
       const requestData = {
         userId: auth.currentUser.uid,
-        name: auth.currentUser.displayName || 'Anonymous',
-        ...currentFormData
+        name: formData.name || 'Anonymous',
+        age: parseInt(formData.age || '30'),  // Convert to string
+        current_savings: parseFloat(formData.current_savings || '0'),  // Convert to string
+        monthly_savings: parseFloat(formData.monthly_savings || '0'),  // Convert to string
+        investment_horizon_years: parseInt(formData.investment_horizon_years || '5'),  // Convert to string
+        financial_goal: formData.financial_goal || 'Growth',
+        approximate_debt: parseFloat(formData.approximate_debt || '0'),  // Convert to string
+        needs_money_during_horizon: formData.needs_money_during_horizon || 'N',
+        has_investment_experience: formData.has_investment_experience || 'N'
       };
 
       const response = await fetch('/api/mutual-funds', {
@@ -895,7 +902,14 @@ export default function InvestmentPage() {
         .insert({
           user_id: auth.currentUser.uid,
           user_name: auth.currentUser.displayName || 'Anonymous',
-          ...currentFormData,
+          age: parseInt(formData.age || '30'),  // Convert to string
+          current_savings: parseFloat(formData.current_savings || '0'),  // Convert to string
+          monthly_savings: parseFloat(formData.monthly_savings || '0'),  // Convert to string
+          investment_horizon: parseInt(formData.investment_horizon_years || '5'),  // Convert to string
+          financial_goal: formData.financial_goal || 'Growth',
+          approximate_debt: parseFloat(formData.approximate_debt || '0'),  // Convert to string
+          needs_money_during_horizon: formData.needs_money_during_horizon || 'N',
+          has_investment_experience: formData.has_investment_experience || 'N',
           recommendations: result.data,
           created_at: new Date().toISOString()
         })
