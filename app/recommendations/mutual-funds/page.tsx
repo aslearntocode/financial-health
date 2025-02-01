@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/Header'
 import { auth } from "@/lib/firebase"
@@ -24,6 +24,14 @@ interface MutualFund {
 }
 
 export default function MutualFundRecommendations() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MutualFundRecommendationsContent />
+    </Suspense>
+  )
+}
+
+function MutualFundRecommendationsContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [recommendations, setRecommendations] = useState<MutualFund[]>([])
