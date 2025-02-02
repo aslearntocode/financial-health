@@ -18,10 +18,10 @@ function PersonalFinancePage() {
       link: '/learning-center/personal-finance/risk-return'
     },
     {
-      title: 'Tax-Efficient Investing Strategies',
-      description: 'Discover how to optimize your investment returns through tax-efficient investment strategies and planning.',
-      readTime: '7 min read',
-      link: '/learning-center/personal-finance/tax-strategies'
+      title: 'How to Invest in SIP?',
+      description: 'Learn how to start investing in SIPs and make your money work for you.',
+      readTime: '15 min read',
+      link: '/learning-center/personal-finance/sip'
     }
   ]
 

@@ -80,11 +80,11 @@ const articles: Article[] = [
   },
   {
     id: '9',
-    title: 'Tax-Efficient Investing Strategies',
-    description: 'Discover how to optimize your investment returns through tax-efficient investment strategies and planning.',
+    title: 'How to Invest in SIP?',
+    description: 'Learn how to start investing in SIPs and make your money work for you.',
     category: 'Personal Finance',
-    readTime: '7 min read',
-    link: '/learning-center/personal-finance/tax-strategies'
+    readTime: '15 min read',
+    link: '/learning-center/personal-finance/sip'
   }
 ]
 
