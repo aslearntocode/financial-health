@@ -12,7 +12,7 @@ function ReturnComparisonBox() {
   const difference = value12 - value8;
 
   return (
-    <div className="absolute right-4 top-[80px] p-3 bg-gradient-to-br from-green-50 to-white rounded-2xl shadow-2xl border border-green-100 w-80 animate-pulse-slow hover:animate-none transition-all duration-300 hover:scale-105 z-50">
+    <div className="hidden md:block absolute right-4 top-[80px] p-3 bg-gradient-to-br from-green-50 to-white rounded-2xl shadow-2xl border border-green-100 w-80 animate-pulse-slow hover:animate-none transition-all duration-300 hover:scale-105 z-50">
       <h3 className="text-base font-semibold mb-2 text-green-800 text-center">How much a Wrong Fund Distribution Can Cost You?</h3>
       <div className="space-y-2">
         <div className="bg-white py-1.5 px-2 rounded-lg shadow-sm">
