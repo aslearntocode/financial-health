@@ -61,6 +61,30 @@ const articles: Article[] = [
     category: 'Real Estate',
     readTime: '8 min read',
     link: '/learning-center/real-estate/reit-guide'
+  },
+  {
+    id: '7',
+    title: 'Investment Options for Retail Investors in India',
+    description: 'Understand what financial instruments you can invest in India for long term wealth creation. For a comprehensive guide, we recommend reading this excellent article on Groww: https://groww.in/blog/best-investment-options-in-india',
+    category: 'Personal Finance',
+    readTime: '8 min read',
+    link: '/learning-center/personal-finance/investment-options'
+  },
+  {
+    id: '8',
+    title: 'Understanding Risk and Return',
+    description: 'Learn about the relationship between risk and return, and how to balance them in your investment portfolio.',
+    category: 'Personal Finance',
+    readTime: '6 min read',
+    link: '/learning-center/personal-finance/risk-return'
+  },
+  {
+    id: '9',
+    title: 'Tax-Efficient Investing Strategies',
+    description: 'Discover how to optimize your investment returns through tax-efficient investment strategies and planning.',
+    category: 'Personal Finance',
+    readTime: '7 min read',
+    link: '/learning-center/personal-finance/tax-strategies'
   }
 ]
 
