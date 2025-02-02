@@ -9,6 +9,7 @@ import { User } from "firebase/auth"
 import { ProfileDropdown } from "@/components/ProfileDropdown"
 import Testimonials from "@/components/Testimonials"
 import Header from "@/components/Header"
+import ReturnComparisonBox from "@/components/ReturnComparisonBox"
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('distribution') // 'distribution' or 'offer'
@@ -71,7 +72,7 @@ export default function Home() {
   }, [testimonials.length])
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white relative">
       <Header />
       
       {/* Hero Section */}
@@ -92,6 +93,9 @@ export default function Home() {
           </Link>
         </div>
       </div>
+
+      {/* Add ReturnComparisonBox here */}
+      <ReturnComparisonBox />
 
       {/* Steps Container */}
       <div className="max-w-5xl mx-auto mt-12 mb-20">
