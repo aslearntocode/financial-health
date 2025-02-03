@@ -1,5 +1,5 @@
 function ReturnComparisonBox() {
-  const initialInvestment = 500000; // 5 Lakhs
+  const initialInvestment = 1000000; // 10 Lakhs
   const years = 20;
   const returns = [0.08, 0.12]; // 8% and 12%
 

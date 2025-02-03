@@ -54,11 +54,13 @@ export default function Home() {
   ]
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveSection((current) => current === 'distribution' ? 'offer' : 'distribution')
-    }, 10000) // Switch every 10 seconds
+    if (window.innerWidth >= 768) {  // Only run on desktop
+      const timer = setInterval(() => {
+        setActiveSection((current) => current === 'distribution' ? 'offer' : 'distribution')
+      }, 10000) // Switch every 10 seconds
 
-    return () => clearInterval(timer)
+      return () => clearInterval(timer)
+    }
   }, [])
 
   useEffect(() => {
@@ -156,17 +158,19 @@ export default function Home() {
       <div className="relative overflow-hidden mb-16">
         {/* Why Distribution Matters Section */}
         <div className={`transition-all duration-3000 ${
-          activeSection === 'distribution' 
+          activeSection === 'distribution' || window.innerWidth < 768
             ? 'translate-x-0 opacity-100' 
             : '-translate-x-full opacity-0'
-        } absolute w-full ${activeSection === 'offer' ? 'pointer-events-none' : ''}`}>
+        } absolute w-full ${activeSection === 'offer' && window.innerWidth >= 768 ? 'pointer-events-none' : ''}`}>
           <div className="bg-gray-50 py-16">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <h2 className="text-3xl font-bold text-center mb-12">Why Distribution Matters</h2>
               <p className="text-xl text-center text-gray-600 mb-12 italic">
                 &quot;The right balance between savings, investments, and risk can help you achieve your financial goals faster and with greater confidence.&quot;
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              
+              {/* Desktop Grid */}
+              <div className="hidden md:grid md:grid-cols-4 gap-8">
                 <div className="bg-white p-8 rounded-lg shadow-md">
                   <h3 className="text-xl font-semibold mb-4">Maximize Your Resources</h3>
                   <p className="text-gray-600">
@@ -192,12 +196,52 @@ export default function Home() {
                   </p>
                 </div>
               </div>
+
+              {/* Mobile Slider */}
+              <div className="md:hidden">
+                <div className="overflow-x-auto scrollbar-hide">
+                  <div className="flex gap-4 w-max pb-4">
+                    <div className="bg-white p-6 rounded-lg shadow-md w-[280px] flex-shrink-0">
+                      <h3 className="text-xl font-semibold mb-4">Maximize Your Resources</h3>
+                      <p className="text-gray-600">
+                        Allocating your funds wisely ensures every dollar works towards your goals—whether it&apos;s building wealth, securing your retirement, or achieving short-term milestones.
+                      </p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md w-[280px] flex-shrink-0">
+                      <h3 className="text-xl font-semibold mb-4">Mitigate Risks</h3>
+                      <p className="text-gray-600">
+                        Over-concentrating funds in one area can leave you vulnerable to unexpected financial shocks. Diversification helps balance growth potential and safety.
+                      </p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md w-[280px] flex-shrink-0">
+                      <h3 className="text-xl font-semibold mb-4">Tailored to Your Life Stage</h3>
+                      <p className="text-gray-600">
+                        Your financial needs evolve—someone starting their career will have different priorities than someone nearing retirement. Distribution ensures your money adapts as your life changes.
+                      </p>
+                    </div>
+                    <div className="bg-white p-6 rounded-lg shadow-md w-[280px] flex-shrink-0">
+                      <h3 className="text-xl font-semibold mb-4">Peace of Mind</h3>
+                      <p className="text-gray-600">
+                        A clear, balanced financial plan reduces stress by showing you a roadmap to meet your obligations and build for the future, even during economic uncertainty.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Optional: Add scroll indicator dots */}
+                <div className="flex justify-center space-x-2 mt-4">
+                  <div className="w-2 h-2 rounded-full bg-blue-600"></div>
+                  <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                  <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                  <div className="w-2 h-2 rounded-full bg-gray-300"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* What We Offer Section */}
-        <div className={`transition-all duration-3000 ${
+        <div className={`transition-all duration-3000 hidden md:block ${
           activeSection === 'offer' 
             ? 'translate-x-0 opacity-100' 
             : 'translate-x-full opacity-0'
@@ -247,8 +291,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Slide Indicators */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        {/* Slide Indicators - Hide on Mobile */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 hidden md:flex space-x-2">
           <button
             onClick={() => setActiveSection('distribution')}
             className={`w-2 h-2 rounded-full transition-all ${
@@ -263,8 +307,8 @@ export default function Home() {
           />
         </div>
 
-        {/* Spacer div to maintain layout flow */}
-        <div className="h-[650px]" />
+        {/* Spacer div - Adjust height for mobile */}
+        <div className="h-[650px] md:h-[650px]" />
       </div>
 
       {/* Pricing Section - New Addition */}
@@ -374,8 +418,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
           
-          {/* Testimonials Slider */}
-          <div className="relative">
+          {/* Desktop Testimonials Slider */}
+          <div className="relative hidden md:block">
             <div className="overflow-hidden">
               <div 
                 className="flex transition-transform duration-500 ease-in-out"
@@ -399,7 +443,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Slider Controls */}
+            {/* Desktop Slider Controls */}
             <div className="flex justify-center space-x-2 mt-8">
               {Array.from({ length: testimonials.length - 2 }).map((_, index) => (
                 <button
@@ -407,6 +451,41 @@ export default function Home() {
                   onClick={() => setCurrentTestimonialIndex(index)}
                   className={`w-2 h-2 rounded-full transition-all ${
                     currentTestimonialIndex === index ? 'bg-blue-600' : 'bg-gray-300'
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Testimonials Slider */}
+          <div className="md:hidden">
+            <div className="overflow-x-auto scrollbar-hide">
+              <div className="flex gap-4 w-max pb-4">
+                {testimonials.map((testimonial, index) => (
+                  <div 
+                    key={index}
+                    className="w-[300px] flex-shrink-0 px-4"
+                  >
+                    <div className="bg-white p-6 rounded-lg shadow">
+                      <div className={`w-12 h-12 ${testimonial.color} rounded-full text-white flex items-center justify-center text-xl font-bold mb-4`}>
+                        {testimonial.initial}
+                      </div>
+                      <h3 className="font-semibold mb-2">{testimonial.name}</h3>
+                      <p className="text-gray-500 mb-4">{testimonial.role}</p>
+                      <p className="text-gray-600">{testimonial.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mobile Slider Indicator Dots */}
+            <div className="flex justify-center space-x-2 mt-4">
+              {testimonials.map((_, index) => (
+                <div 
+                  key={index}
+                  className={`w-2 h-2 rounded-full ${
+                    index === Math.floor(currentTestimonialIndex) ? 'bg-blue-600' : 'bg-gray-300'
                   }`}
                 />
               ))}
