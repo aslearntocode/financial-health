@@ -1,8 +1,11 @@
 'use client'
 
 import Header from "@/components/Header"
+import { useRouter } from 'next/navigation'
 
 export default function CreditPage() {
+  const router = useRouter()
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -24,7 +27,10 @@ export default function CreditPage() {
             </p>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-16">
-              <div className="bg-white rounded-xl p-6 shadow-lg">
+              <div 
+                className="bg-white rounded-xl p-6 shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
+                onClick={() => router.push('/credit/score')}
+              >
                 <h3 className="text-xl font-bold text-gray-900 mb-3 font-serif">
                   Understand Credit Score through AI Generated Video
                 </h3>
