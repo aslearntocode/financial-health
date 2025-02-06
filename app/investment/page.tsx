@@ -1289,6 +1289,7 @@ export default function InvestmentPage() {
                         <li>Remember to have at least 5 multiples of your annual income as Life Cover. If you haven't done that then please buy Life Insurance that can give you the required life cover</li>
                         <li>You should review your allocation every 3 months to check if market conditions have changed or your risk profile has changed</li>
                         <li>Review your allocation irrespective of the time period in case there is a life altering event such as savings increase or decrease, getting married, having a kid etc.</li>
+                        <li>If you have any high interest debt, please pay it off first before investing</li>
                       </ul>
                     </div>
 
