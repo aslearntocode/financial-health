@@ -1103,7 +1103,7 @@ export default function InvestmentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="age">Age</Label>
+                <Label htmlFor="age">Age (in years)</Label>
                 <Input
                   id="age"
                   type="number"
@@ -1115,7 +1115,7 @@ export default function InvestmentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="current_savings">Current Savings</Label>
+                <Label htmlFor="current_savings">Current Savings Uptil Now (in INR)</Label>
                 <Input
                   id="current_savings"
                   type="number"
@@ -1127,7 +1127,7 @@ export default function InvestmentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="monthly_savings">Monthly Savings</Label>
+                <Label htmlFor="monthly_savings">Monthly Savings Going Forward (in INR)</Label>
                 <Input
                   id="monthly_savings"
                   type="number"
@@ -1170,7 +1170,9 @@ export default function InvestmentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="approximate_debt">How much approximate debt do you have?</Label>
+                <Label htmlFor="approximate_debt">How much approximate debt do you have? (in INR)
+                  <br/> (This should include any Home Loan, Car Loan, Personal Loan, Credit Card Debt, etc.)
+                </Label>
                 <Input
                   id="approximate_debt"
                   type="number"
@@ -1182,7 +1184,9 @@ export default function InvestmentPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="needs_money_during_horizon">Do you anticipate needing this money during your investment horizon?</Label>
+                <Label htmlFor="needs_money_during_horizon">Do you anticipate needing this money during your investment horizon?
+                  <br/> (This is important for us to understand your risk appetite)<br/>
+                </Label>
                 <Select 
                   value={formData.needs_money_during_horizon}
                   onValueChange={(value: 'Y' | 'N') => {
