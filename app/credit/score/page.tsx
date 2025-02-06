@@ -12,6 +12,7 @@ export default function CreditScorePage() {
     name: '',
     dob: '',
     pan: '',
+    incomeRange: '',
     acceptTerms: false
   })
 
@@ -69,6 +70,23 @@ export default function CreditScorePage() {
                       value={formData.dob}
                       onChange={(e) => setFormData({...formData, dob: e.target.value})}
                     />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-2">Income Range</label>
+                    <select
+                      required
+                      className="w-full p-2 border rounded-md bg-white"
+                      value={formData.incomeRange}
+                      onChange={(e) => setFormData({...formData, incomeRange: e.target.value})}
+                    >
+                      <option value="">Select Income Range</option>
+                      <option value="0-5">₹0 - ₹5 Lakhs</option>
+                      <option value="5-10">₹5 - ₹10 Lakhs</option>
+                      <option value="10-25">₹10 - ₹25 Lakhs</option>
+                      <option value="25-50">₹25 - ₹50 Lakhs</option>
+                      <option value="50+">₹50 Lakhs+</option>
+                    </select>
                   </div>
 
                   <div className="mb-4">
