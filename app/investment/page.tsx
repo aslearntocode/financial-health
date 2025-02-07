@@ -1301,34 +1301,34 @@ export default function InvestmentPage() {
                       To get specific recommendations, click on the financial instruments below
                     </div>
                     
-                    <div className="grid grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4">
                       <button 
                         onClick={handleMutualFundClick}
-                        className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                        className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
                       >
                         MUTUAL FUNDS
                       </button>
                       <button 
                         onClick={handleStockClick}
-                        className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                        className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
                       >
                         STOCKS
                       </button>
                       <button 
                         onClick={() => router.push('/recommendations/bonds')}
-                        className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                        className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
                       >
                         BONDS
                       </button>
                       <button 
                         onClick={() => router.push('/recommendations/fixed-deposit')}
-                        className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                        className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
                       >
                         FIXED DEPOSITS
                       </button>
                       <button 
                         onClick={() => router.push('/recommendations/etf')}
-                        className="p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-sm font-medium"
+                        className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium whitespace-nowrap col-span-2 md:col-span-1"
                       >
                         ETF
                       </button>
