@@ -311,6 +311,102 @@ export default function Home() {
         <div className="h-[650px] md:h-[650px]" />
       </div>
 
+      {/* Did You Know Section */}
+      <div className="bg-blue-50 py-12 mb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-lg shadow-lg p-8 relative overflow-hidden">
+            {/* Decorative Element */}
+            <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
+              <div className="absolute inset-0 bg-blue-100 rounded-full opacity-50"></div>
+              <div className="absolute inset-2 bg-blue-200 rounded-full opacity-50"></div>
+            </div>
+            
+            <div className="relative">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="text-3xl">💡</span>
+                Did You Know?
+              </h2>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Closed-End Funds */}
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-xl font-semibold text-blue-600 mb-3">Closed-End Mutual Funds</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span><strong>Fixed Number of Shares</strong> – They issue a fixed number of shares through an IPO and trade on the stock exchange like stocks.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span><strong>Market Price Fluctuations</strong> – Prices depend on supply and demand, often trading at a premium or discount to NAV.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span><strong>No Direct Redemption</strong> – Investors buy/sell on the secondary market instead of redeeming shares from the fund.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span><strong>Active Trading</strong> – Can be actively managed with leverage, making them riskier but potentially more profitable.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span><strong>Dividends & Distributions</strong> – Often provide regular income through dividends.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Open-End Funds */}
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-xl font-semibold text-green-600 mb-3">Open-End Mutual Funds</h3>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-1">•</span>
+                      <span><strong>Unlimited Shares</strong> – Investors can buy and redeem shares directly from the fund at the NAV price.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-1">•</span>
+                      <span><strong>Price Based on NAV</strong> – Shares are priced once a day based on the total value of fund assets.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-1">•</span>
+                      <span><strong>Liquidity</strong> – Easier to buy/sell as redemptions happen directly with the fund.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-1">•</span>
+                      <span><strong>Management Style</strong> – Can be actively or passively managed (e.g., index funds).</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-1">•</span>
+                      <span><strong>No Exchange Trading</strong> – Unlike closed-end funds, they don't trade on stock exchanges.</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <Link
+                href="/learning-center/mutual-funds/types"
+                className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold group mt-4"
+              >
+                Learn More About Mutual Funds
+                <svg 
+                  className="w-4 h-4 ml-1 transform transition-transform group-hover:translate-x-1" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth="2" 
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Pricing Section - New Addition */}
       <div className="bg-white py-16 relative">
         {/* Beta Testing Overlay */}
