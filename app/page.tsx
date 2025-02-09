@@ -14,6 +14,7 @@ import ReturnComparisonBox from "@/components/ReturnComparisonBox"
 export default function Home() {
   const [activeSection, setActiveSection] = useState('distribution') // 'distribution' or 'offer'
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0)
+  const [proTipPosition, setProTipPosition] = useState(0)
 
   const testimonials = [
     {
@@ -73,10 +74,41 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [testimonials.length])
 
+  useEffect(() => {
+    const animateProTip = () => {
+      setProTipPosition((prev) => {
+        if (prev <= -33.33) return 0 // Reset when one message completes
+        return prev - 0.02 // Slower speed
+      })
+    }
+
+    const animation = setInterval(animateProTip, 16) // ~60fps
+    return () => clearInterval(animation)
+  }, [])
+
   return (
     <main className="min-h-screen bg-white relative">
       <Header />
       
+      {/* Pro Tip Notification Banner */}
+      <div className="bg-green-50 border-y border-green-100 overflow-hidden relative">
+        <div 
+          className="flex whitespace-nowrap py-2"
+          style={{ transform: `translateX(${proTipPosition}%)` }}
+        >
+          {/* Repeat the message three times to ensure continuous flow */}
+          {[0, 1, 2].map((index) => (
+            <div key={index} className="flex items-center gap-2 px-4 min-w-full">
+              <span className="text-xl">💡</span>
+              <span className="font-semibold text-green-800">Pro Tip:</span>
+              <span className="text-green-700">
+                Invest more in Financial Assets compared to Non-Financial Assets towards retirement to generate recurring income
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Hero Section */}
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
         <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4">
