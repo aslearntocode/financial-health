@@ -14,7 +14,7 @@ import ReturnComparisonBox from "@/components/ReturnComparisonBox"
 export default function Home() {
   const [activeSection, setActiveSection] = useState('distribution') // 'distribution' or 'offer'
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0)
-  const [proTipPosition, setProTipPosition] = useState(0)
+  const [proTipPosition, setProTipPosition] = useState(100)
 
   const testimonials = [
     {
@@ -77,8 +77,12 @@ export default function Home() {
   useEffect(() => {
     const animateProTip = () => {
       setProTipPosition((prev) => {
-        if (prev <= -33.33) return 0 // Reset when one message completes
-        return prev - 0.02 // Slower speed
+        if (prev <= -100) {
+          // When message exits screen, reset to start position
+          return 100
+        }
+        // Continue moving left
+        return prev - 0.2
       })
     }
 
@@ -91,21 +95,17 @@ export default function Home() {
       <Header />
       
       {/* Pro Tip Notification Banner */}
-      <div className="bg-green-50 border-y border-green-100 overflow-hidden relative">
+      <div className="bg-green-50 border-y border-green-100 overflow-hidden relative h-10">
         <div 
-          className="flex whitespace-nowrap py-2"
+          className="absolute py-2 px-4 whitespace-nowrap transition-transform duration-100"
           style={{ transform: `translateX(${proTipPosition}%)` }}
         >
-          {/* Repeat the message three times to ensure continuous flow */}
-          {[0, 1, 2].map((index) => (
-            <div key={index} className="flex items-center gap-2 px-4 min-w-full">
-              <span className="text-xl">💡</span>
-              <span className="font-semibold text-green-800">Pro Tip:</span>
-              <span className="text-green-700">
-                Invest more in Financial Assets compared to Non-Financial Assets towards retirement to generate recurring income
-              </span>
-            </div>
-          ))}
+          <div className="flex items-center gap-2">
+            <span className="text-xl flex-shrink-0">💡</span>
+            <span className="text-green-700 text-sm md:text-base">
+              Invest more in Financial Assets compared to Non-Financial Assets towards retirement to generate passive income
+            </span>
+          </div>
         </div>
       </div>
 
