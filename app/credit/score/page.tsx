@@ -1,7 +1,7 @@
 'use client'
 
 import Header from "@/components/Header"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from 'next/navigation'
 import { auth } from '@/lib/firebase'
@@ -9,12 +9,22 @@ import { auth } from '@/lib/firebase'
 export default function CreditScorePage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
-    name: '',
+    name: auth.currentUser?.displayName || '',
     dob: '',
     pan: '',
     incomeRange: '',
     acceptTerms: false
   })
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user?.displayName) {
+        setFormData(prev => ({...prev, name: user.displayName || ''}))
+      }
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   const handlePageClick = () => {
     const user = auth.currentUser
