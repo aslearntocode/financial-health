@@ -50,9 +50,12 @@ export default function CreditScorePage() {
       
       <div className="flex-1 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8 font-serif">
-            Understand Your Credit Score
-          </h1>
+          <h3 className="text-2xl font-bold text-blue-700 mb-8 font-serif text-center">
+            We fetch your latest Credit Report from Licensed Credit Bureaus which are governed by RBI.
+            <br/>
+            We then give you a Personalized AI-powered summary of your credit report.
+            <br/>
+          </h3>
           
           <div className="flex flex-col md:flex-row gap-8">
             {/* Form Section */}
@@ -135,12 +138,32 @@ export default function CreditScorePage() {
                   </button>
                 </form>
               </div>
+              
+              {/* New Audio Section */}
+              <div className="mt-6 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-6 shadow-lg">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <h3 className="text-xl font-semibold text-white mb-3">
+                    Understand and Improve Your Credit Score
+                  </h3>
+                  <audio 
+                    controls 
+                    className="w-full focus:outline-none"
+                    controlsList="nodownload"
+                  >
+                    <source src="/credit_analysis.mp3" type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                  <p className="text-sm text-white/80 mt-2">
+                    Listen to our expert analysis on understanding your credit score and learn how to further improve it. Timely action can help you get better loan offers.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Credit Report Image Section */}
             <div className="md:w-1/2">
               <div className="bg-white rounded-xl p-8 shadow-lg h-full">
-                <h2 className="text-2xl font-bold mb-6">Sample Credit Report</h2>
+                <h2 className="text-2xl font-bold mb-6">Your Summarized Credit Report</h2>
                 <div className="relative h-[600px] w-full">
                   <Image
                     src="/sample-credit-report.jpg"
