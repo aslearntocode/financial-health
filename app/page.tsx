@@ -703,7 +703,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a 
-                    href="https://instagram.com/fhainvcredit" 
+                    href="https://www.instagram.com/financialhealthai?igsh=bXgweHE5cmRwZmx2&utm_source=qr" 
                     target="_blank" 
                     rel="noopener noreferrer" 
                     className="text-gray-400 hover:text-white flex items-center gap-2"

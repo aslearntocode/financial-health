@@ -71,7 +71,7 @@ export default function Footer() {
               </li>
               <li>
                 <a 
-                  href="https://instagram.com/financialhealth" 
+                  href="https://www.instagram.com/financialhealthai?igsh=bXgweHE5cmRwZmx2&utm_source=qr" 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="hover:text-white/90 flex items-center gap-2"
