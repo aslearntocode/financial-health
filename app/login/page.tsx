@@ -13,7 +13,13 @@ export default function LoginPage() {
     try {
       const provider = new GoogleAuthProvider()
       await signInWithPopup(auth, provider)
-      router.push('/investment')
+      
+      // Get redirect path from URL if it exists
+      const params = new URLSearchParams(window.location.search)
+      const redirectPath = params.get('redirect')
+      
+      // Redirect to the specified path if it exists, otherwise go to investment
+      router.push(redirectPath || '/investment')
     } catch (error) {
       setError('Failed to sign in. Please try again.')
       console.error('Sign in error:', error)

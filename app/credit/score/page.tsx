@@ -19,7 +19,7 @@ export default function CreditScorePage() {
   const handlePageClick = () => {
     const user = auth.currentUser
     if (!user) {
-      const currentPath = window.location.pathname
+      const currentPath = '/credit/score'
       router.push(`/login?redirect=${currentPath}`)
       return
     }
