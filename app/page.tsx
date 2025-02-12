@@ -112,7 +112,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
         <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4">
-          Your Complete Financial Health Solution
+          Your AI-Powered Personalized Financial Health Solution
         </h1>
         <p className="text-base md:text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
           Get personalized recommendations for both investments and credit decisions. 
