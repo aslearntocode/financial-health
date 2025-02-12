@@ -207,9 +207,9 @@ export default function Header() {
               <Link href="/credit" className="text-white hover:text-white/90 py-2 text-lg">
                 Credit
               </Link>
-              <Link href="/learning-center" className="text-white hover:text-white/90 py-2 text-lg">
+              {/* <Link href="/learning-center" className="text-white hover:text-white/90 py-2 text-lg">
                 Financial Planning Guide
-              </Link>
+              </Link> */}
             </div>
           </div>
 
@@ -259,9 +259,9 @@ export default function Header() {
               <Link href="/credit" className="text-white hover:text-white/90 px-2 py-1">
                 Credit
               </Link>
-              <Link href="/learning-center" className="text-white hover:text-white/90 px-2 py-1">
+              {/* <Link href="/learning-center" className="text-white hover:text-white/90 px-2 py-1">
                 Financial Planning Guide
-              </Link>
+              </Link> */}
             </div>
           </div>
         )}

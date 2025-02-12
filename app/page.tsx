@@ -9,7 +9,7 @@ import { User } from "firebase/auth"
 import { ProfileDropdown } from "@/components/ProfileDropdown"
 import Testimonials from "@/components/Testimonials"
 import Header from "@/components/Header"
-import ReturnComparisonBox from "@/components/ReturnComparisonBox"
+// import ReturnComparisonBox from "@/components/ReturnComparisonBox"
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('distribution') // 'distribution' or 'offer'
@@ -112,62 +112,101 @@ export default function Home() {
       {/* Hero Section */}
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
         <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4">
-          Your Financial Blueprint, Tailored Just for You
+          Your Complete Financial Health Solution
         </h1>
         <p className="text-base md:text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
-          Answer a few simple questions, and we&apos;ll recommend a fund distribution strategy that 
-          aligns with your goals, risk tolerance, and financial situation.
+          Get personalized recommendations for both investments and credit decisions. 
+          We help you build wealth and manage debt intelligently.
         </p>
-        <div className="flex justify-center">
+        <div className="flex justify-center gap-4 flex-wrap">
           <Link
             href="/investment"
-            className="inline-block rounded-md bg-black px-6 py-2.5 text-base font-semibold text-white hover:bg-gray-800"
+            className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-blue-700"
           >
-            Click Here to Get Your Personalized Fund Distribution Strategy
+            Get Funds Allocation Strategy <br />
+            with Recommendations
+          </Link>
+          <Link
+            href="/credit"
+            className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
+          >
+            Understand Your Credit Score <br />
+            and Apply for Loans
           </Link>
         </div>
       </div>
 
-      {/* Add ReturnComparisonBox here */}
-      <ReturnComparisonBox />
-
-      {/* Steps Container */}
-      <div className="max-w-5xl mx-auto mt-12 mb-20">
-        <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-10">How It Works - It's Just 3 Easy Steps</h2>
+      {/* Steps Container - Update to show both services */}
+      <div className="max-w-6xl mx-auto mt-12 mb-20">
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-10">Our Services</h2>
         
-        <div className="grid md:grid-cols-3 gap-6 px-4">
-          {/* Step 1 */}
-          <div className="bg-blue-50 rounded-xl p-6 text-center transition-transform hover:scale-105 duration-300">
-            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-white text-xl font-bold">1</span>
+        <div className="grid md:grid-cols-2 gap-8 px-4">
+          {/* Investment Service */}
+          <div className="bg-blue-50 rounded-xl p-8">
+            <h3 className="text-2xl font-bold text-blue-600 mb-6">Investment Planning</h3>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-bold">1</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Fill Investment Form</h4>
+                  <p className="text-gray-600">Share your financial goals and risk appetite by filling our investment form</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-bold">2</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Get Portfolio Strategy</h4>
+                  <p className="text-gray-600">Receive AI-driven fund distribution recommendations to allocate your funds optimally</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-bold">3</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Start Investing</h4>
+                  <p className="text-gray-600">Get specific investment recommendations and begin your journey</p>
+                </div>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold text-blue-600 mb-3">Fill Investment Form</h3>
-            <p className="text-gray-600">
-              Complete the investment form to help us understand your financial health and goals
-            </p>
           </div>
 
-          {/* Step 2 */}
-          <div className="bg-blue-50 rounded-xl p-6 text-center transition-transform hover:scale-105 duration-300">
-            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-white text-xl font-bold">2</span>
+          {/* Credit Service */}
+          <div className="bg-green-50 rounded-xl p-8">
+            <h3 className="text-2xl font-bold text-green-600 mb-6">Credit Solutions</h3>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-bold">1</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Credit Score</h4>
+                  <p className="text-gray-600">Understand Your Credit Score through our AI generated personalized video</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-bold">2</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Get Recommendations</h4>
+                  <p className="text-gray-600">Receive personalized recommendations for score improvement</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-lg font-bold">3</span>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Apply for Loans</h4>
+                  <p className="text-gray-600">Apply for secured and unsecured loans with higher chances of approval</p>
+                </div>
+              </div>
             </div>
-            <h3 className="text-xl font-semibold text-blue-600 mb-3">Get Fund Distribution</h3>
-            <p className="text-gray-600">
-              Generate a pie chart showing optimal distribution of your investments across different financial instruments. 
-              Additionally, you get to see the risk and expected returns of the suggested portfolio.
-            </p>
-          </div>
-
-          {/* Step 3 */}
-          <div className="bg-blue-50 rounded-xl p-6 text-center transition-transform hover:scale-105 duration-300">
-            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-white text-xl font-bold">3</span>
-            </div>
-            <h3 className="text-xl font-semibold text-blue-600 mb-3">Start Your Journey</h3>
-            <p className="text-gray-600">
-              Get specific mutual funds and stocks recommendations to begin your wealth building journey
-            </p>
           </div>
         </div>
       </div>
@@ -285,38 +324,29 @@ export default function Home() {
                 &quot;We analyze your inputs with advanced AI to provide an actionable and easy-to-understand fund distribution plan.&quot;
               </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {/* Comprehensive Analysis Box */}
-                <div className="bg-white p-8 rounded-lg shadow-md">
-                  <h3 className="text-xl font-semibold mb-4">Comprehensive Analysis</h3>
-                  <p className="text-gray-600 mb-4">We consider various financial instruments, such as:</p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                {/* Investment Analysis Box */}
+                <div className="bg-white p-8 rounded-lg shadow-md col-span-2">
+                  <h3 className="text-xl font-semibold mb-4">Investment Analysis</h3>
+                  <p className="text-gray-600 mb-4">Comprehensive investment planning including:</p>
                   <ul className="text-gray-600 space-y-2">
-                    <li>• Savings: Emergency funds, short-term goals.</li>
-                    <li>• Investments: Stocks, bonds, mutual funds, ETFs.</li>
-                    <li>• Debt Management: Allocating funds to pay off high-interest debts efficiently.</li>
-                    <li>• Insurance & Retirement Planning: Ensuring long-term financial security.</li>
+                    <li>• Portfolio optimization and rebalancing</li>
+                    <li>• Mutual funds and stock recommendations</li>
+                    <li>• Risk assessment and management</li>
+                    <li>• Retirement planning strategies</li>
                   </ul>
                 </div>
 
-                {/* Actionable Insights Box */}
-                <div className="bg-white p-8 rounded-lg shadow-md">
-                  <h3 className="text-xl font-semibold mb-4">Actionable Insights</h3>
-                  <p className="text-gray-600 mb-4">
-                    We don&apos;t just give you numbers—we provide easy-to-understand AI generated recommendations. For example:
-                  </p>
+                {/* Credit Solutions Box */}
+                <div className="bg-white p-8 rounded-lg shadow-md col-span-2">
+                  <h3 className="text-xl font-semibold mb-4">Credit Solutions</h3>
+                  <p className="text-gray-600 mb-4">Smart credit management including:</p>
                   <ul className="text-gray-600 space-y-2">
-                    <li>• &quot;Invest 30% of your monthly savings into a balanced mutual fund portfolio.&quot;</li>
-                    <li>• &quot;Suggest the Mutual Funds, Stocks etc. based on your risk appetite.&quot;</li>
+                    <li>• Personal and business loan options</li>
+                    <li>• Credit card recommendations</li>
+                    <li>• Debt consolidation strategies</li>
+                    <li>• Credit score improvement tips</li>
                   </ul>
-                </div>
-
-                {/* Transparent and Dynamic Box */}
-                <div className="bg-white p-8 rounded-lg shadow-md">
-                  <h3 className="text-xl font-semibold mb-4">Transparent and Dynamic</h3>
-                  <p className="text-gray-600">
-                    Your plan isn&apos;t static. You can revisit and adjust it as your financial situation or goals change, 
-                    ensuring you always stay on track.
-                  </p>
                 </div>
               </div>
             </div>
@@ -679,7 +709,7 @@ export default function Home() {
                     className="text-gray-400 hover:text-white flex items-center gap-2"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
+                      <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.074-4.947c-.061-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
                     </svg>
                     Instagram
                   </a>
