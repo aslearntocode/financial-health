@@ -53,7 +53,7 @@ export default function CreditScorePage() {
           <h3 className="text-2xl font-bold text-blue-700 mb-8 font-serif text-center">
             We fetch your latest Credit Report from Licensed Credit Bureaus which are governed by RBI.
             <br/>
-            We then give you a Personalized AI-powered summary of your credit report.
+            We then give you a Personalized AI-powered Audio Summary of your credit report.
             <br/>
           </h3>
           
@@ -125,7 +125,8 @@ export default function CreditScorePage() {
                         onChange={(e) => setFormData({...formData, acceptTerms: e.target.checked})}
                       />
                       <span className="text-sm text-gray-700">
-                        I accept the terms and conditions
+                      By clicking submit below, 
+                      you consent FHAI Services Pvt Ltd to store and process the Personal Data submitted by you and the Bureau.
                       </span>
                     </label>
                   </div>
