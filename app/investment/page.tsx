@@ -19,6 +19,8 @@ import { User } from 'firebase/auth'
 import { supabase } from '@/app/lib/supabaseClient'
 import { testSupabaseConnection } from '@/lib/supabase-utils'
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
 interface InvestmentRecord {
   stocks: number
@@ -1073,10 +1075,71 @@ export default function InvestmentPage() {
     }
   };
 
+  // Add this new function to handle PDF generation
+  const generatePDF = async () => {
+    try {
+      // Get the dashboard content
+      const dashboardElement = document.getElementById('dashboard-content');
+      if (!dashboardElement) return;
+
+      // Create canvas from the dashboard element
+      const canvas = await html2canvas(dashboardElement, {
+        scale: 1.5, // Reduced from 2 to 1.5 for better fitting
+        useCORS: true,
+        logging: false
+      });
+
+      // Calculate dimensions
+      const imgWidth = 190; // Reduced from 210 to give more margins
+      const pageHeight = 297;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      // Create PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      // Add title with smaller font
+      pdf.setFontSize(14); // Reduced from 16
+      pdf.text('Investment Portfolio Dashboard', 105, 20, { align: 'center' });
+      
+      // Add date with smaller font
+      pdf.setFontSize(8); // Reduced from 10
+      pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 25, { align: 'center' });
+      
+      // Add the dashboard image - adjusted position
+      pdf.addImage(
+        canvas.toDataURL('image/png'),
+        'PNG',
+        10, // Left margin of 10mm
+        30, // Top margin adjusted
+        imgWidth,
+        imgHeight
+      );
+
+      // Save the PDF
+      pdf.save('investment-dashboard.pdf');
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setError('Failed to generate PDF');
+    }
+  };
+
   return (
     <div id="investment-page-container" className="min-h-screen bg-white">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        {/* Add Download PDF button */}
+        {showChart && chartData.allocation && chartData.allocation.length > 0 && (
+          <div className="mb-4">
+            <Button 
+              onClick={generatePDF}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Download PDF Report
+            </Button>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {/* Form Section */}
           <div className="bg-white rounded-lg shadow-lg p-8">
@@ -1235,8 +1298,8 @@ export default function InvestmentPage() {
             </form>
           </div>
 
-          {/* Chart Section */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
+          {/* Chart Section - Add id for PDF generation */}
+          <div id="dashboard-content" className="bg-white rounded-lg shadow-lg p-8">
             <h2 className="text-2xl font-bold mb-4">Your Investment Allocation</h2>
             {isLoading ? (
               <p>Calculating your allocation...</p>
