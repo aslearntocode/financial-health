@@ -41,7 +41,7 @@ export const PieChart: React.FC<PieChartProps> = ({ data }) => {
         fill="white"
         textAnchor="middle"
         dominantBaseline="central"
-        className="text-lg font-semibold"
+        className="text-sm md:text-lg font-semibold"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>

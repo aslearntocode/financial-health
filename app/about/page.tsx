@@ -22,12 +22,23 @@ export default function AboutPage() {
       <div className="max-w-4xl mx-auto px-4 py-12 -mt-20 bg-white rounded-lg shadow-lg">
         <div className="prose prose-lg max-w-none">
           <p className="lead">
-            Our mission is simple: to empower individuals like you to make informed, confident decisions about your financial future. In a world where investment choices can often feel overwhelming, we are here to guide you toward the right financial instruments—without human biases, and with the help of cutting-edge AI technology.
+            Our mission is simple: to empower individuals like you to make informed, confident decisions about your financial future be it Investments or Credit.
+            In a world where investment choices can often feel overwhelming, we are here to guide you toward the right financial instruments—without human biases, and with the help of cutting-edge AI technology.
+            For Credit, there are a lot of options available but how do you get the best possible product at the lowest possible interest rate is where our AI comes in. We help you undersatnd and improve your credit score and then confidently apply for a loan product that you are most likely to get approved for.
+
           </p>
 
           <h2 className="text-2xl font-bold mt-8 mb-4">The Problem</h2>
-          <p>
-            Navigating the world of investments is complex. From choosing the right mix of mutual funds, bonds, stocks, and alternative assets, to ensuring your portfolio aligns with your long-term goals, the sheer number of options and advice out there can be paralyzing. Worse, human biases often cloud investment decisions, whether they come from emotions, subjective experiences, or outdated strategies.
+          <p className="mb-6"> 
+            Navigating the world of investmentsand credit is complex. <br /> </p>
+          <p className="mb-6"> 
+            From choosing the right mix of mutual funds, bonds, stocks, and alternative assets, to ensuring your portfolio aligns with your long-term goals, the sheer number of options and advice out there can be paralyzing. 
+            Worse, human biases often cloud investment decisions, whether they come from emotions, subjective experiences, or outdated strategies.
+            <br /> </p>
+            <p className="mb-6">
+            Similarly, for Credit, there are a lot of options available and an easy access to loans at high interest rates can put you in a lot of debt.
+            You might be able to get a loan at 12% interest rate but if you have a credit score of 700, you can get a loan at 8% interest rate. This would mean a significant difference in the total amount you pay over the loan period.
+            <br />
           </p>
 
           <h2 className="text-2xl font-bold mt-8 mb-4">Our Solution</h2>
@@ -40,10 +51,12 @@ export default function AboutPage() {
 
           <h2 className="text-2xl font-bold mt-8 mb-4">Why We Do It</h2>
           <p>
-            Our founder, Abhinav, knows firsthand the challenges of investing. An IIT Bombay graduate with an MBA from UNC Chapel Hill, Abhinav has spent over 15 years in the banking industry, working with some of the world's leading financial institutions. Despite this extensive experience, he struggled with making the right investment choices, often feeling overwhelmed by conflicting advice and constantly evolving markets.
+            Our founder, Abhinav, knows firsthand the challenges of handling the money and planning for the future. An IIT Bombay graduate with an MBA from UNC Chapel Hill, Abhinav has spent over 15 years in the banking industry, working with some of the world's leading financial institutions. 
+            Despite this extensive experience, he struggled with taking the right financial decisions, often feeling overwhelmed by conflicting advice and constantly evolving markets.
           </p>
           <p>
-            This personal struggle inspired the creation of financialhealth.co.in —a platform where data, not bias, drives investment recommendations. With AI, we aim to remove the guesswork and empower you to make better financial decisions, based on your individual needs and circumstances.
+            This personal struggle inspired the creation of financialhealth.co.in —a platform where data, not bias, drives recommendations. 
+            With AI, we aim to remove the guesswork and empower you to make better financial decisions, based on your individual needs and circumstances.
           </p>
 
           <h2 className="text-2xl font-bold mt-8 mb-4">Our Approach</h2>

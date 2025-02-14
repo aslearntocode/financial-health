@@ -1078,39 +1078,72 @@ export default function InvestmentPage() {
   // Add this new function to handle PDF generation
   const generatePDF = async () => {
     try {
-      // Get the dashboard content
       const dashboardElement = document.getElementById('dashboard-content');
       if (!dashboardElement) return;
 
-      // Create canvas from the dashboard element
+      // Get device width
+      const deviceWidth = window.innerWidth;
+      
+      // Adjust scale based on device width
+      const scale = deviceWidth < 768 ? 1 : 1.5; // Lower scale for mobile devices
+      
+      // Create canvas with adjusted settings
       const canvas = await html2canvas(dashboardElement, {
-        scale: 1.5, // Reduced from 2 to 1.5 for better fitting
+        scale: scale,
         useCORS: true,
-        logging: false
+        logging: false,
+        // Add width limitation for mobile
+        width: Math.min(dashboardElement.offsetWidth, 1200), // Limit max width
+        windowWidth: Math.min(window.innerWidth, 1200), // Limit window width
+        // Improve text rendering
+        letterRendering: true,
+        // Improve quality
+        imageTimeout: 0,
+        removeContainer: true,
+        backgroundColor: '#ffffff'
       });
 
-      // Calculate dimensions
-      const imgWidth = 190; // Reduced from 210 to give more margins
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      // Calculate dimensions while maintaining aspect ratio
+      const pageWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const margins = 20; // Margins in mm
       
-      // Create PDF
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      // Calculate available space
+      const availableWidth = pageWidth - (margins * 2);
+      const availableHeight = pageHeight - (margins * 2);
       
-      // Add title with smaller font
-      pdf.setFontSize(14); // Reduced from 16
-      pdf.text('Investment Portfolio Dashboard', 105, 20, { align: 'center' });
+      // Calculate image dimensions maintaining aspect ratio
+      let imgWidth = availableWidth;
+      let imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      // Add date with smaller font
-      pdf.setFontSize(8); // Reduced from 10
-      pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 105, 25, { align: 'center' });
+      // If image height exceeds available height, scale down
+      if (imgHeight > availableHeight) {
+        imgHeight = availableHeight;
+        imgWidth = (canvas.width * imgHeight) / canvas.height;
+      }
       
-      // Add the dashboard image - adjusted position
+      // Create PDF with proper orientation
+      const orientation = imgHeight > imgWidth ? 'p' : 'l';
+      const pdf = new jsPDF(orientation, 'mm', 'a4');
+      
+      // Add title
+      pdf.setFontSize(14);
+      pdf.text('Investment Portfolio Dashboard', pageWidth / 2, margins, { align: 'center' });
+      
+      // Add date
+      pdf.setFontSize(8);
+      pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, pageWidth / 2, margins + 5, { align: 'center' });
+      
+      // Calculate center position
+      const xPos = (pageWidth - imgWidth) / 2;
+      const yPos = margins + 10; // Position after title and date
+      
+      // Add the image
       pdf.addImage(
         canvas.toDataURL('image/png'),
         'PNG',
-        10, // Left margin of 10mm
-        30, // Top margin adjusted
+        xPos,
+        yPos,
         imgWidth,
         imgHeight
       );
