@@ -1095,8 +1095,6 @@ export default function InvestmentPage() {
         // Add width limitation for mobile
         width: Math.min(dashboardElement.offsetWidth, 1200), // Limit max width
         windowWidth: Math.min(window.innerWidth, 1200), // Limit window width
-        // Improve text rendering
-        letterRendering: true,
         // Improve quality
         imageTimeout: 0,
         removeContainer: true,
