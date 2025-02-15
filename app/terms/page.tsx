@@ -11,7 +11,7 @@ export default function TermsAndConditions() {
 
           <p className="mb-6">
             These Terms and Conditions ("Terms") govern your access to and use of the services 
-            provided by THAI Services Pvt. Ltd. ("we," "our," or "us"), including investment 
+            provided by FHAI Services Pvt. Ltd. ("we," "our," or "us"), including investment 
             recommendations and credit bureau report retrieval. By using our services, you agree to 
             comply with these Terms. If you do not agree, please do not use our services.
           </p>

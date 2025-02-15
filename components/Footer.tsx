@@ -59,7 +59,7 @@ export default function Footer() {
                   YouTube
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a 
                   href="https://twitter.com/financialhealth" 
                   target="_blank" 
@@ -71,7 +71,7 @@ export default function Footer() {
                   </svg>
                   Twitter
                 </a>
-              </li>
+              </li> */}
               <li>
                 <a 
                   href="https://www.instagram.com/financialhealthai?igsh=bXgweHE5cmRwZmx2&utm_source=qr" 
