@@ -6,6 +6,8 @@ import { User } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
+import { ChevronDownIcon } from '@heroicons/react/24/solid'
 
 interface ProfileDropdownProps {
   user: User
@@ -25,13 +27,21 @@ export function ProfileDropdown({ user }: ProfileDropdownProps) {
 
   return (
     <Menu as="div" className="relative inline-block text-left z-[100]">
-      <Menu.Button className="flex items-center space-x-2 text-white hover:text-white/90">
-        <img
-          src={user.photoURL || '/default-avatar.png'}
-          alt="Profile"
-          className="w-8 h-8 rounded-full"
-        />
-        <span>{user.displayName || 'User'}</span>
+      <Menu.Button className="flex items-center text-black">
+        {user?.photoURL ? (
+          <Image
+            src={user.photoURL}
+            alt="Profile"
+            width={32}
+            height={32}
+            className="rounded-full"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+            <span className="text-black">{user?.email?.[0].toUpperCase()}</span>
+          </div>
+        )}
+        <ChevronDownIcon className="ml-1 h-4 w-4 text-black" aria-hidden="true" />
       </Menu.Button>
 
       <Transition

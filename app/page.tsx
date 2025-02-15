@@ -81,12 +81,13 @@ export default function Home() {
           // When message exits screen, reset to start position
           return 100
         }
-        // Continue moving left
-        return prev - 0.2
+        // Increase speed by 20% (from -0.06 to -0.072)
+        return prev - 0.072
       })
     }
 
-    const animation = setInterval(animateProTip, 16) // ~60fps
+    // Decrease interval by 20% (from 40 to 32) for faster animation
+    const animation = setInterval(animateProTip, 32)
     return () => clearInterval(animation)
   }, [])
 
@@ -97,13 +98,13 @@ export default function Home() {
       {/* Pro Tip Notification Banner */}
       <div className="bg-green-50 border-y border-green-100 overflow-hidden relative h-10">
         <div 
-          className="absolute py-2 px-4 whitespace-nowrap transition-transform duration-200"
+          className="absolute py-2 px-4 whitespace-nowrap transition-all duration-1000 ease-linear"
           style={{ transform: `translateX(${proTipPosition}%)` }}
         >
           <div className="flex items-center gap-2">
             <span className="text-xl flex-shrink-0">💡</span>
             <span className="text-green-700 text-sm md:text-base font-bold">
-              If you are planning to take a loan then do check loan options against your Mutual Funds or Fixed Deposits as they are offered at much lower interest rates
+              If you are planning to take a loan then do check loan options against your Mutual Funds (LAMF) or Fixed Deposits (LAFD) as they are offered at much lower interest rates
             </span>
           </div>
         </div>
@@ -662,13 +663,16 @@ export default function Home() {
                 <li><Link href="/about" className="text-gray-400 hover:text-white">About Us</Link></li>
                 <li><Link href="/careers" className="text-gray-400 hover:text-white">Careers</Link></li>
                 <li><Link href="/press" className="text-gray-400 hover:text-white">Press</Link></li>
+                <li><Link href="/terms-and-conditions" className="text-gray-400 hover:text-white">Terms & Conditions</Link></li>
+                <li><Link href="/privacy-policy" className="text-gray-400 hover:text-white">Privacy Policy</Link></li>
+                {/* <li><Link href="/refund-policy" className="text-gray-400 hover:text-white">Refund Policy</Link></li> */}
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Resources</h3>
               <ul className="space-y-2">
                 <li><Link href="/faq" className="text-gray-400 hover:text-white">FAQ</Link></li>
-                <li><Link href="/blog" className="text-gray-400 hover:text-white">Blog</Link></li>
+                {/* <li><Link href="/blog" className="text-gray-400 hover:text-white">Blog</Link></li> */}
                 <li><Link href="/learning-center" className="text-gray-400 hover:text-white">Learning Center</Link></li>
               </ul>
             </div>

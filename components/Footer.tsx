@@ -30,9 +30,9 @@ export default function Footer() {
               <li>
                 <Link href="/faq" className="hover:text-white/90">FAQ</Link>
               </li>
-              <li>
+              {/* <li>
                 <Link href="/blog" className="hover:text-white/90">Blog</Link>
-              </li>
+              </li> */}
               <li>
                 <Link href="/guides" className="hover:text-white/90">Investment Guides</Link>
               </li>

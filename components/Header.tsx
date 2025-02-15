@@ -141,22 +141,23 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-gradient-to-r from-blue-600 to-blue-700 w-full overflow-x-hidden">
+    <header className="bg-white w-full overflow-x-hidden border-b border-gray-200">
       <nav className="max-w-7xl mx-auto px-1 sm:px-2 lg:px-2">
         <div className="flex justify-between h-16 items-center w-full">
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <Image 
-                src="/BlueLogo.png" 
+                src="/Logo_Blue_Green.jpeg" 
                 alt="Brand Logo" 
-                height={64} 
-                width={64} 
-                className="mr-4" 
+                height={144} 
+                width={144} 
+                className="h-36 w-auto" 
+                priority
               />
             </Link>
             
             <button
-              className="md:hidden p-2 text-white"
+              className="md:hidden p-2 text-black"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <svg
@@ -177,20 +178,20 @@ export default function Header() {
             </button>
 
             <div className="hidden md:flex items-center space-x-8 ml-8">
-              <Link href="/" className="text-white hover:text-white/90 py-2 text-lg">
+              <Link href="/" className="text-black hover:text-gray-700 py-2 text-lg">
                 Home
               </Link>
-              <Link href="/about" className="text-white hover:text-white/90 py-2 text-lg">
+              <Link href="/about" className="text-black hover:text-gray-700 py-2 text-lg">
                 About Us
               </Link>
-              <Link href="/investment" className="text-white hover:text-white/90 py-2 text-lg">
+              <Link href="/investment" className="text-black hover:text-gray-700 py-2 text-lg">
                 Investments
               </Link>
               {hasRecommendationAccess && (
                 <Button
                   variant="ghost"
                   onClick={handleMutualFundsDashboard}
-                  className="text-white text-2xl hover:bg-transparent hover:text-white/90 px-0 text-lg"
+                  className="text-black text-lg hover:bg-transparent hover:text-gray-700 px-0"
                 >
                   MF Dashboard
                 </Button>
@@ -199,12 +200,12 @@ export default function Header() {
                 <Button
                   variant="ghost"
                   onClick={handleStocksDashboard}
-                  className="text-white text-2xl hover:bg-transparent hover:text-white/90 px-0 text-lg"
+                  className="text-black text-lg hover:bg-transparent hover:text-gray-700 px-0"
                 >
                   Stocks Dashboard
                 </Button>
               )}
-              <Link href="/credit" className="text-white hover:text-white/90 py-2 text-lg">
+              <Link href="/credit" className="text-black hover:text-gray-700 py-2 text-lg">
                 Credit
               </Link>
               {/* <Link href="/learning-center" className="text-white hover:text-white/90 py-2 text-lg">
@@ -218,7 +219,7 @@ export default function Header() {
               <ProfileDropdown user={user} />
             ) : (
               <Link href="/login">
-                <button className="text-white hover:text-white/90 whitespace-nowrap">
+                <button className="text-black hover:text-gray-700 whitespace-nowrap">
                   Log in
                 </button>
               </Link>
@@ -227,22 +228,22 @@ export default function Header() {
         </div>
 
         {isMenuOpen && (
-          <div className="md:hidden py-2 w-full bg-gradient-to-r from-blue-600 to-blue-700">
+          <div className="md:hidden py-2 w-full bg-white">
             <div className="flex flex-col space-y-2">
-              <Link href="/" className="text-white hover:text-white/90 px-2 py-1">
+              <Link href="/" className="text-black hover:text-gray-700 px-2 py-1">
                 Home
               </Link>
-              <Link href="/about" className="text-white hover:text-white/90 px-2 py-1">
+              <Link href="/about" className="text-black hover:text-gray-700 px-2 py-1">
                 About Us
               </Link>
-              <Link href="/investment" className="text-white hover:text-white/90 px-2 py-1">
+              <Link href="/investment" className="text-black hover:text-gray-700 px-2 py-1">
                 Investments
               </Link>
               {hasRecommendationAccess && (
                 <Button
                   variant="ghost"
                   onClick={handleMutualFundsDashboard}
-                  className="text-white hover:text-white/90"
+                  className="text-black hover:text-gray-700"
                 >
                   MF Dashboard
                 </Button>
@@ -251,12 +252,12 @@ export default function Header() {
                 <Button
                   variant="ghost"
                   onClick={handleStocksDashboard}
-                  className="text-white hover:text-white/90"
+                  className="text-black hover:text-gray-700"
                 >
                   Stocks Dashboard
                 </Button>
               )}
-              <Link href="/credit" className="text-white hover:text-white/90 px-2 py-1">
+              <Link href="/credit" className="text-black hover:text-gray-700 px-2 py-1">
                 Credit
               </Link>
               {/* <Link href="/learning-center" className="text-white hover:text-white/90 px-2 py-1">
