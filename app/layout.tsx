@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import Header from '@/components/Header'
 import { Analytics } from "@vercel/analytics/react"
+import Footer from "@/components/Footer"
 
 export const metadata: Metadata = {
   title: 'Financial Health',
@@ -33,6 +34,7 @@ export default function RootLayout({
       <head />
       <body>
         {children}
+        <Footer />
         <Analytics />
       </body>
     </html>

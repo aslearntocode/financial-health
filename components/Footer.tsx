@@ -18,7 +18,10 @@ export default function Footer() {
                 <Link href="/careers" className="hover:text-white/90">Careers</Link>
               </li>
               <li>
-                <Link href="/press" className="hover:text-white/90">Press</Link>
+                <Link href="/privacy" className="hover:text-white/90">Privacy Policy</Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-white/90">Terms & Conditions</Link>
               </li>
             </ul>
           </div>
