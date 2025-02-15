@@ -97,13 +97,13 @@ export default function Home() {
       {/* Pro Tip Notification Banner */}
       <div className="bg-green-50 border-y border-green-100 overflow-hidden relative h-10">
         <div 
-          className="absolute py-2 px-4 whitespace-nowrap transition-transform duration-100"
+          className="absolute py-2 px-4 whitespace-nowrap transition-transform duration-200"
           style={{ transform: `translateX(${proTipPosition}%)` }}
         >
           <div className="flex items-center gap-2">
             <span className="text-xl flex-shrink-0">💡</span>
-            <span className="text-green-700 text-sm md:text-base">
-              Invest more in Financial Assets compared to Non-Financial Assets towards retirement to generate passive income
+            <span className="text-green-700 text-sm md:text-base font-bold">
+              If you are planning to take a loan then do check loan options against your Mutual Funds or Fixed Deposits as they are offered at much lower interest rates
             </span>
           </div>
         </div>
