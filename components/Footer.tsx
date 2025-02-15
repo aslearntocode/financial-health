@@ -113,7 +113,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 mt-12 pt-8 text-center">
-          <p>&copy; {new Date().getFullYear()} Investment Platform. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Financial Health Platform. All rights reserved.</p>
         </div>
       </div>
     </footer>
