@@ -24,20 +24,20 @@ export default function AboutPage() {
           <p className="lead">
             Our mission is simple: to empower individuals like you to make informed, confident decisions about your financial future be it Investments or Credit.
             In a world where investment choices can often feel overwhelming, we are here to guide you toward the right financial instruments—without human biases, and with the help of cutting-edge AI technology.
-            For Credit, there are a lot of options available but how do you get the best possible product at the lowest possible interest rate is where our AI comes in. We help you undersatnd and improve your credit score and then confidently apply for a loan product that you are most likely to get approved for.
+            For Credit, there are a lot of options available but how do you get the best possible product at the lowest possible interest rate is where our AI comes in. We help you understand and improve your credit score and then confidently apply for a loan product that you are most likely to get approved for.
 
           </p>
 
           <h2 className="text-2xl font-bold mt-8 mb-4">The Problem</h2>
           <p className="mb-6"> 
-            Navigating the world of investmentsand credit is complex. <br /> </p>
+            Navigating the world of investments and credit is complex. <br /> </p>
           <p className="mb-6"> 
             From choosing the right mix of mutual funds, bonds, stocks, and alternative assets, to ensuring your portfolio aligns with your long-term goals, the sheer number of options and advice out there can be paralyzing. 
             Worse, human biases often cloud investment decisions, whether they come from emotions, subjective experiences, or outdated strategies.
             <br /> </p>
             <p className="mb-6">
             Similarly, for Credit, there are a lot of options available and an easy access to loans at high interest rates can put you in a lot of debt.
-            You might be able to get a loan at 12% interest rate but if you have a credit score of 700, you can get a loan at 8% interest rate. This would mean a significant difference in the total amount you pay over the loan period.
+            You might be able to get a loan at 12% interest rate but if you have a credit score of 750, you can get a loan at 8% interest rate. This would mean a significant difference in the total amount you pay over the loan period.
             <br />
           </p>
 
