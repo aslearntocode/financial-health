@@ -147,7 +147,7 @@ export default function Header() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <Image 
-                src="/Logo_Final.jpeg" 
+                src="/Logo_Final3.jpeg" 
                 alt="Brand Logo" 
                 height={144} 
                 width={144} 

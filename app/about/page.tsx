@@ -20,6 +20,15 @@ export default function AboutPage() {
 
       {/* Content Section */}
       <div className="max-w-4xl mx-auto px-4 py-12 -mt-20 bg-white rounded-lg shadow-lg">
+        {/* Audio Player */}
+        <div className="mb-8">
+          <h3 className="text-lg font-medium mb-2">Listen to Our Story</h3>
+          <audio controls className="w-full">
+            <source src="/AboutUs.mp3" type="audio/mpeg" />
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+
         <div className="prose prose-lg max-w-none">
           <p className="lead">
             Our mission is simple: to empower individuals like you to make informed, confident decisions about your financial future be it Investments or Credit.
@@ -52,7 +61,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold mt-8 mb-4">Why We Do It</h2>
           <p>
             Our founder, Abhinav, knows firsthand the challenges of handling the money and planning for the future. An IIT Bombay graduate with an MBA from UNC Chapel Hill, Abhinav has spent over 15 years in the banking industry, working with some of the world's leading financial institutions. 
-            Despite this extensive experience, he struggled with taking the right financial decisions, often feeling overwhelmed by conflicting advice and constantly evolving markets.
+            Despite this extensive experience, he struggled with taking the right financial decisions, often feeling overwhelmed by conflicting advice and constantly evolving markets and his own credit needs.
           </p>
           <p>
             This personal struggle inspired the creation of financialhealth.co.in —a platform where data, not bias, drives recommendations. 
@@ -77,7 +86,7 @@ export default function AboutPage() {
             At Financial Health, we believe that financial literacy and smart investing should be accessible to everyone, regardless of background or experience. Whether you're just starting your investment journey or looking to optimize an existing portfolio, we're here to guide you every step of the way.
           </p>
           <p className="font-medium text-lg mt-6">
-            Together, we can take the guesswork out of investing and build a secure, prosperous future.
+            Together, we can take the guesswork out of Finance and build a secure, prosperous future.
           </p>
         </div>
       </div>
