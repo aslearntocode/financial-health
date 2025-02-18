@@ -22,6 +22,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [hasRecommendationAccess, setHasRecommendationAccess] = useState(false)
   const [hasStockAccess, setHasStockAccess] = useState(false)
+  const [isInvestmentDropdownOpen, setIsInvestmentDropdownOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -184,27 +185,64 @@ export default function Header() {
               <Link href="/about" className="text-black hover:text-gray-700 py-2 text-lg">
                 About Us
               </Link>
-              <Link href="/investment" className="text-black hover:text-gray-700 py-2 text-lg">
-                Investments
-              </Link>
-              {hasRecommendationAccess && (
-                <Button
-                  variant="ghost"
-                  onClick={handleMutualFundsDashboard}
-                  className="text-black text-lg hover:bg-transparent hover:text-gray-700 px-0"
+              <div className="relative" style={{ zIndex: 50 }}>
+                <div className="flex items-center">
+                  <Link 
+                    href="/investment"
+                    className="text-black hover:text-gray-700 py-2 text-lg mr-1"
+                  >
+                    Investments
+                  </Link>
+                  <button 
+                    onClick={() => setIsInvestmentDropdownOpen(!isInvestmentDropdownOpen)}
+                    className="p-1"
+                  >
+                    <svg 
+                      width="24" 
+                      height="24" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      className={`transition-transform duration-200 ${isInvestmentDropdownOpen ? 'rotate-180' : ''}`}
+                    >
+                      <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+                <div 
+                  className={`
+                    fixed w-64 bg-white rounded-lg shadow-lg py-2
+                    ${isInvestmentDropdownOpen ? 'block' : 'hidden'}
+                  `}
+                  style={{
+                    zIndex: 1000,
+                    top: '4rem',
+                    left: '28rem'
+                  }}
                 >
-                  MF Dashboard
-                </Button>
-              )}
-              {hasStockAccess && (
-                <Button
-                  variant="ghost"
-                  onClick={handleStocksDashboard}
-                  className="text-black text-lg hover:bg-transparent hover:text-gray-700 px-0"
-                >
-                  Stocks Dashboard
-                </Button>
-              )}
+                  <Link 
+                    href="/investment" 
+                    className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                  >
+                    <span className="text-base">Investment Allocation</span>
+                  </Link>
+                  {Boolean(user) && Boolean(hasRecommendationAccess) && (
+                    <button
+                      onClick={handleMutualFundsDashboard}
+                      className="w-full flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                    >
+                      <span className="text-base">MF Dashboard</span>
+                    </button>
+                  )}
+                  {Boolean(user) && Boolean(hasStockAccess) && (
+                    <button
+                      onClick={handleStocksDashboard}
+                      className="w-full flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                    >
+                      <span className="text-base">Stocks Dashboard</span>
+                    </button>
+                  )}
+                </div>
+              </div>
               <Link href="/credit" className="text-black hover:text-gray-700 py-2 text-lg">
                 Credit
               </Link>
@@ -236,33 +274,51 @@ export default function Header() {
               <Link href="/about" className="text-black hover:text-gray-700 px-2 py-1">
                 About Us
               </Link>
-              <Link href="/investment" className="text-black hover:text-gray-700 px-2 py-1">
-                Investments
-              </Link>
-              {hasRecommendationAccess && (
-                <Button
-                  variant="ghost"
-                  onClick={handleMutualFundsDashboard}
-                  className="text-black hover:text-gray-700"
+              <div>
+                <button
+                  className="text-black hover:text-gray-700 px-2 py-1 w-full text-left flex items-center"
+                  onClick={() => setIsInvestmentDropdownOpen(!isInvestmentDropdownOpen)}
                 >
-                  MF Dashboard
-                </Button>
-              )}
-              {hasStockAccess && (
-                <Button
-                  variant="ghost"
-                  onClick={handleStocksDashboard}
-                  className="text-black hover:text-gray-700"
-                >
-                  Stocks Dashboard
-                </Button>
-              )}
+                  <span>Investments</span>
+                  <svg
+                    className="w-4 h-4 ml-1"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path d={isInvestmentDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
+                  </svg>
+                </button>
+                {isInvestmentDropdownOpen && (
+                  <div className="pl-4">
+                    <Link href="/investment" className="block px-2 py-1 text-black hover:text-gray-700">
+                      Investment Allocation
+                    </Link>
+                    {hasRecommendationAccess && (
+                      <button
+                        onClick={handleMutualFundsDashboard}
+                        className="w-full text-left px-2 py-1 text-black hover:text-gray-700"
+                      >
+                        MF Dashboard
+                      </button>
+                    )}
+                    {hasStockAccess && (
+                      <button
+                        onClick={handleStocksDashboard}
+                        className="w-full text-left px-2 py-1 text-black hover:text-gray-700"
+                      >
+                        Stocks Dashboard
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
               <Link href="/credit" className="text-black hover:text-gray-700 px-2 py-1">
                 Credit
               </Link>
-              {/* <Link href="/learning-center" className="text-white hover:text-white/90 px-2 py-1">
-                Financial Planning Guide
-              </Link> */}
             </div>
           </div>
         )}
