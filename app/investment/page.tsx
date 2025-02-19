@@ -1381,18 +1381,9 @@ export default function InvestmentPage() {
 
                   {/* Investment Options Grid */}
                   <div className="mt-8">
-                    <div className="mb-4 p-6 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg">
-                      <h3 className="text-lg font-semibold mb-3">Key Considerations:</h3>
-                      <ul className="list-disc pl-6 space-y-3 text-md">
-                        <li>Remember to have at least 5 multiples of your annual income as Life Cover. If you haven't done that then please buy Life Insurance that can give you the required life cover</li>
-                        <li>You should review your allocation every 3 months to check if market conditions have changed or your risk profile has changed</li>
-                        <li>Review your allocation irrespective of the time period in case there is a life altering event such as savings increase or decrease, getting married, having a kid etc.</li>
-                        <li>If you have any high interest debt, please pay it off first before investing</li>
-                      </ul>
-                    </div>
-
-                    <div className="text-center mb-4 p-4 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg text-sm">
-                      To get specific recommendations, click on the financial instruments below
+                    <div className="text-center mb-4 p-4 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg text-lg">
+                      To get specific recommendations, click on the financial instruments below 
+                      <br/>(we are currently live with Stocks and Mutual Funds)
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4">
