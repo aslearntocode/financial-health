@@ -262,7 +262,7 @@ export default function Header() {
               <div className="relative" style={{ zIndex: 50 }}>
                 <div className="flex items-center">
                   <Link 
-                    href="/credit"
+                    href="/credit/score"
                     className="text-black hover:text-gray-700 py-2 text-lg mr-1"
                   >
                     Credit
@@ -384,7 +384,9 @@ export default function Header() {
                   className="text-black hover:text-gray-700 px-2 py-1 w-full text-left flex items-center"
                   onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
                 >
-                  <span>Credit</span>
+                  <Link href="/credit/score" className="text-black hover:text-gray-700">
+                    Credit
+                  </Link>
                   <svg
                     className="w-4 h-4 ml-1"
                     fill="none"
@@ -400,11 +402,11 @@ export default function Header() {
                 {isCreditDropdownOpen && (
                   <div className="pl-4">
                     <Link href="/credit/score" className="block px-2 py-1 text-black hover:text-gray-700">
-                      Check Credit Score
+                      Generate Credit Score Video
                     </Link>
-                    {hasCreditReport && (
+                    {Boolean(user) && Boolean(hasCreditReport) && (
                       <Link href="/credit/score/report" className="block px-2 py-1 text-black hover:text-gray-700">
-                        View Credit Report
+                        View Credit Report Video
                       </Link>
                     )}
                   </div>

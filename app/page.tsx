@@ -128,7 +128,7 @@ export default function Home() {
             with Recommendations
           </Link>
           <Link
-            href="/credit"
+            href="/credit/score"
             className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
           >
             Understand Your Credit Score <br />
