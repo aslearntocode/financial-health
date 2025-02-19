@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Company</h3>
@@ -93,7 +93,7 @@ export default function Footer() {
             <h3 className="text-lg font-semibold">Contact Us</h3>
             <ul className="space-y-2">
               <li>
-                <a href="mailto:support@financialhealth.co.in" className="hover:text-white/90">
+                <a href="mailto:support@financialhealth.co.in" className="hover:text-white/90 break-words">
                   support@financialhealth.co.in
                 </a>
               </li>
