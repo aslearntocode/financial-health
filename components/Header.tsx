@@ -23,6 +23,8 @@ export default function Header() {
   const [hasRecommendationAccess, setHasRecommendationAccess] = useState(false)
   const [hasStockAccess, setHasStockAccess] = useState(false)
   const [isInvestmentDropdownOpen, setIsInvestmentDropdownOpen] = useState(false)
+  const [isCreditDropdownOpen, setIsCreditDropdownOpen] = useState(false)
+  const [hasCreditReport, setHasCreditReport] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -55,12 +57,26 @@ export default function Header() {
             console.error('Error checking stock access:', stockError)
           }
           setHasStockAccess(Boolean(stockData?.length))
+
+          // Check for credit report
+          const { data: creditData, error: creditError } = await supabaseClient
+            .from('credit_reports')
+            .select('id')
+            .eq('user_id', user.uid)
+            .order('created_at', { ascending: false })
+            .limit(1)
+
+          if (creditError) {
+            console.error('Error checking credit access:', creditError)
+          }
+          setHasCreditReport(Boolean(creditData?.length))
         } catch (err) {
           console.error('Error checking recommendations:', err)
         }
       } else {
         setHasRecommendationAccess(false)
         setHasStockAccess(false)
+        setHasCreditReport(false)
       }
     })
 
@@ -243,9 +259,56 @@ export default function Header() {
                   )}
                 </div>
               </div>
-              <Link href="/credit" className="text-black hover:text-gray-700 py-2 text-lg">
-                Credit
-              </Link>
+              <div className="relative" style={{ zIndex: 50 }}>
+                <div className="flex items-center">
+                  <Link 
+                    href="/credit"
+                    className="text-black hover:text-gray-700 py-2 text-lg mr-1"
+                  >
+                    Credit
+                  </Link>
+                  <button 
+                    onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
+                    className="p-1"
+                  >
+                    <svg 
+                      width="24" 
+                      height="24" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      className={`transition-transform duration-200 ${isCreditDropdownOpen ? 'rotate-180' : ''}`}
+                    >
+                      <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+                <div 
+                  className={`
+                    fixed w-64 bg-white rounded-lg shadow-lg py-2
+                    ${isCreditDropdownOpen ? 'block' : 'hidden'}
+                  `}
+                  style={{
+                    zIndex: 1000,
+                    top: '4rem',
+                    left: '36rem'
+                  }}
+                >
+                  <Link 
+                    href="/credit/score" 
+                    className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                  >
+                    <span className="text-base">Generate Credit Score Video</span>
+                  </Link>
+                  {Boolean(user) && Boolean(hasCreditReport) && (
+                    <Link
+                      href="/credit/score/report"
+                      className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                    >
+                      <span className="text-base">View Credit Report Video</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
               {/* <Link href="/learning-center" className="text-white hover:text-white/90 py-2 text-lg">
                 Financial Planning Guide
               </Link> */}
@@ -316,9 +379,37 @@ export default function Header() {
                   </div>
                 )}
               </div>
-              <Link href="/credit" className="text-black hover:text-gray-700 px-2 py-1">
-                Credit
-              </Link>
+              <div>
+                <button
+                  className="text-black hover:text-gray-700 px-2 py-1 w-full text-left flex items-center"
+                  onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
+                >
+                  <span>Credit</span>
+                  <svg
+                    className="w-4 h-4 ml-1"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path d={isCreditDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} />
+                  </svg>
+                </button>
+                {isCreditDropdownOpen && (
+                  <div className="pl-4">
+                    <Link href="/credit/score" className="block px-2 py-1 text-black hover:text-gray-700">
+                      Check Credit Score
+                    </Link>
+                    {hasCreditReport && (
+                      <Link href="/credit/score/report" className="block px-2 py-1 text-black hover:text-gray-700">
+                        View Credit Report
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
