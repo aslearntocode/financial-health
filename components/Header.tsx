@@ -157,6 +157,15 @@ export default function Header() {
     }
   }
 
+  // Add these handlers
+  const handleInvestmentMouseLeave = () => {
+    setIsInvestmentDropdownOpen(false)
+  }
+
+  const handleCreditMouseLeave = () => {
+    setIsCreditDropdownOpen(false)
+  }
+
   return (
     <header className="bg-white w-full overflow-x-hidden border-b border-gray-200">
       <nav className="max-w-7xl mx-auto px-1 sm:px-2 lg:px-2">
@@ -168,7 +177,7 @@ export default function Header() {
                 alt="Brand Logo" 
                 height={144} 
                 width={144} 
-                className="h-40 w-auto" 
+                className="h-16 w-auto" 
                 priority
               />
             </Link>
@@ -201,11 +210,12 @@ export default function Header() {
               <Link href="/about" className="text-black hover:text-gray-700 py-2 text-lg">
                 About Us
               </Link>
-              <div className="relative" style={{ zIndex: 50 }}>
+              <div className="relative" style={{ zIndex: 50 }} onMouseLeave={handleInvestmentMouseLeave}>
                 <div className="flex items-center">
                   <Link 
                     href="/investment"
                     className="text-black hover:text-gray-700 py-2 text-lg mr-1"
+                    onMouseEnter={() => setIsInvestmentDropdownOpen(true)}
                   >
                     Investments
                   </Link>
@@ -259,11 +269,12 @@ export default function Header() {
                   )}
                 </div>
               </div>
-              <div className="relative" style={{ zIndex: 50 }}>
+              <div className="relative" style={{ zIndex: 50 }} onMouseLeave={handleCreditMouseLeave}>
                 <div className="flex items-center">
                   <Link 
                     href="/credit"
                     className="text-black hover:text-gray-700 py-2 text-lg mr-1"
+                    onMouseEnter={() => setIsCreditDropdownOpen(true)}
                   >
                     Credit
                   </Link>
