@@ -107,46 +107,48 @@ export default function CreditScorePage() {
       // Format the date for API
       const formattedDate = new Date(formData.dob).toISOString().split('T')[0]
 
-      // Prepare the request payload
-      const requestPayload = {
+      // Prepare the request payload as URL parameters
+      const params = new URLSearchParams({
         pan: formData.pan.toUpperCase(),
         name: formData.name,
         dob: formattedDate,
         mobile: formData.mobile
-      }
+      })
 
-      // Log the payload for debugging
-      console.log('Sending request payload:', requestPayload)
+      console.log('Sending request with params:', params.toString())
 
-      // Call API to get report analysis - simple GET request
-      const analysisResponse = await fetch('https://172.210.82.112:5001/get-processed-report', {
+      // Updated API call to use GET with query parameters
+      const analysisResponse = await fetch(`http://172.210.82.112:5001/get-processed-report?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
-        }
+        },
+        mode: 'cors',
+        credentials: 'omit'
       })
 
-      // Log the raw response
-      console.log('Response status:', analysisResponse.status)
-      const responseText = await analysisResponse.text()
-      console.log('Raw response:', responseText)
+      if (!analysisResponse.ok) {
+        const errorText = await analysisResponse.text()
+        console.error('API Error:', {
+          status: analysisResponse.status,
+          statusText: analysisResponse.statusText,
+          body: errorText
+        })
+        throw new Error(`Request failed: ${analysisResponse.status} ${analysisResponse.statusText}`)
+      }
 
-      // Parse the response as JSON
-      const analysisData = responseText ? JSON.parse(responseText) : null
+      const analysisData = await analysisResponse.json()
+      console.log('Received analysis data:', analysisData)
 
       if (!analysisData) {
         throw new Error('No response data received')
       }
 
-      // Add debug logs to check the data structure
-      console.log('Analysis Data:', analysisData)
-
-      // Check if analysis exists and is a string before processing
       if (!analysisData.processed_report) {
         throw new Error('No processed report found in response')
       }
 
-      // Save to Supabase with the full processed report
+      // Save to Supabase
       const { data, error } = await supabase
         .from('credit_reports')
         .insert({
@@ -158,22 +160,22 @@ export default function CreditScorePage() {
           report_analysis: {
             processed_report: analysisData.processed_report
           },
-          report_generated_at: new Date().toISOString()
+          created_at: new Date().toISOString()
         })
         .select('*')
         .single()
 
       if (error) {
+        console.error('Supabase error:', error)
         throw new Error('Failed to save credit report')
       }
 
       if (data) {
-        localStorage.setItem('lastReportId', data.id)
         router.replace('/credit/score/report')
       }
     } catch (err) {
       console.error('Error submitting form:', err)
-      alert('An unexpected error occurred. Please try again.')
+      alert(err instanceof Error ? err.message : 'An error occurred while processing your request. Please try again.')
     } finally {
       submitButton.disabled = false
       submitButton.textContent = 'Send OTP'
