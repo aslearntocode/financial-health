@@ -145,35 +145,101 @@ interface ProcessedReport {
 export default function CreditScoreReportPage() {
   const router = useRouter()
   const [reportData, setReportData] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchReport = async () => {
-      const lastReportId = localStorage.getItem('lastReportId')
-      if (!lastReportId) return
+      try {
+        setIsLoading(true)
+        setError(null)
+        
+        const lastReportId = localStorage.getItem('lastReportId')
+        if (!lastReportId) {
+          setError('No report ID found')
+          setIsLoading(false)
+          return
+        }
 
-      const { data, error } = await supabase
-        .from('credit_reports')
-        .select('*')
-        .eq('id', lastReportId)
-        .single()
+        const { data, error: supabaseError } = await supabase
+          .from('credit_reports')
+          .select('*')
+          .eq('id', lastReportId)
+          .single()
 
-      if (data && !error) {
-        console.log('Fetched data:', data); // Debug log
+        if (supabaseError) {
+          console.error('Error fetching data:', supabaseError)
+          setError('Failed to fetch report data')
+          setIsLoading(false)
+          return
+        }
+
+        if (!data) {
+          setError('No report found')
+          setIsLoading(false)
+          return
+        }
+
+        console.log('Fetched data:', data) // Debug log
         setReportData(data.report_analysis.processed_report)
-      } else {
-        console.error('Error fetching data:', error); // Debug log
+        setIsLoading(false)
+      } catch (err) {
+        console.error('Error in fetchReport:', err)
+        setError('An unexpected error occurred')
+        setIsLoading(false)
       }
     }
 
     fetchReport()
   }, [])
 
-  if (!reportData) {
+  // Loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+            <button 
+              onClick={() => router.push('/credit/score')}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // No data state
+  if (!reportData) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-gray-500 mb-4">No report data available</p>
+            <button 
+              onClick={() => router.push('/credit/score')}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     )
