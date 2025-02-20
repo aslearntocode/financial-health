@@ -119,7 +119,7 @@ export default function CreditScorePage() {
       console.log('Sending request payload:', requestPayload)
 
       // Call API to get report analysis - simple GET request
-      const analysisResponse = await fetch('http://172.210.82.112:5001/get-processed-report', {
+      const analysisResponse = await fetch('https://172.210.82.112:5001/get-processed-report', {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
