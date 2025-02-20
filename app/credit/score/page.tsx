@@ -7,8 +7,59 @@ import { useRouter } from 'next/navigation'
 import { auth } from '@/lib/firebase'
 import { supabase } from "@/lib/supabase"
 
+const CreditScoreMeter = ({ score }: { score: number }) => {
+  // Calculate needle rotation (0 to 180 degrees)
+  const rotation = Math.min(Math.max((score / 900) * 180, 0), 180);
+
+  return (
+    <div className="relative w-full max-w-[400px] mx-auto mt-8">
+      {/* Semi-circular meter background */}
+      <div className="relative h-[200px] overflow-hidden">
+        <div className="absolute w-[400px] h-[400px] bottom-0 rounded-[50%] bg-gradient-to-r from-red-500 via-yellow-400 to-green-500"></div>
+        
+        {/* Score ranges */}
+        <div className="absolute bottom-0 w-full h-[200px]">
+          <div className="relative w-full h-full">
+            <span className="absolute left-[5%] bottom-8 text-sm font-semibold">Very Low</span>
+            <span className="absolute left-[25%] bottom-8 text-sm font-semibold">Low</span>
+            <span className="absolute left-[45%] bottom-8 text-sm font-semibold">Average</span>
+            <span className="absolute left-[65%] bottom-8 text-sm font-semibold">Above Avg</span>
+            <span className="absolute right-[5%] bottom-8 text-sm font-semibold">Excellent</span>
+          </div>
+        </div>
+
+        {/* Needle */}
+        <div 
+          className="absolute bottom-0 left-1/2 w-1 h-[160px] bg-black origin-bottom transform -translate-x-1/2"
+          style={{ transform: `rotate(${rotation}deg)` }}
+        >
+          <div className="absolute -top-2 left-1/2 w-4 h-4 bg-black rounded-full -translate-x-1/2"></div>
+        </div>
+
+        {/* Center point */}
+        <div className="absolute bottom-0 left-1/2 w-6 h-6 bg-white border-4 border-black rounded-full -translate-x-1/2 translate-y-1/2"></div>
+      </div>
+
+      {/* Score display */}
+      <div className="text-center mt-8">
+        <span className="text-4xl font-bold">{score}</span>
+        <span className="text-xl text-gray-600">/900</span>
+      </div>
+    </div>
+  );
+};
+
 export default function CreditScorePage() {
   const router = useRouter()
+  // Add state for structured data
+  const [structuredData, setStructuredData] = useState<{
+    score: number;
+    openAccounts: number;
+    closedAccounts: number;
+    writtenOffAccounts: any[];
+    overdueAccounts: any[];
+  } | null>(null);
+
   const [formData, setFormData] = useState({
     name: auth.currentUser?.displayName || '',
     dob: '',
@@ -30,7 +81,7 @@ export default function CreditScorePage() {
   const handlePageClick = () => {
     const user = auth.currentUser
     if (!user) {
-      const currentPath = '/credit/score'
+      const currentPath = encodeURIComponent('/credit/score')
       router.push(`/login?redirect=${currentPath}`)
       return
     }
@@ -39,26 +90,63 @@ export default function CreditScorePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    const form = e.target as HTMLFormElement
+    const submitButton = form.querySelector('button[type="submit"]') as HTMLButtonElement
+    
     const user = auth.currentUser
     if (!user) {
-      router.push('/login')
+      const currentPath = encodeURIComponent('/credit/score')
+      router.push(`/login?redirect=${currentPath}`)
       return
     }
 
     try {
-      // Get the Firebase ID token
-      const token = await user.getIdToken()
-      
-      // Set the auth token for Supabase
-      supabase.auth.setSession({
-        access_token: token,
-        refresh_token: '',
-      })
+      submitButton.disabled = true
+      submitButton.textContent = 'Processing...'
 
-      // Format the date to ISO string for Supabase
+      // Format the date for API
       const formattedDate = new Date(formData.dob).toISOString().split('T')[0]
 
-      // Insert the credit report data into Supabase
+      // Prepare the request payload
+      const requestPayload = {
+        pan: formData.pan.toUpperCase(),
+        name: formData.name,
+        dob: formattedDate,
+        mobile: formData.mobile
+      }
+
+      // Log the payload for debugging
+      console.log('Sending request payload:', requestPayload)
+
+      // Call API to get report analysis - simple GET request
+      const analysisResponse = await fetch('http://172.210.82.112:5001/get-processed-report', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+
+      // Log the raw response
+      console.log('Response status:', analysisResponse.status)
+      const responseText = await analysisResponse.text()
+      console.log('Raw response:', responseText)
+
+      // Parse the response as JSON
+      const analysisData = responseText ? JSON.parse(responseText) : null
+
+      if (!analysisData) {
+        throw new Error('No response data received')
+      }
+
+      // Add debug logs to check the data structure
+      console.log('Analysis Data:', analysisData)
+
+      // Check if analysis exists and is a string before processing
+      if (!analysisData.processed_report) {
+        throw new Error('No processed report found in response')
+      }
+
+      // Save to Supabase with the full processed report
       const { data, error } = await supabase
         .from('credit_reports')
         .insert({
@@ -67,23 +155,28 @@ export default function CreditScorePage() {
           dob: formattedDate,
           pan: formData.pan.toUpperCase(),
           mobile: formData.mobile,
+          report_analysis: {
+            processed_report: analysisData.processed_report
+          },
+          report_generated_at: new Date().toISOString()
         })
         .select('*')
         .single()
 
       if (error) {
-        console.error('Error saving credit report:', error.message)
-        alert('Failed to save credit report. Please try again.')
-        return
+        throw new Error('Failed to save credit report')
       }
 
-      // If successful, redirect to the report page
       if (data) {
-        router.push('/credit/score/report')
+        localStorage.setItem('lastReportId', data.id)
+        router.replace('/credit/score/report')
       }
     } catch (err) {
       console.error('Error submitting form:', err)
       alert('An unexpected error occurred. Please try again.')
+    } finally {
+      submitButton.disabled = false
+      submitButton.textContent = 'Send OTP'
     }
   }
 
