@@ -149,22 +149,25 @@ export default function CreditScoreReportPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchReport = async () => {
+    const fetchLatestReport = async () => {
       try {
         setIsLoading(true)
         setError(null)
-        
-        const lastReportId = localStorage.getItem('lastReportId')
-        if (!lastReportId) {
-          setError('No report ID found')
+
+        const user = auth.currentUser
+        if (!user) {
+          setError('Please login to view your report')
           setIsLoading(false)
           return
         }
 
+        // Fetch the latest report for the user
         const { data, error: supabaseError } = await supabase
           .from('credit_reports')
           .select('*')
-          .eq('id', lastReportId)
+          .eq('user_id', user.uid)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .single()
 
         if (supabaseError) {
@@ -180,17 +183,17 @@ export default function CreditScoreReportPage() {
           return
         }
 
-        console.log('Fetched data:', data) // Debug log
+        console.log('Fetched latest report:', data)
         setReportData(data.report_analysis.processed_report)
         setIsLoading(false)
       } catch (err) {
-        console.error('Error in fetchReport:', err)
+        console.error('Error in fetchLatestReport:', err)
         setError('An unexpected error occurred')
         setIsLoading(false)
       }
     }
 
-    fetchReport()
+    fetchLatestReport()
   }, [])
 
   // Loading state
@@ -199,7 +202,10 @@ export default function CreditScoreReportPage() {
       <div className="min-h-screen flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your credit report...</p>
+          </div>
         </div>
       </div>
     )
@@ -212,12 +218,19 @@ export default function CreditScoreReportPage() {
         <Header />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <p className="text-red-500 mb-4">{error}</p>
+            <p className="text-red-500 text-xl mb-4">{error}</p>
+            <p className="text-gray-600 mb-6">
+              {error === 'No report found' 
+                ? 'Please generate a new credit report to view the details.'
+                : 'Please try again or generate a new report.'}
+            </p>
             <button 
               onClick={() => router.push('/credit/score')}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
-              Go Back
+              {error === 'Please login to view your report' 
+                ? 'Go to Login' 
+                : 'Generate New Report'}
             </button>
           </div>
         </div>
@@ -235,9 +248,9 @@ export default function CreditScoreReportPage() {
             <p className="text-gray-500 mb-4">No report data available</p>
             <button 
               onClick={() => router.push('/credit/score')}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
-              Go Back
+              Generate New Report
             </button>
           </div>
         </div>
