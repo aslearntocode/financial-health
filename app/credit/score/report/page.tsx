@@ -319,7 +319,7 @@ export default function CreditScoreReportPage() {
                       <div key={lender} className="bg-white rounded-lg p-4 shadow">
                         <p className="font-semibold text-green-700">{lender}</p>
                         <div className="space-y-1">
-                          {lenderAccounts.map((accountType, index) => (
+                          {lenderAccounts.map((accountType: string, index: number) => (
                             <p key={index} className="text-green-600">
                               {accountType}
                             </p>
