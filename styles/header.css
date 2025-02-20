@@ -1,0 +1,41 @@
+@media screen and (max-width: 768px) {
+  header {
+    position: relative;
+    min-height: 64px;
+  }
+
+  nav {
+    position: static !important;
+  }
+
+  .md\:hidden.py-2 {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: 1rem;
+  }
+
+  /* Keep logo and login at top */
+  .flex.justify-between.h-16 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    z-index: 1000;
+    padding: 0 1rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  /* Adjust spacing for fixed header */
+  .md\:hidden.py-2 .flex.flex-col.space-y-2 {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+    space-y-0 !important;
+  }
+} 
