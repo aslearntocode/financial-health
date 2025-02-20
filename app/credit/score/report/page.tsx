@@ -44,7 +44,7 @@ const CreditScoreMeter = ({ score }: { score: number }) => {
         <div className="absolute w-full h-full">
           <svg width="100%" height="100%" viewBox="0 0 400 250">
             <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y1="0%">
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" style={{ stopColor: '#FF4B4B' }} />
                 <stop offset="33%" style={{ stopColor: '#FFA500' }} />
                 <stop offset="66%" style={{ stopColor: '#90EE90' }} />
