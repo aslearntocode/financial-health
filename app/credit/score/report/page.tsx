@@ -23,6 +23,17 @@ interface CreditReport {
   }[];
 }
 
+interface FullDetails {
+  creditguarantor: string;
+  accountstatus: string;
+  accounttype?: string;
+}
+
+interface MatchingBlock {
+  account_type?: string;
+  full_details: FullDetails;
+}
+
 const CreditScoreMeter = ({ score }: { score: number }) => {
   // Calculate needle rotation for a 180-degree arc (-90 to 90 degrees)
   // For score 300 out of 900, it should be in the "Poor" range
@@ -261,14 +272,14 @@ export default function CreditScoreReportPage() {
                   {Object.entries(reportData.active_loans_by_lender || {}).map(([lender, count]) => {
                     // Find the matching block for this lender to get account type
                     const lenderAccounts = reportData.matching_blocks
-                      .filter(block => 
+                      .filter((block: MatchingBlock) => 
                         block.full_details.creditguarantor === lender && 
                         block.full_details.accountstatus === 'Active'
                       )
-                      .map(block => {
+                      .map((block: MatchingBlock) => {
                         // Map common account types to more readable formats
                         const accountType = (block.account_type || '').toLowerCase();
-                        const fullDetails = block.full_details || {};
+                        const fullDetails = block.full_details;
                         
                         // Log the data for debugging
                         console.log('Account data:', {
@@ -282,8 +293,7 @@ export default function CreditScoreReportPage() {
                         if (accountType.includes('auto') || accountType.includes('car')) return 'Auto Loan';
                         if (accountType.includes('personal')) return 'Personal Loan';
                         if (accountType.includes('consumer')) return 'Consumer Loan';
-                        if (accountType.includes('credit card') || accountType.includes('Credit card')) {
-                          // Check if it's a secured credit card
+                        if (accountType.includes('credit card') || accountType.includes('secured credit card')) {
                           return accountType.includes('secured') ? 'Secured Credit Card' : 'Credit Card';
                         }
                         if (accountType.includes('business')) return 'Business Loan';
@@ -291,21 +301,17 @@ export default function CreditScoreReportPage() {
                         
                         // Additional checks for specific banks
                         if (lender === 'IDFC FIRST BANK LIMITED' || lender === 'SBM BANK INDIA LIMITED') {
-                          // Check account details for credit cards
                           if (fullDetails.accounttype?.toLowerCase().includes('credit card')) {
                             return 'Credit Card';
                           }
-                          // Check for secured credit cards
                           if (fullDetails.accounttype?.toLowerCase().includes('secured')) {
                             return 'Secured Credit Card';
                           }
-                          // Check for auto loans
                           if (fullDetails.accounttype?.toLowerCase().includes('auto')) {
                             return 'Auto Loan';
                           }
                         }
 
-                        // If no specific type is found, try to get it from account_type or fullDetails
                         return block.account_type || fullDetails.accounttype || 'Unknown Account Type';
                       });
 
