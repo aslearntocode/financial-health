@@ -117,14 +117,12 @@ export default function CreditScorePage() {
 
       console.log('Sending request with params:', params.toString())
 
-      // Updated API call to use GET with query parameters
-      const analysisResponse = await fetch(`http://172.210.82.112:5001/get-processed-report?${params.toString()}`, {
+      // Use the Next.js API route instead of calling the external API directly
+      const analysisResponse = await fetch(`/api/credit-report?${params.toString()}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
-        },
-        mode: 'cors',
-        credentials: 'omit'
+        }
       })
 
       if (!analysisResponse.ok) {
