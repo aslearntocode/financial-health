@@ -34,6 +34,11 @@ interface MatchingBlock {
   full_details: FullDetails;
 }
 
+interface MatchingBlockWithAmounts extends MatchingBlock {
+  overdue_amount: number;
+  write_off_amount: number;
+}
+
 const CreditScoreMeter = ({ score }: { score: number }) => {
   // Calculate needle rotation for a 180-degree arc (-90 to 90 degrees)
   // For score 300 out of 900, it should be in the "Poor" range
@@ -332,15 +337,15 @@ export default function CreditScoreReportPage() {
               </div>
 
               {/* Overdue and Written Off Accounts Section */}
-              {(reportData.matching_blocks || []).some(block => 
+              {(reportData.matching_blocks || []).some((block: MatchingBlockWithAmounts) => 
                 block.overdue_amount > 0 || block.write_off_amount > 0
               ) && (
                 <div className="bg-red-50 rounded-xl shadow-lg p-6">
                   <h2 className="text-xl font-semibold mb-4 text-red-800">Overdue & Written Off Accounts</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {reportData.matching_blocks
-                      .filter(block => block.overdue_amount > 0 || block.write_off_amount > 0)
-                      .map((block, index) => (
+                      .filter((block: MatchingBlockWithAmounts) => block.overdue_amount > 0 || block.write_off_amount > 0)
+                      .map((block: MatchingBlockWithAmounts, index: number) => (
                         <div key={index} className="bg-white rounded-lg p-4 shadow">
                           <p className="font-semibold text-gray-800">{block.full_details.creditguarantor}</p>
                           <p className="text-sm text-gray-600">Account: {block.account_type}</p>
