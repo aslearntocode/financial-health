@@ -182,12 +182,12 @@ export default function Header() {
               </Link>
               <div className="relative" style={{ zIndex: 50 }}>
                 <div className="flex items-center">
-                  <Link 
-                    href="/investment"
+                  <button 
+                    onClick={() => setIsInvestmentDropdownOpen(!isInvestmentDropdownOpen)}
                     className="text-black hover:text-gray-700 py-2 text-lg mr-1"
                   >
                     Investments
-                  </Link>
+                  </button>
                   <button 
                     onClick={() => setIsInvestmentDropdownOpen(!isInvestmentDropdownOpen)}
                     className="p-1"
@@ -240,12 +240,12 @@ export default function Header() {
               </div>
               <div className="relative" style={{ zIndex: 50 }}>
                 <div className="flex items-center">
-                  <Link 
-                    href="/credit/score"
+                  <button 
+                    onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
                     className="text-black hover:text-gray-700 py-2 text-lg mr-1"
                   >
                     Credit
-                  </Link>
+                  </button>
                   <button 
                     onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
                     className="p-1"
