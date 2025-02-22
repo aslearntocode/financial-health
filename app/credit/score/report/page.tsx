@@ -147,6 +147,7 @@ export default function CreditScoreReportPage() {
   const [reportData, setReportData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchLatestReport = async () => {
@@ -195,6 +196,15 @@ export default function CreditScoreReportPage() {
 
     fetchLatestReport()
   }, [])
+
+  useEffect(() => {
+    // Construct the URL with any necessary parameters
+    const audioUrl = `/api/credit-audio?${new URLSearchParams({
+      // Add any required parameters here
+      // For example: reportId: reportData.id
+    })}`
+    setAudioUrl(audioUrl)
+  }, [/* dependencies */])
 
   // Loading state
   if (isLoading) {
@@ -300,15 +310,15 @@ export default function CreditScoreReportPage() {
                     Listen to your personalized credit report summary narrated in clear, simple terms:
                   </p>
                   
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <audio 
-                      controls 
-                      className="w-full focus:outline-none"
-                      src="/credit_summary.mp3"
-                    >
-                      Your browser does not support the audio element.
-                    </audio>
-                  </div>
+                  {audioUrl && (
+                    <div className="my-4">
+                      <h3 className="text-lg font-semibold mb-2">Audio Summary</h3>
+                      <audio controls className="w-full">
+                        <source src={audioUrl} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                      </audio>
+                    </div>
+                  )}
 
                   <div className="flex items-start space-x-3 mt-4 bg-blue-100 rounded-lg p-4">
                     <svg 
