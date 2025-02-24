@@ -2,10 +2,89 @@
 
 import { useAuth } from '@/context/AuthContext'
 import Header from '@/components/Header'
+import Script from 'next/script'
 
 export default function EquityIntro() {
+    // Define structured data for the article
+    const articleStructuredData = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "Understand Credit Card Interest Calculation",
+      "description": "Understanding how credit card interest is calculated is crucial for managing your finances effectively. Learn about APR, daily periodic rates, and how to avoid high interest charges.",
+      "author": {
+        "@type": "Organization",
+        "name": "Financial Health"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Financial Health",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://financialhealth.co.in/Logo_Final3.jpeg"
+        }
+      },
+      "datePublished": "2025-02-24", // Add actual publication date
+      "dateModified": "2025-02-24", // Add actual last modified date
+      "image": "https://financialhealth.co.in/InterestCalc.png",
+      "articleSection": "Credit Cards",
+      "url": "https://financialhealth.co.in/learning-center/credit-cards/interest-calculation",
+      "timeRequired": "15 min read",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://financialhealth.co.in/learning-center/credit-cards/interest-calculation"
+      }
+    }
+
+    // Define structured data for the credit card comparison table
+    const creditCardComparisonData = {
+      "@context": "https://schema.org",
+      "@type": "Table",
+      "about": "Credit Card Comparison",
+      "mainEntity": [
+        {
+          "@type": "FinancialProduct",
+          "name": "Regalia Credit Card",
+          "brand": "HDFC Bank",
+          "annualPercentageRate": {
+            "@type": "QuantitativeValue",
+            "minValue": 36,
+            "maxValue": 42,
+            "unitText": "PERCENT_PER_ANNUM"
+          },
+          "feesAndCommissionsSpecification": "₹2,500 annual fee",
+          "description": "4X rewards on travel & dining, Airport lounge access, Milestone benefits up to ₹12,000"
+        },
+        {
+          "@type": "FinancialProduct",
+          "name": "Ace Credit Card",
+          "brand": "Axis Bank",
+          "annualPercentageRate": {
+            "@type": "QuantitativeValue",
+            "minValue": 37,
+            "maxValue": 42,
+            "unitText": "PERCENT_PER_ANNUM"
+          },
+          "feesAndCommissionsSpecification": "₹499 annual fee",
+          "description": "5% cashback on bill payments, 2% on other spends, Welcome benefits worth ₹5,000"
+        },
+        // Add other cards similarly...
+      ]
+    }
+
     return (
       <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+        {/* Add structured data scripts */}
+        <Script
+          id="article-structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleStructuredData) }}
+        />
+        <Script
+          id="comparison-structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(creditCardComparisonData) }}
+        />
+
         <Header />
         
         {/* Hero Section */}

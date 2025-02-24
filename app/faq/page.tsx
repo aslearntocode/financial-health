@@ -6,6 +6,22 @@ import { useState } from "react"
 export default function FAQPage() {
   const [openQuestion, setOpenQuestion] = useState<number | null>(null);
 
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How much life insurance coverage should I have?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You should have at least 5 multiples of your annual income as Life Cover. If you haven't secured this level of coverage yet, it's recommended to purchase Life Insurance that can provide the required protection for your family."
+        }
+      },
+      // Add more FAQ items...
+    ]
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
       <Header />

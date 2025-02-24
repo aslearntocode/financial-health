@@ -1,10 +1,47 @@
 'use client'
 
+import { useEffect } from 'react'
 import Header from '@/components/Header'
+import Script from 'next/script'
 
 function MutualFundsGuide() {
+  const articleStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Understanding Mutual Funds: A Beginner's Guide",
+    "description": "Learn the basics of mutual funds, how they work, and why they're a popular investment choice for both new and experienced investors.",
+    "author": {
+      "@type": "Organization",
+      "name": "Financial Health"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Financial Health",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://financialhealth.co.in/Logo_Final3.jpeg"
+      }
+    },
+    "datePublished": "2025-01-01", // Add actual publication date
+    "dateModified": "2025-02-21", // Add actual last modified date
+    "image": "https://financialhealth.co.in/images/mutual-funds-guide.jpg", // Add actual image URL
+    "articleSection": "Mutual Funds",
+    "url": "https://financialhealth.co.in/learning-center/mutual-funds/beginners-guide",
+    "timeRequired": "5 min read",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://financialhealth.co.in/learning-center/mutual-funds/beginners-guide"
+    }
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
+      <Script
+        id="article-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleStructuredData) }}
+      />
+
       <Header />
       
       <main className="flex-1 py-8">

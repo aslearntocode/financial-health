@@ -48,7 +48,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <a 
-                  href="https://youtube.com/@financialhealth" 
+                  href="https://www.youtube.com/@FHAI-InvCredit" 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="hover:text-white/90 flex items-center gap-2"
