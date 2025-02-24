@@ -104,11 +104,11 @@ const articles: Article[] = [
   },
   {
     id: '12',
-    title: 'Personal Loan Guide: Everything You Need to Know',
-    description: 'Learn about personal loans, interest rates, eligibility criteria, and how to apply successfully.',
+    title: 'Personal Loan: The Interest You Pay',
+    description: 'Learn how interest rate, tenure and loan amount impact the interest paid and principal repayment.',
     category: 'Personal Loans',
     readTime: '10 min read',
-    link: '/learning-center/personal-loans/guide'
+    link: '/learning-center/personal-loans/payment'
   },
   {
     id: '13',

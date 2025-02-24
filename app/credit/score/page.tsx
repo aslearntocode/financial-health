@@ -193,7 +193,11 @@ export default function CreditScorePage() {
             We fetch your latest Credit Report from Licensed Credit Bureaus which are governed by RBI.
             <br/>
             We then give you a Personalized AI-powered Audio Summary of your credit report.
-          </h3>
+            <br/>
+            </h3>
+            <br/>
+            <span style={{ fontSize: '0.875rem', fontStyle: 'italic' }}>We are currently working with Bureaus to get this live. For Now, you can see our sample report.</span>
+         
           
           <div className="flex flex-col md:flex-row gap-8">
             {/* Steps Section */}

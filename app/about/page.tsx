@@ -60,7 +60,7 @@ export default function AboutPage() {
 
           <h2 className="text-2xl font-bold mt-8 mb-4">Why We Do It</h2>
           <p>
-            Our founder, Abhinav, knows firsthand the challenges of handling the money and planning for the future. An IIT Bombay graduate with an MBA from UNC Chapel Hill, Abhinav has spent over 15 years in the banking industry, working with some of the world's leading financial institutions. 
+            Our founder knows firsthand the challenges of handling the money and planning for the future. An IIT Bombay graduate with an MBA from UNC Chapel Hill, he has spent over 15 years in the banking industry, working with some of the world's leading financial institutions. 
             Despite this extensive experience, he struggled with taking the right financial decisions, often feeling overwhelmed by conflicting advice and constantly evolving markets and his own credit needs.
           </p>
           <p>
