@@ -88,11 +88,11 @@ const articles: Article[] = [
   },
   {
     id: '10',
-    title: 'Credit Cards: How to Choose the Right One',
-    description: 'Learn about different types of credit cards, their benefits, and how to select the best one for your needs.',
+    title: 'Credit Cards: Understand Interest Calculation',
+    description: 'Learn how the banks calculate the interest on your credit card.',
     category: 'Credit Cards',
-    readTime: '8 min read',
-    link: '/learning-center/credit-cards/choosing'
+    readTime: '15 min read',
+    link: '/learning-center/credit-cards/interest-calculation'
   },
   {
     id: '11',
