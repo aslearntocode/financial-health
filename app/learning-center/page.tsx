@@ -85,11 +85,52 @@ const articles: Article[] = [
     category: 'Personal Finance',
     readTime: '15 min read',
     link: '/learning-center/personal-finance/sip'
+  },
+  {
+    id: '10',
+    title: 'Credit Cards: How to Choose the Right One',
+    description: 'Learn about different types of credit cards, their benefits, and how to select the best one for your needs.',
+    category: 'Credit Cards',
+    readTime: '8 min read',
+    link: '/learning-center/credit-cards/choosing'
+  },
+  {
+    id: '11',
+    title: 'Credit Card Rewards Explained',
+    description: 'Understanding credit card rewards programs, points, cashback, and how to maximize your benefits.',
+    category: 'Credit Cards',
+    readTime: '7 min read',
+    link: '/learning-center/credit-cards/rewards'
+  },
+  {
+    id: '12',
+    title: 'Personal Loan Guide: Everything You Need to Know',
+    description: 'Learn about personal loans, interest rates, eligibility criteria, and how to apply successfully.',
+    category: 'Personal Loans',
+    readTime: '10 min read',
+    link: '/learning-center/personal-loans/guide'
+  },
+  {
+    id: '13',
+    title: 'Auto Loans: Tips for First-Time Borrowers',
+    description: 'Understanding auto loans, comparing offers, and getting the best deal on your car financing.',
+    category: 'Auto Loans',
+    readTime: '6 min read',
+    link: '/learning-center/auto-loans/first-time'
+  },
+  {
+    id: '14',
+    title: 'Home Loan Basics: A Complete Guide',
+    description: 'Everything you need to know about home loans, mortgage types, and the application process.',
+    category: 'Home Loans',
+    readTime: '12 min read',
+    link: '/learning-center/home-loans/basics'
   }
 ]
 
 function LearningCenter() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   
   const categories = ['all', ...new Set(articles.map(article => article.category))]
   
@@ -97,51 +138,128 @@ function LearningCenter() {
     ? articles 
     : articles.filter(article => article.category === selectedCategory)
 
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category)
+    setIsMobileMenuOpen(false) // Close mobile menu after selection
+  }
+
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       
-      <main className="flex-1 py-8">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Learning Center</h1>
-          
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-3 mb-6">
-            {categories.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium ${
-                  selectedCategory === category
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </button>
-            ))}
+      <main className="flex-1 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Learning Center</h1>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Explore our comprehensive guides and articles to enhance your investment knowledge
+            </p>
           </div>
+          
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Mobile Category Menu Button */}
+            <div className="lg:hidden mb-4">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="flex items-center justify-between w-full px-4 py-3 bg-white rounded-lg shadow-sm"
+              >
+                <span className="text-gray-700 font-medium">
+                  {selectedCategory === 'all' ? 'All Categories' : selectedCategory}
+                </span>
+                <svg
+                  className={`w-5 h-5 transition-transform duration-200 ${isMobileMenuOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
 
-          {/* Articles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredArticles.map(article => (
-              <Link href={article.link} key={article.id}>
-                <div className="border rounded-lg p-6 hover:shadow-lg transition-shadow h-full flex flex-col">
-                  <div className="text-sm font-medium text-blue-600 mb-2">
-                    {article.category}
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3">
-                    {article.title}
-                  </h2>
-                  <p className="text-base text-gray-600 mb-4 flex-grow">
-                    {article.description}
-                  </p>
-                  <div className="text-sm text-gray-500">
-                    {article.readTime}
-                  </div>
+              {/* Mobile Category Menu Dropdown */}
+              {isMobileMenuOpen && (
+                <div className="absolute z-50 mt-2 w-[calc(100%-2rem)] bg-white rounded-lg shadow-lg py-2 border border-gray-100">
+                  {categories.map(category => (
+                    <button
+                      key={category}
+                      onClick={() => handleCategorySelect(category)}
+                      className={`
+                        w-full px-4 py-3 text-left transition-colors duration-200
+                        ${selectedCategory === category
+                          ? 'bg-blue-50 text-blue-600 font-medium'
+                          : 'text-gray-700 hover:bg-gray-50'
+                        }
+                      `}
+                    >
+                      {category === 'all' ? 'All Categories' : category}
+                    </button>
+                  ))}
                 </div>
-              </Link>
-            ))}
+              )}
+            </div>
+
+            {/* Desktop Category Sidebar */}
+            <div className="hidden lg:block lg:w-64 flex-shrink-0">
+              <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Categories</h2>
+                <div className="flex flex-col gap-2">
+                  {categories.map(category => (
+                    <button
+                      key={category}
+                      onClick={() => setSelectedCategory(category)}
+                      className={`
+                        px-4 py-3 rounded-lg text-left transition-all duration-200
+                        ${selectedCategory === category
+                          ? 'bg-blue-600 text-white shadow-md transform translate-x-2'
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                        }
+                        ${selectedCategory === category ? 'font-medium' : 'font-normal'}
+                      `}
+                    >
+                      {category === 'all' ? 'All Categories' : category}
+                      {selectedCategory === category && (
+                        <span className="float-right">→</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Articles Grid */}
+            <div className="flex-1">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {filteredArticles.map(article => (
+                  <Link href={article.link} key={article.id}>
+                    <div className="bg-white border rounded-xl p-6 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full flex flex-col">
+                      <div className="inline-block px-3 py-1 rounded-full text-sm font-medium text-blue-600 bg-blue-50 mb-4 self-start">
+                        {article.category}
+                      </div>
+                      <h2 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2">
+                        {article.title}
+                      </h2>
+                      <p className="text-base text-gray-600 mb-4 flex-grow line-clamp-3">
+                        {article.description}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500 flex items-center">
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {article.readTime}
+                        </span>
+                        <span className="text-blue-600 text-sm font-medium">Read more →</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </main>
