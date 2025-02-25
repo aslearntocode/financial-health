@@ -125,7 +125,16 @@ const articles: Article[] = [
     category: 'Home Loans',
     readTime: '12 min read',
     link: '/learning-center/home-loans/basics'
+  },
+  {
+    id: '15',
+    title: 'Why Having Too Many Credit Cards Is Not Recommended',
+    description: 'Learn about the hidden financial impacts of having multiple credit cards and best practices for managing credit wisely.',
+    category: 'Credit Cards',
+    readTime: '10 min read',
+    link: '/learning-center/credit-cards/number-of-cards'
   }
+
 ]
 
 function LearningCenter() {
