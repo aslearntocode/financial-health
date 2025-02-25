@@ -54,7 +54,7 @@ export default function EquityIntro(): JSX.Element {
         "name": "How do multiple credit cards affect my FOIR?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Multiple credit cards increase your total credit limit, which adds to your FOIR calculation. Banks typically consider 5% of your total credit limit as a monthly obligation, even if you don't use the full limit."
+          "text": "Multiple credit cards increase your total credit limit, which adds to your FOIR calculation. Banks typically consider 5% of your total credit limit or outstanding amount (whichever is higher) as a monthly obligation, even if you don't use the full limit."
         }
       }, {
         "@type": "Question",
@@ -192,7 +192,7 @@ export default function EquityIntro(): JSX.Element {
                   </div>
                   <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                     <h3 className="font-semibold text-lg mb-2">How do multiple credit cards affect my FOIR?</h3>
-                    <p className="text-gray-700">Multiple credit cards increase your total credit limit, which adds to your FOIR calculation. Banks typically consider 5% of your total credit limit as a monthly obligation, even if you don't use the full limit.</p>
+                    <p className="text-gray-700">Multiple credit cards increase your total credit limit, which adds to your FOIR calculation. Banks typically consider 5% of your total credit limit or outstanding amount (whichever is higher) as a monthly obligation, even if you don't use the full limit.</p>
                   </div>
                   <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                     <h3 className="font-semibold text-lg mb-2">What is a healthy FOIR percentage?</h3>
