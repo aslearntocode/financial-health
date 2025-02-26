@@ -133,6 +133,14 @@ const articles: Article[] = [
     category: 'Credit Cards',
     readTime: '10 min read',
     link: '/learning-center/credit-cards/number-of-cards'
+  },
+  {
+    id: '16',
+    title: 'Understanding Your Risk Profile',
+    description: 'Learn about lenders build risk scores for lending products such as Credit Cards, Peronal Loans, Home Loans etc. and how they affect your applications.',
+    category: 'Credit Cards',
+    readTime: '20 min read',
+    link: '/learning-center/credit-cards/risk-profile'
   }
 
 ]
