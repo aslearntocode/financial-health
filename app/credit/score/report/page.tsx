@@ -277,6 +277,39 @@ export default function CreditScoreReportPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       
+      {/* Add the floating dispute button - with correct data passing */}
+      <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[9999]">
+        <button 
+          onClick={() => {
+            // Store report data in localStorage before navigation
+            if (reportData) {
+              localStorage.setItem('creditReportData', JSON.stringify(reportData));
+            }
+            router.push('/credit/dispute');
+          }}
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg shadow-lg 
+            transition-all duration-200 flex items-center space-x-2 group
+            hover:shadow-xl active:scale-95 text-sm md:text-base whitespace-nowrap"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            className="h-5 w-5" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            stroke="currentColor"
+          >
+            <path 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              strokeWidth={2} 
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
+            />
+          </svg>
+          <span className="hidden md:inline">Found Inaccuracy in the Report - Dispute It Here</span>
+          <span className="md:hidden">Inaccurate - Dispute It Here</span>
+        </button>
+      </div>
+
       <div className="flex-1 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <h1 className="text-2xl font-bold text-center mb-12">Your Credit Report Summary</h1>
