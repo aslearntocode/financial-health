@@ -48,67 +48,107 @@ export default function DisputePage() {
   const [reportData, setReportData] = useState<any>(null)
 
   useEffect(() => {
-    const reportDataStr = localStorage.getItem('creditReportData');
-    if (!reportDataStr) {
-      router.push('/credit/score/report');
-      return;
-    }
+    const checkExistingDisputes = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        router.push('/login');
+        return;
+      }
 
-    try {
-      const data = JSON.parse(reportDataStr);
-      setReportData(data);
-      console.log('Full report data:', data);
+      // Get Firebase ID token and set it for Supabase
+      const idToken = await user.getIdToken();
+      supabase.auth.setSession({
+        access_token: idToken,
+        refresh_token: '',
+      });
 
-      // Get accounts from matching_blocks
-      const matchingBlocks: MatchingBlock[] = data.matching_blocks || [];
-      
-      // Get additional active accounts from active_loans_by_lender
-      const additionalActiveAccounts = Object.entries(data.active_loans_by_lender || {})
-        .filter(([lender]) => {
-          // Only add lenders that aren't already in matching_blocks
-          return !matchingBlocks.some(block => 
-            block.full_details.creditguarantor === lender
-          );
-        })
-        .map(([lender]) => ({
-          account_type: 'Active Loan',
-          full_details: {
-            accountstatus: 'Active',
-            creditguarantor: lender,
-          },
-          overdue_amount: 0,
-          write_off_amount: 0,
-          current_balance: 0
-        }));
+      // Check for existing disputes
+      const { data: existingDisputes, error } = await supabase
+        .from('disputes')
+        .select('id')
+        .eq('user_id', user.uid)
+        .limit(1);
 
-      // Combine both sources
-      const allAccounts = [...matchingBlocks, ...additionalActiveAccounts];
-      console.log('Combined accounts:', allAccounts);
+      if (error) {
+        console.error('Error checking disputes:', error);
+        return;
+      }
 
-      // Categorize all accounts
-      const categorizedAccounts = {
-        active: allAccounts.filter(block => {
-          const status = block.full_details?.accountstatus?.toLowerCase() || '';
-          return status.includes('active') || status === 'current' || status.includes('open');
-        }),
-        closed: allAccounts.filter(block => {
-          const status = block.full_details?.accountstatus?.toLowerCase() || '';
-          return status.includes('closed') || status.includes('settled');
-        }),
-        overdue: allAccounts.filter(block => 
-          block.overdue_amount > 0
-        ),
-        writtenOff: allAccounts.filter(block => 
-          block.write_off_amount > 0
-        )
-      };
+      if (existingDisputes && existingDisputes.length > 0) {
+        toast.error('You already have an active dispute. Please wait for it to be resolved.');
+        router.push('/credit/disputes');
+        return;
+      }
 
-      console.log('Categorized accounts:', categorizedAccounts);
-      setAccounts(categorizedAccounts);
-    } catch (error) {
-      console.error('Error parsing report data:', error);
-      router.push('/credit/score/report');
-    }
+      // Continue with loading report data if no existing disputes
+      loadReportData();
+    };
+
+    const loadReportData = () => {
+      const reportDataStr = localStorage.getItem('creditReportData');
+      if (!reportDataStr) {
+        router.push('/credit/score/report');
+        return;
+      }
+
+      try {
+        const data = JSON.parse(reportDataStr);
+        setReportData(data);
+        console.log('Full report data:', data);
+
+        // Get accounts from matching_blocks
+        const matchingBlocks: MatchingBlock[] = data.matching_blocks || [];
+        
+        // Get additional active accounts from active_loans_by_lender
+        const additionalActiveAccounts = Object.entries(data.active_loans_by_lender || {})
+          .filter(([lender]) => {
+            // Only add lenders that aren't already in matching_blocks
+            return !matchingBlocks.some(block => 
+              block.full_details.creditguarantor === lender
+            );
+          })
+          .map(([lender]) => ({
+            account_type: 'Active Loan',
+            full_details: {
+              accountstatus: 'Active',
+              creditguarantor: lender,
+            },
+            overdue_amount: 0,
+            write_off_amount: 0,
+            current_balance: 0
+          }));
+
+        // Combine both sources
+        const allAccounts = [...matchingBlocks, ...additionalActiveAccounts];
+        console.log('Combined accounts:', allAccounts);
+
+        // Categorize all accounts
+        const categorizedAccounts = {
+          active: allAccounts.filter(block => {
+            const status = block.full_details?.accountstatus?.toLowerCase() || '';
+            return status.includes('active') || status === 'current' || status.includes('open');
+          }),
+          closed: allAccounts.filter(block => {
+            const status = block.full_details?.accountstatus?.toLowerCase() || '';
+            return status.includes('closed') || status.includes('settled');
+          }),
+          overdue: allAccounts.filter(block => 
+            block.overdue_amount > 0
+          ),
+          writtenOff: allAccounts.filter(block => 
+            block.write_off_amount > 0
+          )
+        };
+
+        console.log('Categorized accounts:', categorizedAccounts);
+        setAccounts(categorizedAccounts);
+      } catch (error) {
+        console.error('Error parsing report data:', error);
+        router.push('/credit/score/report');
+      }
+    };
+
+    checkExistingDisputes();
   }, [router]);
 
   const handleAccountSelect = (accountId: string) => {
@@ -258,8 +298,8 @@ export default function DisputePage() {
       // Wait for 2 seconds to let user read the message
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Navigate back to credit report
-      router.push('/credit/score/report');
+      // Navigate to disputes list page instead of credit report
+      router.push('/credit/disputes');
       
     } catch (error) {
       console.error('Dispute submission error:', error);
