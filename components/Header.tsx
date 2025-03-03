@@ -25,6 +25,7 @@ export default function Header() {
   const [isInvestmentDropdownOpen, setIsInvestmentDropdownOpen] = useState(false)
   const [isCreditDropdownOpen, setIsCreditDropdownOpen] = useState(false)
   const [hasCreditReport, setHasCreditReport] = useState(false)
+  const [hasDisputes, setHasDisputes] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export default function Header() {
           }
           setHasStockAccess(Boolean(stockData?.length))
 
-          // Check for credit report
+          // First check for credit report
           const { data: creditData, error: creditError } = await supabaseClient
             .from('credit_reports')
             .select('id')
@@ -70,13 +71,29 @@ export default function Header() {
             console.error('Error checking credit access:', creditError)
           }
           setHasCreditReport(Boolean(creditData?.length))
+
+          // Check if user has any disputes in the disputes table
+          const { data: disputeData, error: disputeError } = await supabaseClient
+            .from('disputes')
+            .select('id')
+            .eq('user_id', user.uid)
+            .limit(1)
+
+          if (disputeError) {
+            console.error('Error checking disputes:', disputeError)
+          }
+          // Only show disputes link if user has submitted disputes before
+          setHasDisputes(Boolean(disputeData?.length))
+
         } catch (err) {
-          console.error('Error checking recommendations:', err)
+          console.error('Error checking user data:', err)
         }
       } else {
+        // Reset all states when user is not logged in
         setHasRecommendationAccess(false)
         setHasStockAccess(false)
         setHasCreditReport(false)
+        setHasDisputes(false)
       }
     })
 
@@ -286,6 +303,14 @@ export default function Header() {
                       <span className="text-base">View Credit Report Video</span>
                     </Link>
                   )}
+                  {Boolean(user) && Boolean(hasDisputes) && (
+                    <Link
+                      href="/credit/disputes"
+                      className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                    >
+                      <span className="text-base">Your Disputes</span>
+                    </Link>
+                  )}
                 </div>
               </div>
               <Link href="/learning-center" className="text-black hover:text-gray-700 py-2 text-lg">
@@ -385,6 +410,14 @@ export default function Header() {
                       className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
                     >
                       View Credit Report Video
+                    </Link>
+                  )}
+                  {Boolean(user) && Boolean(hasDisputes) && (
+                    <Link
+                      href="/credit/disputes"
+                      className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
+                    >
+                      Your Disputes
                     </Link>
                   )}
                 </div>

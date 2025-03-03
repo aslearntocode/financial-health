@@ -154,23 +154,31 @@ export default function DisputePage() {
 
       // Prepare dispute accounts data
       const disputeAccounts: DisputeAccount[] = selectedAccounts.map(accountId => {
-        const [type, identifier] = accountId.split('-');
+        const [type, index] = accountId.split('-');
         
         // Find the account in the correct category
         let account;
-        if (type === 'active') {
-          account = accounts.active.find((a, index) => index.toString() === identifier || a.account_number === identifier);
-        } else if (type === 'closed') {
-          account = accounts.closed.find((a, index) => index.toString() === identifier || a.account_number === identifier);
-        } else if (type === 'overdue') {
-          account = accounts.overdue.find((a, index) => index.toString() === identifier || a.account_number === identifier);
-        } else if (type === 'writtenoff') {
-          account = accounts.writtenOff.find((a, index) => index.toString() === identifier || a.account_number === identifier);
+        switch (type) {
+          case 'active':
+            account = accounts.active[parseInt(index)];
+            break;
+          case 'closed':
+            account = accounts.closed[parseInt(index)];
+            break;
+          case 'overdue':
+            account = accounts.overdue[parseInt(index)];
+            break;
+          case 'writtenoff':
+            account = accounts.writtenOff[parseInt(index)];
+            break;
+          default:
+            console.error('Invalid account type:', type);
+            throw new Error(`Invalid account type: ${type}`);
         }
 
         if (!account) {
-          console.error('Account not found:', accountId);
-          throw new Error(`Account not found: ${accountId}`);
+          console.error('Account not found:', { accountId, type, index });
+          throw new Error(`Account not found for index ${index} in ${type} category`);
         }
 
         return {
@@ -285,7 +293,7 @@ export default function DisputePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {accounts.map((account, index) => (
             <div 
-              key={`${type}-${account.account_number || index}`}
+              key={`${type}-${index}`}
               className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 
                 hover:border-blue-500 hover:shadow-md transition-all duration-200"
             >
@@ -294,8 +302,8 @@ export default function DisputePage() {
                   type="checkbox"
                   className="mt-1.5 h-4 w-4 rounded border-gray-300 text-blue-600 
                     focus:ring-blue-500 transition duration-150 ease-in-out"
-                  checked={selectedAccounts.includes(`${type}-${account.account_number || index}`)}
-                  onChange={() => handleAccountSelect(`${type}-${account.account_number || index}`)}
+                  checked={selectedAccounts.includes(`${type}-${index}`)}
+                  onChange={() => handleAccountSelect(`${type}-${index}`)}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
