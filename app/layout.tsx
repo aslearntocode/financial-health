@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import Header from '@/components/Header'
 import { Analytics } from "@vercel/analytics/react"
 import Footer from "@/components/Footer"
+import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
   title: 'Financial Health',
@@ -36,6 +37,7 @@ export default function RootLayout({
         {children}
         <Footer />
         <Analytics />
+        <Toaster />
       </body>
     </html>
   )

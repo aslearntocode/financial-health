@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from "@/components/Header"
+import toast from 'react-hot-toast'
+import { supabase } from '@/lib/supabase'
+import { auth } from '@/lib/firebase'
 
 interface MatchingBlock {
   account_type?: string;
@@ -17,9 +20,20 @@ interface MatchingBlock {
   current_balance: number;
 }
 
+interface DisputeAccount {
+  lender: string;
+  accountType: string;
+  accountNumber?: string;
+  status: string;
+  currentBalance?: number;
+  overdueAmount?: number;
+  writeOffAmount?: number;
+}
+
 export default function DisputePage() {
   const router = useRouter()
   const [selectedAccounts, setSelectedAccounts] = useState<string[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [accounts, setAccounts] = useState<{
     active: MatchingBlock[];
     closed: MatchingBlock[];
@@ -31,6 +45,7 @@ export default function DisputePage() {
     overdue: [],
     writtenOff: []
   })
+  const [reportData, setReportData] = useState<any>(null)
 
   useEffect(() => {
     const reportDataStr = localStorage.getItem('creditReportData');
@@ -40,14 +55,15 @@ export default function DisputePage() {
     }
 
     try {
-      const reportData = JSON.parse(reportDataStr);
-      console.log('Full report data:', reportData);
+      const data = JSON.parse(reportDataStr);
+      setReportData(data);
+      console.log('Full report data:', data);
 
       // Get accounts from matching_blocks
-      const matchingBlocks: MatchingBlock[] = reportData.matching_blocks || [];
+      const matchingBlocks: MatchingBlock[] = data.matching_blocks || [];
       
       // Get additional active accounts from active_loans_by_lender
-      const additionalActiveAccounts = Object.entries(reportData.active_loans_by_lender || {})
+      const additionalActiveAccounts = Object.entries(data.active_loans_by_lender || {})
         .filter(([lender]) => {
           // Only add lenders that aren't already in matching_blocks
           return !matchingBlocks.some(block => 
@@ -104,8 +120,149 @@ export default function DisputePage() {
   };
 
   const handleSubmitDispute = async () => {
-    // Implement your dispute submission logic here
-    console.log('Selected accounts for dispute:', selectedAccounts);
+    try {
+      setIsSubmitting(true)
+
+      const user = auth.currentUser;
+      if (!user) {
+        toast.error('Please login to submit a dispute');
+        return;
+      }
+
+      // Get Firebase ID token
+      const idToken = await user.getIdToken();
+      
+      // Set the Authorization header for this request
+      supabase.auth.setSession({
+        access_token: idToken,
+        refresh_token: '',
+      });
+
+      // Get the credit report ID
+      const { data: reportData, error: reportError } = await supabase
+        .from('credit_reports')
+        .select('id')
+        .eq('user_id', user.uid)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (reportError) {
+        console.error('Error fetching report:', reportError);
+        // Continue without credit_report_id since it's nullable
+      }
+
+      // Prepare dispute accounts data
+      const disputeAccounts: DisputeAccount[] = selectedAccounts.map(accountId => {
+        const [type, identifier] = accountId.split('-');
+        
+        // Find the account in the correct category
+        let account;
+        if (type === 'active') {
+          account = accounts.active.find((a, index) => index.toString() === identifier || a.account_number === identifier);
+        } else if (type === 'closed') {
+          account = accounts.closed.find((a, index) => index.toString() === identifier || a.account_number === identifier);
+        } else if (type === 'overdue') {
+          account = accounts.overdue.find((a, index) => index.toString() === identifier || a.account_number === identifier);
+        } else if (type === 'writtenoff') {
+          account = accounts.writtenOff.find((a, index) => index.toString() === identifier || a.account_number === identifier);
+        }
+
+        if (!account) {
+          console.error('Account not found:', accountId);
+          throw new Error(`Account not found: ${accountId}`);
+        }
+
+        return {
+          lender: account.full_details.creditguarantor,
+          accountType: account.account_type || account.full_details.accounttype || 'Unknown',
+          accountNumber: account.account_number,
+          status: account.full_details.accountstatus,
+          currentBalance: account.current_balance || 0,
+          overdueAmount: account.overdue_amount || 0,
+          writeOffAmount: account.write_off_amount || 0
+        };
+      });
+
+      if (disputeAccounts.length === 0) {
+        toast.error('No valid accounts selected for dispute');
+        return;
+      }
+
+      // Prepare the dispute data with explicit typing
+      const disputeData: {
+        user_id: string;
+        accounts: DisputeAccount[];
+        status: 'pending';
+        credit_report_id?: string;
+      } = {
+        user_id: user.uid,
+        accounts: disputeAccounts,
+        status: 'pending'
+      };
+
+      // Add credit_report_id only if it exists
+      if (reportData?.id) {
+        disputeData.credit_report_id = reportData.id;
+      }
+
+      console.log('Current user ID:', user.uid);
+      console.log('Sending dispute data:', disputeData);
+
+      // Save dispute to Supabase
+      const { data: insertedDispute, error: disputeError } = await supabase
+        .from('disputes')
+        .insert([disputeData]) // Wrap in array as per Supabase requirements
+        .select()
+        .single();
+
+      if (disputeError) {
+        console.error('Supabase Error Details:', {
+          code: disputeError.code,
+          message: disputeError.message,
+          details: disputeError.details,
+          hint: disputeError.hint
+        });
+        throw new Error(`Failed to save dispute: ${disputeError.message}`);
+      }
+
+      if (!insertedDispute) {
+        throw new Error('No data returned from dispute creation');
+      }
+
+      console.log('Dispute created successfully:', insertedDispute);
+
+      // Show success message
+      toast.success(
+        'We will be passing the details to the Bureau. Expect a resolution within 15 days.',
+        {
+          duration: 5000,
+          position: 'top-center',
+          style: {
+            background: '#10B981',
+            color: '#FFFFFF',
+            padding: '16px',
+            borderRadius: '8px',
+          },
+        }
+      );
+
+      // Wait for 2 seconds to let user read the message
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Navigate back to credit report
+      router.push('/credit/score/report');
+      
+    } catch (error) {
+      console.error('Dispute submission error:', error);
+      toast.error(
+        error instanceof Error 
+          ? `Error: ${error.message}` 
+          : 'Failed to submit dispute. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const formatAmount = (amount: number) => {
@@ -239,24 +396,54 @@ export default function DisputePage() {
           <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[9999]">
             <button
               onClick={handleSubmitDispute}
+              disabled={isSubmitting}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg 
                 shadow-lg transition-all duration-200 flex items-center space-x-2 group
-                hover:shadow-xl active:scale-95 text-sm md:text-base whitespace-nowrap"
+                hover:shadow-xl active:scale-95 text-sm md:text-base whitespace-nowrap
+                disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
             >
-              <span>Submit {selectedAccounts.length} Dispute{selectedAccounts.length > 1 ? 's' : ''}</span>
-              <svg 
-                className="h-5 w-5 transition-transform group-hover:translate-x-1" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M14 5l7 7m0 0l-7 7m7-7H3" 
-                />
-              </svg>
+              {isSubmitting ? (
+                <>
+                  <svg 
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24"
+                  >
+                    <circle 
+                      className="opacity-25" 
+                      cx="12" 
+                      cy="12" 
+                      r="10" 
+                      stroke="currentColor" 
+                      strokeWidth="4"
+                    />
+                    <path 
+                      className="opacity-75" 
+                      fill="currentColor" 
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                <>
+                  <span>Submit {selectedAccounts.length} Dispute{selectedAccounts.length > 1 ? 's' : ''}</span>
+                  <svg 
+                    className="h-5 w-5 transition-transform group-hover:translate-x-1" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M14 5l7 7m0 0l-7 7m7-7H3" 
+                    />
+                  </svg>
+                </>
+              )}
             </button>
           </div>
         )}
