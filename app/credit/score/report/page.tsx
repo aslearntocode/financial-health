@@ -39,6 +39,13 @@ interface MatchingBlockWithAmounts extends MatchingBlock {
   write_off_amount: number;
 }
 
+interface CreditInquiry {
+  "INQUIRY-DT": string;
+  "LENDER-NAME": string;
+  "CREDIT-INQ-PURPS-TYPE": string;
+  "AMOUNT": string;
+}
+
 const CreditScore = ({ score }: { score: number }) => {
   const getScoreColor = (score: number) => {
     if (score >= 750) return 'text-green-500';
@@ -435,8 +442,8 @@ export default function CreditScoreReportPage() {
               <div className="space-y-4">
                 {recentEnquiriesCount > 0 ? (
                   reportData?.inquiry_history
-                    ?.filter(inquiry => isWithinLast6Months(inquiry["INQUIRY-DT"]))
-                    .map((inquiry, index) => (
+                    ?.filter((inquiry: CreditInquiry) => isWithinLast6Months(inquiry["INQUIRY-DT"]))
+                    .map((inquiry: CreditInquiry, index) => (
                       <div key={index} className="border rounded-lg p-4">
                         <div className="flex justify-between">
                           <p className="font-semibold">{inquiry["LENDER-NAME"]}</p>
