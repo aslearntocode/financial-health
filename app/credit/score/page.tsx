@@ -107,7 +107,7 @@ export default function CreditScorePage() {
       // Format the date for API
       const formattedDate = new Date(formData.dob).toISOString().split('T')[0]
 
-      // Prepare the request payload as URL parameters
+      // Create query parameters
       const params = new URLSearchParams({
         pan: formData.pan.toUpperCase(),
         name: formData.name,
@@ -115,10 +115,8 @@ export default function CreditScorePage() {
         mobile: formData.mobile
       })
 
-      console.log('Sending request with params:', params.toString())
-
-      // Use the Next.js API route instead of calling the external API directly
-      const analysisResponse = await fetch(`/api/credit-report?${params.toString()}`, {
+      // Make GET request to the external API
+      const analysisResponse = await fetch(`http://172.210.82.112:5001/analyze?${params}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -126,25 +124,10 @@ export default function CreditScorePage() {
       })
 
       if (!analysisResponse.ok) {
-        const errorText = await analysisResponse.text()
-        console.error('API Error:', {
-          status: analysisResponse.status,
-          statusText: analysisResponse.statusText,
-          body: errorText
-        })
-        throw new Error(`Request failed: ${analysisResponse.status} ${analysisResponse.statusText}`)
+        throw new Error(`API request failed: ${analysisResponse.statusText}`)
       }
 
       const analysisData = await analysisResponse.json()
-      console.log('Received analysis data:', analysisData)
-
-      if (!analysisData) {
-        throw new Error('No response data received')
-      }
-
-      if (!analysisData.processed_report) {
-        throw new Error('No processed report found in response')
-      }
 
       // Save to Supabase
       const { data, error } = await supabase
@@ -155,25 +138,25 @@ export default function CreditScorePage() {
           dob: formattedDate,
           pan: formData.pan.toUpperCase(),
           mobile: formData.mobile,
-          report_analysis: {
-            processed_report: analysisData.processed_report
-          },
+          report_analysis: analysisData,
           created_at: new Date().toISOString()
         })
         .select('*')
         .single()
 
       if (error) {
-        console.error('Supabase error:', error)
         throw new Error('Failed to save credit report')
       }
 
-      if (data) {
-        router.replace('/credit/score/report')
-      }
+      // Store the analysis data in localStorage for immediate access
+      localStorage.setItem('latestCreditReport', JSON.stringify(analysisData))
+
+      // Redirect to report page
+      router.push('/credit/score/report')
+
     } catch (err) {
-      console.error('Error submitting form:', err)
-      alert(err instanceof Error ? err.message : 'An error occurred while processing your request. Please try again.')
+      console.error('Error:', err)
+      alert('An error occurred while processing your request. Please try again.')
     } finally {
       submitButton.disabled = false
       submitButton.textContent = 'Send OTP'
