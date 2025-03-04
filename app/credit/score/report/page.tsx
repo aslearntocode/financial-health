@@ -39,6 +39,18 @@ interface MatchingBlockWithAmounts extends MatchingBlock {
   write_off_amount: number;
 }
 
+interface Account {
+  account_type: string;
+  account_number: string;
+  credit_grantor: string;
+  lender: string;
+  status: string;
+  current_balance: number;
+  credit_limit?: number;
+  overdue_amount: number;
+  write_off_amount: number;
+}
+
 interface CreditInquiry {
   "INQUIRY-DT": string;
   "LENDER-NAME": string;
@@ -385,7 +397,7 @@ export default function CreditScoreReportPage() {
           <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
             <h2 className="text-xl font-semibold mb-4">Active Accounts</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {reportData?.accounts?.active?.map((account: any, index: number) => (
+              {reportData?.accounts?.active?.map((account: Account, index: number) => (
                 <div key={index} className="border rounded-lg p-4">
                   <p className="font-semibold">{account.credit_grantor}</p>
                   <p className="text-sm text-gray-600">Type: {account.account_type}</p>
@@ -399,13 +411,13 @@ export default function CreditScoreReportPage() {
           </div>
 
           {/* Overdue Accounts */}
-          {reportData?.accounts?.active?.some((account: any) => account.overdue_amount > 0) && (
+          {reportData?.accounts?.active?.some((account: Account) => account.overdue_amount > 0) && (
             <div className="bg-red-50 rounded-xl shadow-lg p-6 mb-8">
               <h2 className="text-xl font-semibold mb-4 text-red-800">Overdue Accounts</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {reportData.accounts.active
-                  .filter((account: any) => account.overdue_amount > 0)
-                  .map((account: any, index: number) => (
+                  .filter((account: Account) => account.overdue_amount > 0)
+                  .map((account: Account, index: number) => (
                     <div key={index} className="bg-white rounded-lg p-4 shadow">
                       <p className="font-semibold">{account.credit_grantor}</p>
                       <p className="text-sm text-gray-600">Type: {account.account_type}</p>
@@ -417,13 +429,13 @@ export default function CreditScoreReportPage() {
           )}
 
           {/* Written Off Accounts */}
-          {reportData?.accounts?.closed?.some((account: any) => account.write_off_amount > 0) && (
+          {reportData?.accounts?.closed?.some((account: Account) => account.write_off_amount > 0) && (
             <div className="bg-red-50 rounded-xl shadow-lg p-6 mb-8">
               <h2 className="text-xl font-semibold mb-4 text-red-800">Written Off Accounts</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {reportData.accounts.closed
-                  .filter((account: any) => account.write_off_amount > 0)
-                  .map((account: any, index: number) => (
+                  .filter((account: Account) => account.write_off_amount > 0)
+                  .map((account: Account, index: number) => (
                     <div key={index} className="bg-white rounded-lg p-4 shadow">
                       <p className="font-semibold">{account.credit_grantor}</p>
                       <p className="text-sm text-gray-600">Type: {account.account_type}</p>
@@ -443,7 +455,7 @@ export default function CreditScoreReportPage() {
                 {recentEnquiriesCount > 0 ? (
                   reportData?.inquiry_history
                     ?.filter((inquiry: CreditInquiry) => isWithinLast6Months(inquiry["INQUIRY-DT"]))
-                    .map((inquiry: CreditInquiry, index) => (
+                    .map((inquiry: CreditInquiry, index: number) => (
                       <div key={index} className="border rounded-lg p-4">
                         <div className="flex justify-between">
                           <p className="font-semibold">{inquiry["LENDER-NAME"]}</p>
@@ -466,12 +478,12 @@ export default function CreditScoreReportPage() {
             {/* Credit Card Utilization */}
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-semibold mb-4">Credit Card Utilization</h2>
-              {reportData?.accounts?.active?.some(account => account.account_type?.toLowerCase().includes('credit card')) ? (
+              {reportData?.accounts?.active?.some((account: Account) => account.account_type?.toLowerCase().includes('credit card')) ? (
                 <div className="space-y-4">
                   {reportData.accounts.active
-                    .filter(account => account.account_type?.toLowerCase().includes('credit card'))
-                    .map((card, index) => {
-                      const utilization = (card.current_balance / card.credit_limit) * 100;
+                    .filter((account: Account) => account.account_type?.toLowerCase().includes('credit card'))
+                    .map((card: Account, index: number) => {
+                      const utilization = (card.current_balance / (card.credit_limit || 1)) * 100;
                       const utilizationColor = 
                         utilization > 80 ? 'text-red-500' :
                         utilization > 30 ? 'text-yellow-500' :
@@ -497,7 +509,7 @@ export default function CreditScoreReportPage() {
                           </div>
                           <div className="flex justify-between mt-2 text-sm text-gray-600">
                             <span>Balance: ₹{card.current_balance.toLocaleString()}</span>
-                            <span>Limit: ₹{card.credit_limit.toLocaleString()}</span>
+                            <span>Limit: ₹{(card.credit_limit || 0).toLocaleString()}</span>
                           </div>
                         </div>
                       );
