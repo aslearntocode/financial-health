@@ -285,8 +285,8 @@ export default function CreditScoreReportPage() {
                 }))
               ];
 
-              // Create active_loans_by_lender object
-              const active_loans_by_lender = {};
+              // Create active_loans_by_lender object with proper typing
+              const active_loans_by_lender: Record<string, any[]> = {};
               reportData.accounts?.active?.forEach((account: any) => {
                 const lender = account.credit_grantor || account.lender;
                 if (!active_loans_by_lender[lender]) {
