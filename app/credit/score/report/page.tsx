@@ -351,7 +351,9 @@ export default function CreditScoreReportPage() {
 
       <div className="flex-1 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-2xl font-bold text-center mb-8">Your Credit Report Summary</h1>
+          <h1 className="text-2xl font-bold text-center mb-8">
+            {`${reportData?.applicant_segment?.["FIRST-NAME"]?.charAt(0).toUpperCase()}${reportData?.applicant_segment?.["FIRST-NAME"]?.slice(1).toLowerCase() || ""} ${reportData?.applicant_segment?.["LAST-NAME"]?.charAt(0).toUpperCase()}${reportData?.applicant_segment?.["LAST-NAME"]?.slice(1).toLowerCase() || ""}'s Credit Report Summary`}
+          </h1>
           
           {/* Audio Player and Score Meter in side-by-side layout with reduced height */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
