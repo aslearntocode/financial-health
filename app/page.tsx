@@ -9,6 +9,7 @@ import { User } from "firebase/auth"
 import { ProfileDropdown } from "@/components/ProfileDropdown"
 import Testimonials from "@/components/Testimonials"
 import Header from "@/components/Header"
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 // import ReturnComparisonBox from "@/components/ReturnComparisonBox"
 
 export default function Home() {
@@ -20,6 +21,12 @@ export default function Home() {
     name: '',
     message: ''
   })
+  const [user, setUser] = useState<User | null>(null)
+  const [latestReport, setLatestReport] = useState<null | {
+    date: string;
+    type: string;
+    score?: number;
+  }>(null)
 
   const testimonials = [
     {
@@ -96,6 +103,54 @@ export default function Home() {
     return () => clearInterval(animation)
   }, [])
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      setUser(user)
+      if (user) {
+        // Fetch latest credit report from Supabase
+        const supabase = createClientComponentClient()
+        const { data, error } = await supabase
+          .from('credit_reports')
+          .select('created_at, report_analysis')
+          .eq('user_id', user.uid)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (data) {
+          try {
+            // Parse the report_analysis if it's a string
+            const reportAnalysis = typeof data.report_analysis === 'string' 
+              ? JSON.parse(data.report_analysis) 
+              : data.report_analysis
+
+            const score = reportAnalysis?.first_block?.score_value || reportAnalysis?.score_details?.score || 0
+            
+            const report = {
+              date: new Date(data.created_at).toLocaleDateString(),
+              type: 'Credit Analysis',
+              score: parseInt(score)
+            }
+            setLatestReport(report)
+          } catch (parseError) {
+            console.log("No credit report found or error parsing data")
+            setLatestReport(null)
+          }
+        } else {
+          // No data found - this is a normal case for new users
+          setLatestReport(null)
+        }
+      } else {
+        setLatestReport(null)
+      }
+    })
+
+    return () => unsubscribe()
+  }, [])
+
+  // Debug log for render
+  console.log("Render state:", { user: !!user, latestReport })
+
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Add country code (+91 for India) and remove any spaces or special characters
@@ -110,6 +165,76 @@ export default function Home() {
     <main className="min-h-screen bg-white relative">
       <Header />
       
+      {/* Credit Score Alert Box - Static positioning */}
+      {user && latestReport && (latestReport.score ?? 0) > 0 && (
+        <div className="absolute md:top-44 top-[360px] md:right-6 right-4 z-40 md:w-[200px] w-[180px] transform transition-transform duration-300 hover:scale-105">
+          <Link href="/credit/score/report" className="block">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              <div className="bg-red-50/80 border-l-4 border-red-500 p-3">
+                <div className="flex gap-2 items-start">
+                  <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div>
+                    <h3 className="text-red-800 font-medium text-xs">Credit Score Analysis</h3>
+                    {/* <p className="text-red-700 text-[11px] mt-0.5">Your score needs improvement. Check detailed analysis.</p> */}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] text-gray-600">Current Score</span>
+                  <span className="text-[10px] font-medium text-gray-600">
+                    {new Date(latestReport.date).toLocaleDateString()}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full ${
+                        (latestReport.score ?? 0) >= 750 ? 'bg-green-500' :
+                        (latestReport.score ?? 0) >= 600 ? 'bg-yellow-500' :
+                        'bg-red-500'
+                      }`}
+                      style={{ width: `${(latestReport.score || 0) / 9}%` }}
+                    />
+                  </div>
+                  <span className={`text-xs font-semibold ${
+                    (latestReport.score ?? 0) >= 750 ? 'text-green-600' :
+                    (latestReport.score ?? 0) >= 600 ? 'text-yellow-600' :
+                    'text-red-600'
+                  }`}>
+                    {latestReport.score}
+                  </span>
+                </div>
+                
+                <div className="text-center text-[10px] text-gray-600 hover:text-gray-800 font-medium mt-1 group">
+                  View Detailed Report 
+                  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+      )}
+
+      {/* Add shimmer animation */}
+      <style jsx>{`
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+      `}</style>
+
       {/* Chat Popup */}
       {isChatOpen && (
         <div className="fixed bottom-24 right-6 z-50">
