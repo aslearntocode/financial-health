@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     
     // Forward the request to the actual API
     const response = await fetch(
-      `http://172.210.82.112:5001/get-processed-report?${searchParams.toString()}`,
+      `http://172.210.82.112:5001/analyze?${searchParams.toString()}`,
       {
         method: 'GET',
         headers: {

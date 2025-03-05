@@ -115,8 +115,8 @@ export default function CreditScorePage() {
         mobile: formData.mobile
       })
 
-      // Make GET request to the external API
-      const analysisResponse = await fetch(`http://172.210.82.112:5001/analyze?${params}`, {
+      // Use the API route instead of direct server call
+      const analysisResponse = await fetch(`/api/credit-report?${params}`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
