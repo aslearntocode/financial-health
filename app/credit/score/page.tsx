@@ -305,8 +305,17 @@ export default function CreditScorePage() {
                         onChange={(e) => setFormData({...formData, acceptTerms: e.target.checked})}
                       />
                       <span className="text-sm text-gray-700">
-                      By clicking submit below, 
-                      you consent FHAI Services Pvt Ltd to store and process the Personal Data submitted by you and the Bureau.
+                        By clicking submit below, 
+                        you allow FHAI Services Pvt Ltd as your authorized represnetative to fetch and provide you access to your credit information from RBI-approved bureau(s)
+                        for the next six months and offer credit related products/services. If applicable, previously provided consent shall continue to apply until expiry or revocation.{' '}
+                        <a 
+                          href="/terms-and-conditions" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          T&C apply
+                        </a>
                       </span>
                     </label>
                   </div>
