@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Header from "@/components/Header"
 import { auth } from '@/lib/firebase'
 import { supabase } from '@/lib/supabase'
@@ -21,8 +21,13 @@ interface Dispute {
 
 export default function DisputesPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [disputes, setDisputes] = useState<Dispute[]>([])
   const [loading, setLoading] = useState(true)
+  const [showNotification, setShowNotification] = useState<boolean>(() => {
+    // Initialize based on URL parameter
+    return searchParams.get('notification') === 'active_dispute'
+  })
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -40,7 +45,6 @@ export default function DisputesPage() {
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-
         setDisputes(data || []);
       } catch (error) {
         console.error('Error fetching disputes:', error);
@@ -50,7 +54,7 @@ export default function DisputesPage() {
     };
 
     fetchDisputes();
-  }, [router]);
+  }, [router]); // Remove searchParams from dependencies
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -65,10 +69,52 @@ export default function DisputesPage() {
     }
   };
 
+  const handleCloseNotification = () => {
+    setShowNotification(false);
+    // Update the URL without causing a page reload
+    const url = new URL(window.location.href);
+    url.searchParams.delete('notification');
+    window.history.replaceState({}, '', url.pathname);
+  };
+
+  const Notification = () => {
+    if (!showNotification) return null;
+    
+    return (
+      <div className="fixed top-0 left-0 right-0 z-50 bg-yellow-50 border-l-4 border-yellow-400 p-4 shadow-md">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                You have an active dispute in progress. Please wait for it to be resolved before submitting a new one.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={handleCloseNotification}
+            className="ml-4 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-yellow-500 rounded-full p-1"
+          >
+            <svg className="h-5 w-5 text-yellow-400 hover:text-yellow-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       
+      {/* Single Notification Component */}
+      <Notification />
+
       <div className="flex-1 w-full max-w-[1400px] mx-auto px-6 md:px-8 py-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Your Disputes</h1>
 
@@ -122,6 +168,30 @@ export default function DisputesPage() {
             ))}
           </div>
         )}
+
+        {/* Back to Report Button */}
+        <div className="flex justify-center pt-8">
+          <button
+            onClick={() => router.push('/credit/score/report')}
+            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 
+              bg-white px-6 py-3 rounded-lg shadow hover:shadow-md transition-all duration-200"
+          >
+            <svg 
+              className="w-5 h-5" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+              />
+            </svg>
+            <span>Back to Report</span>
+          </button>
+        </div>
       </div>
     </div>
   );

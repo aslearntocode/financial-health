@@ -270,8 +270,60 @@ export default function CreditScoreReportPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      {/* Add the floating dispute button */}
-      <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[9999]">
+      {/* Add the floating buttons */}
+      <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[9999] flex flex-col gap-4">
+        {/* Score Improvement Button - Only show if score is below 700 */}
+        {score < 700 ? (
+          <button 
+            onClick={() => router.push('/credit/improve')}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg shadow-lg 
+              transition-all duration-200 flex items-center space-x-2 group
+              hover:shadow-xl active:scale-95 text-sm md:text-base whitespace-nowrap"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" 
+              />
+            </svg>
+            <span className="hidden md:inline">Improve Your Credit Score</span>
+            <span className="md:hidden">Improve Score</span>
+          </button>
+        ) : (
+          <button 
+            onClick={() => router.push('/credit/simplify')}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg shadow-lg 
+              transition-all duration-200 flex items-center space-x-2 group
+              hover:shadow-xl active:scale-95 text-sm md:text-base whitespace-nowrap"
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="h-5 w-5" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M19 9l-7 7-7-7" 
+              />
+            </svg>
+            <span className="hidden md:inline">Simplify Your Finances</span>
+            <span className="md:hidden">Simplify Your Finances</span>
+          </button>
+        )}
+
+        {/* Existing Dispute Button */}
         <button 
           onClick={() => {
             // Store report data in localStorage before navigation
@@ -412,7 +464,7 @@ export default function CreditScoreReportPage() {
             </div>
           </div>
 
-          {/* Overdue Accounts */}
+          {/* Modified Overdue Accounts Section */}
           {reportData?.accounts?.active?.some((account: Account) => account.overdue_amount > 0) && (
             <div className="bg-red-50 rounded-xl shadow-lg p-6 mb-8">
               <h2 className="text-xl font-semibold mb-4 text-red-800">Overdue Accounts</h2>
@@ -424,13 +476,27 @@ export default function CreditScoreReportPage() {
                       <p className="font-semibold">{account.credit_grantor}</p>
                       <p className="text-sm text-gray-600">Type: {account.account_type}</p>
                       <p className="text-red-600">Overdue Amount: ₹{account.overdue_amount.toLocaleString()}</p>
+                      <select 
+                        className="mt-2 w-full p-2 border rounded-lg text-sm"
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            router.push(`/credit/resolve?account=${account.account_number}&action=${e.target.value}`);
+                          }
+                        }}
+                        defaultValue=""
+                      >
+                        <option value="" disabled>Select Resolution Option</option>
+                        <option value="pay_full">Pay In Full</option>
+                        <option value="settle">Settle The Account</option>
+                        <option value="connect">Connect With Lender</option>
+                      </select>
                     </div>
                   ))}
               </div>
             </div>
           )}
 
-          {/* Written Off Accounts */}
+          {/* Modified Written Off Accounts Section */}
           {reportData?.accounts?.closed?.some((account: Account) => account.write_off_amount > 0) && (
             <div className="bg-red-50 rounded-xl shadow-lg p-6 mb-8">
               <h2 className="text-xl font-semibold mb-4 text-red-800">Written Off Accounts</h2>
@@ -442,6 +508,20 @@ export default function CreditScoreReportPage() {
                       <p className="font-semibold">{account.credit_grantor}</p>
                       <p className="text-sm text-gray-600">Type: {account.account_type}</p>
                       <p className="text-red-800">Written Off Amount: ₹{account.write_off_amount.toLocaleString()}</p>
+                      <select 
+                        className="mt-2 w-full p-2 border rounded-lg text-sm"
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            router.push(`/credit/resolve?account=${account.account_number}&action=${e.target.value}`);
+                          }
+                        }}
+                        defaultValue=""
+                      >
+                        <option value="" disabled>Select Resolution Option</option>
+                        <option value="pay_full">Pay In Full</option>
+                        <option value="settle">Settle The Account</option>
+                        <option value="connect">Connect With Lender</option>
+                      </select>
                     </div>
                   ))}
               </div>
