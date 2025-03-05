@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Header from "@/components/Header"
 import { auth } from '@/lib/firebase'
@@ -19,7 +19,7 @@ interface Dispute {
   }[]
 }
 
-export default function DisputesPage() {
+function DisputesContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [disputes, setDisputes] = useState<Dispute[]>([])
@@ -109,10 +109,7 @@ export default function DisputesPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header />
-      
-      {/* Single Notification Component */}
+    <>
       <Notification />
 
       <div className="flex-1 w-full max-w-[1400px] mx-auto px-6 md:px-8 py-6">
@@ -193,6 +190,21 @@ export default function DisputesPage() {
           </button>
         </div>
       </div>
+    </>
+  )
+}
+
+export default function DisputesPage() {
+  return (
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Header />
+      <Suspense fallback={
+        <div className="flex-1 flex justify-center items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      }>
+        <DisputesContent />
+      </Suspense>
     </div>
-  );
+  )
 } 
