@@ -141,6 +141,13 @@ const articles: Article[] = [
     category: 'Credit Cards',
     readTime: '20 min read',
     link: '/learning-center/credit-cards/risk-profile'
+  },{
+    id: '17',
+    title: 'Comparing Fixed Deposits and Personal Loans',
+    description: 'Decide Between Breaking a FD and using the Proceeds or taking a Personal Loan?',
+    category: 'Personal Finance',
+    readTime: '10 min read',
+    link: '/learning-center/personal-finance/comparison'
   }
 
 ]
