@@ -86,6 +86,63 @@ export default function LoanFDComparison() {
     }
   }, [loanAmount, loanRate, loanTenure, fdAmount, fdRate, fdTotalTenure, fdRemainingTenure]);
 
+  const handleLoanAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || parseFloat(value) >= 0) {
+      setLoanAmount(value);
+    }
+  };
+
+  const handleLoanRate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || parseFloat(value) >= 0) {
+      setLoanRate(value);
+    }
+  };
+
+  const handleLoanTenure = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || (parseInt(value) >= 0)) {
+      setLoanTenure(value);
+    }
+  };
+
+  const handleFdAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || parseFloat(value) >= 0) {
+      setFdAmount(value);
+    }
+  };
+
+  const handleFdRate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || parseFloat(value) >= 0) {
+      setFdRate(value);
+    }
+  };
+
+  const handleFdTotalTenure = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || (parseInt(value) >= 0)) {
+      setFdTotalTenure(value);
+      // If remaining tenure is more than new total tenure, update it
+      if (fdRemainingTenure && parseInt(fdRemainingTenure) > parseInt(value)) {
+        setFdRemainingTenure(value);
+      }
+    }
+  };
+
+  const handleFdRemainingTenure = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow empty string or numbers
+    if (value === '' || !isNaN(Number(value))) {
+      // Only set if empty or less than total tenure
+      if (value === '' || !fdTotalTenure || parseInt(value) <= parseInt(fdTotalTenure)) {
+        setFdRemainingTenure(value);
+      }
+    }
+  };
+
   return (
     <>
       <Header />
@@ -108,33 +165,36 @@ export default function LoanFDComparison() {
                 <Label htmlFor="loanAmount" className="text-sm font-medium">Loan Amount (in Lakhs)</Label>
                 <Input
                   id="loanAmount"
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={loanAmount}
-                  onChange={(e) => setLoanAmount(e.target.value)}
+                  onChange={handleLoanAmount}
                   placeholder="Enter loan amount in lakhs"
-                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20"
+                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="loanRate" className="text-sm font-medium">Interest Rate (% p.a.)</Label>
                 <Input
                   id="loanRate"
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={loanRate}
-                  onChange={(e) => setLoanRate(e.target.value)}
+                  onChange={handleLoanRate}
                   placeholder="Enter loan interest rate"
-                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20"
+                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="loanTenure" className="text-sm font-medium">Tenure (months)</Label>
                 <Input
                   id="loanTenure"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={loanTenure}
-                  onChange={(e) => setLoanTenure(e.target.value)}
+                  onChange={handleLoanTenure}
                   placeholder="Enter loan tenure"
-                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20"
+                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
             </CardContent>
@@ -155,44 +215,48 @@ export default function LoanFDComparison() {
                 <Label htmlFor="fdAmount" className="text-sm font-medium">FD Amount (in Lakhs)</Label>
                 <Input
                   id="fdAmount"
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={fdAmount}
-                  onChange={(e) => setFdAmount(e.target.value)}
+                  onChange={handleFdAmount}
                   placeholder="Enter FD amount in lakhs"
-                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20"
+                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="fdRate" className="text-sm font-medium">Interest Rate (% p.a.)</Label>
                 <Input
                   id="fdRate"
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   value={fdRate}
-                  onChange={(e) => setFdRate(e.target.value)}
+                  onChange={handleFdRate}
                   placeholder="Enter FD interest rate"
-                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20"
+                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="fdTotalTenure" className="text-sm font-medium">Total Tenure (months)</Label>
                 <Input
                   id="fdTotalTenure"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={fdTotalTenure}
-                  onChange={(e) => setFdTotalTenure(e.target.value)}
+                  onChange={handleFdTotalTenure}
                   placeholder="Enter total FD tenure"
-                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20"
+                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div className="space-y-1">
                 <Label htmlFor="fdRemainingTenure" className="text-sm font-medium">Remaining Tenure (months)</Label>
                 <Input
                   id="fdRemainingTenure"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={fdRemainingTenure}
-                  onChange={(e) => setFdRemainingTenure(e.target.value)}
+                  onChange={handleFdRemainingTenure}
                   placeholder="Enter remaining tenure"
-                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20"
+                  className="text-sm h-8 focus:ring-2 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
             </CardContent>
