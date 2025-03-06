@@ -167,31 +167,41 @@ export default function Home() {
       
       {/* Credit Score Alert Box - Static positioning */}
       {user && latestReport && (latestReport.score ?? 0) > 0 && (
-        <div className="absolute md:top-44 top-[360px] md:right-6 right-4 z-40 md:w-[200px] w-[180px] transform transition-transform duration-300 hover:scale-105">
+        <div className="md:absolute relative md:top-36 md:right-6 z-40 md:w-[200px] w-full px-4 md:px-0 mb-6">
           <Link href="/credit/score/report" className="block">
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="bg-red-50/80 border-l-4 border-red-500 p-3">
-                <div className="flex gap-2 items-start">
-                  <svg className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
+            <div className="bg-blue-50 rounded-xl shadow-lg overflow-hidden">
+              <div className="p-4">
+                <div className="flex justify-between items-center mb-3">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                    </svg>
+                    <span className="text-blue-600 font-medium">Credit Report</span>
+                  </div>
+                  <button className="text-gray-400 hover:text-gray-500">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="flex justify-between items-center mb-2">
                   <div>
-                    <h3 className="text-red-800 font-medium text-xs">Credit Score Analysis</h3>
-                    {/* <p className="text-red-700 text-[11px] mt-0.5">Your score needs improvement. Check detailed analysis.</p> */}
+                    <p className="text-gray-600 text-sm">Generated on:</p>
+                    <p className="font-medium">{new Date(latestReport.date).toLocaleDateString()}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-gray-600 text-sm">Score:</p>
+                    <p className={`font-medium ${
+                      (latestReport.score ?? 0) >= 750 ? 'text-green-600' :
+                      (latestReport.score ?? 0) >= 600 ? 'text-yellow-600' :
+                      'text-red-600'
+                    }`}>{latestReport.score}</p>
                   </div>
                 </div>
-              </div>
 
-              <div className="p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] text-gray-600">Current Score</span>
-                  <span className="text-[10px] font-medium text-gray-600">
-                    {new Date(latestReport.date).toLocaleDateString()}
-                  </span>
-                </div>
-                
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div 
                       className={`h-full rounded-full ${
                         (latestReport.score ?? 0) >= 750 ? 'bg-green-500' :
@@ -201,19 +211,14 @@ export default function Home() {
                       style={{ width: `${(latestReport.score || 0) / 9}%` }}
                     />
                   </div>
-                  <span className={`text-xs font-semibold ${
-                    (latestReport.score ?? 0) >= 750 ? 'text-green-600' :
-                    (latestReport.score ?? 0) >= 600 ? 'text-yellow-600' :
-                    'text-red-600'
-                  }`}>
-                    {latestReport.score}
-                  </span>
                 </div>
-                
-                <div className="text-center text-[10px] text-gray-600 hover:text-gray-800 font-medium mt-1 group">
-                  View Detailed Report 
-                  <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
-                </div>
+
+                <button className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2 hover:bg-blue-50 rounded-lg transition-colors">
+                  View Report
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </div>
             </div>
           </Link>

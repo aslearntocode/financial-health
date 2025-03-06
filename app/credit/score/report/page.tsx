@@ -270,19 +270,19 @@ export default function CreditScoreReportPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      {/* Add the floating buttons */}
-      <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[9999] flex flex-col gap-4">
+      {/* Adjusted floating buttons with better mobile positioning */}
+      <div className="fixed top-44 right-2 md:top-20 md:right-4 z-[9999] flex flex-col gap-2">
         {/* Score Improvement Button - Only show if score is below 700 */}
         {score < 700 ? (
           <button 
             onClick={() => router.push('/credit/improve')}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg shadow-lg 
+            className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg shadow-lg 
               transition-all duration-200 flex items-center space-x-2 group
-              hover:shadow-xl active:scale-95 text-sm md:text-base whitespace-nowrap"
+              hover:shadow-xl active:scale-95 text-xs md:text-sm whitespace-nowrap"
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5" 
+              className="h-4 w-4" 
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
@@ -300,13 +300,13 @@ export default function CreditScoreReportPage() {
         ) : (
           <button 
             onClick={() => router.push('/credit/simplify')}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-lg shadow-lg 
+            className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg shadow-lg 
               transition-all duration-200 flex items-center space-x-2 group
-              hover:shadow-xl active:scale-95 text-sm md:text-base whitespace-nowrap"
+              hover:shadow-xl active:scale-95 text-xs md:text-sm whitespace-nowrap"
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5" 
+              className="h-4 w-4" 
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
@@ -319,7 +319,7 @@ export default function CreditScoreReportPage() {
               />
             </svg>
             <span className="hidden md:inline">Simplify Your Finances</span>
-            <span className="md:hidden">Simplify Your Finances</span>
+            <span className="md:hidden">Simplify</span>
           </button>
         )}
 
@@ -378,13 +378,13 @@ export default function CreditScoreReportPage() {
             }
             router.push('/credit/dispute');
           }}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg shadow-lg 
+          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg shadow-lg 
             transition-all duration-200 flex items-center space-x-2 group
-            hover:shadow-xl active:scale-95 text-sm md:text-base whitespace-nowrap"
+            hover:shadow-xl active:scale-95 text-xs md:text-sm whitespace-nowrap"
         >
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5" 
+            className="h-4 w-4" 
             fill="none" 
             viewBox="0 0 24 24" 
             stroke="currentColor"
@@ -396,8 +396,8 @@ export default function CreditScoreReportPage() {
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
             />
           </svg>
-          <span className="hidden md:inline">Found Inaccuracy in the Report - Dispute It Here</span>
-          <span className="md:hidden">Inaccurate - Dispute It Here</span>
+          <span className="hidden md:inline">Found Inaccuracy - Dispute Here</span>
+          <span className="md:hidden">Dispute</span>
         </button>
       </div>
 
