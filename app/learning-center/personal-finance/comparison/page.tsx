@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Head from 'next/head';
 import Header from '@/components/Header';
 import {
   Card,
@@ -10,6 +11,21 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+
+// JSON-LD structured data for better SEO
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Loan vs Fixed Deposit Calculator",
+  "description": "Compare loan interest with FD returns to make informed financial decisions. Calculate whether to break your FD to repay a loan.",
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  }
+};
 
 export default function LoanFDComparison() {
   // State for form inputs (amounts in lakhs)
@@ -145,10 +161,42 @@ export default function LoanFDComparison() {
 
   return (
     <>
-      <Header />
-      <div className="container mx-auto p-4 sm:p-6">
-        <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-center">Loan vs FD Calculator</h1>
+      <Head>
+        <title>Loan vs FD Calculator | Compare Loan Interest with FD Returns</title>
+        <meta name="description" content="Should you break your FD to repay a loan? Compare loan interest payments with FD returns using our free calculator. Make smarter financial decisions." />
+        <meta name="keywords" content="loan vs fd calculator, loan against fd, fd break calculator, loan interest calculator, fixed deposit returns calculator, financial planning tools, loan prepayment calculator" />
         
+        {/* Open Graph tags for social sharing */}
+        <meta property="og:title" content="Loan vs FD Calculator | Compare Loan Interest with FD Returns" />
+        <meta property="og:description" content="Should you break your FD to repay a loan? Compare loan interest payments with FD returns using our free calculator." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://yourwebsite.com/learning-center/personal-finance/comparison" />
+        
+        {/* Twitter Card tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Loan vs FD Calculator" />
+        <meta name="twitter:description" content="Compare loan interest with FD returns to make informed financial decisions." />
+        
+        {/* Canonical URL to prevent duplicate content issues */}
+        <link rel="canonical" href="https://yourwebsite.com/learning-center/personal-finance/comparison" />
+
+        {/* JSON-LD structured data */}
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Head>
+
+      <Header />
+      <main className="container mx-auto p-4 sm:p-6">
+        <h1 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-center">
+          Should You Break Your FD to Repay a Loan? Calculate and Compare
+        </h1>
+        
+        <p className="text-sm text-gray-600 mb-4 text-center max-w-2xl mx-auto">
+          Compare your loan interest payments with FD returns to make an informed decision. 
+          Enter your loan and FD details below to see which option is financially better for you.
+        </p>
+
         <div className="grid grid-cols-2 gap-2 sm:gap-4">
           {/* Loan Details Card */}
           <Card className="col-span-1 shadow-lg hover:shadow-xl transition-shadow duration-200 border-t-4 border-primary">
@@ -302,7 +350,7 @@ export default function LoanFDComparison() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </main>
     </>
   );
 }

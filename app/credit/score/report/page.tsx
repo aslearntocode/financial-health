@@ -270,8 +270,8 @@ export default function CreditScoreReportPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      {/* Adjusted floating buttons with better mobile positioning */}
-      <div className="fixed top-44 right-2 md:top-20 md:right-4 z-[9999] flex flex-col gap-2">
+      {/* Adjusted floating buttons with updated desktop positioning */}
+      <div className="fixed top-44 right-2 md:top-44 md:right-4 z-[9999] flex flex-col gap-2">
         {/* Score Improvement Button - Only show if score is below 700 */}
         {score < 700 ? (
           <button 

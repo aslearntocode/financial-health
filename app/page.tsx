@@ -213,12 +213,42 @@ export default function Home() {
                   </div>
                 </div>
 
-                <button className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2 hover:bg-blue-50 rounded-lg transition-colors">
-                  View Report
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                <div className="space-y-2">
+                  <button className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2 hover:bg-blue-50 rounded-lg transition-colors">
+                    View Report
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+
+                  <Link href={new Date().getTime() - new Date(latestReport.date).getTime() > 30 * 24 * 60 * 60 * 1000 ? "/credit/score" : "#"}>
+                    <button 
+                      className={`w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2 hover:bg-blue-50 rounded-lg transition-colors group ${
+                        new Date().getTime() - new Date(latestReport.date).getTime() <= 30 * 24 * 60 * 60 * 1000 
+                          ? 'opacity-50 cursor-not-allowed'
+                          : ''
+                      }`}
+                      disabled={new Date().getTime() - new Date(latestReport.date).getTime() <= 30 * 24 * 60 * 60 * 1000}
+                    >
+                      <div className="relative">
+                        Refresh Analysis
+                        <svg className="w-4 h-4 inline-block ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        
+                        {/* Desktop tooltip (hidden on mobile) */}
+                        <div className="hidden md:group-hover:block text-xs text-gray-500 mt-1">
+                          Latest report generated on {new Date(latestReport.date).toLocaleDateString()}
+                        </div>
+
+                        {/* Mobile text (visible only on mobile) */}
+                        <div className="block md:hidden text-xs text-gray-500 mt-1">
+                          Latest report generated on {new Date(latestReport.date).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </button>
+                  </Link>
+                </div>
               </div>
             </div>
           </Link>
