@@ -263,9 +263,9 @@ export default function Home() {
 
   // Mobile Carousel
   const MobileCarousel = () => (
-    <div className="md:hidden px-4 relative">
+    <div className="md:hidden px-4">
       {!user ? (
-        <div className="flex flex-col gap-4 relative z-30">
+        <div className="flex flex-col gap-4">
           <Link href="/investment" className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white hover:bg-blue-700">
             Get Funds Allocation Strategy <br />
             with Recommendations
@@ -279,7 +279,7 @@ export default function Home() {
       ) : (
         <>
           {/* Card Toggle Buttons */}
-          <div className="flex gap-2 mb-4 justify-center relative z-30">
+          <div className="flex gap-2 mb-4 justify-center">
             <button
               onClick={() => setActiveCard('investment')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -302,15 +302,11 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Swipeable Cards Area */}
-          <div 
-            {...handlers} 
-            className="relative z-20"
-            style={{ touchAction: 'pan-y pinch-zoom' }}
-          >
+          {/* Swipeable Cards Area - only apply z-index to the cards */}
+          <div {...handlers}>
             <div className="transition-all duration-500 ease-in-out">
               {activeCard === 'investment' ? (
-                <div className={cardStyles} onClick={(e) => e.stopPropagation()}>
+                <div className={`${cardStyles} relative z-10`}>
                   <div className="p-4 h-full flex flex-col justify-between">
                     <div>
                       <div className={headerStyles + " bg-blue-600/10"}>
@@ -371,7 +367,7 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <div className={cardStyles} onClick={(e) => e.stopPropagation()}>
+                <div className={`${cardStyles} relative z-10`}>
                   <div className="p-4 h-full flex flex-col justify-between">
                     <div>
                       <div className={headerStyles + " bg-green-600/10"}>
@@ -467,14 +463,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header with highest z-index */}
-      <div className="relative z-50">
+      {/* Header */}
+      <div className="relative z-[100]">
         <Header />
       </div>
       
-      <main className="relative z-10">
-        {/* Hero Section */}
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center pointer-events-auto">
+      <main>
+        {/* Hero Section - no special z-index needed */}
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
           <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4">
             Your AI-Powered Personalized Financial Health Solution
           </h1>
@@ -483,13 +479,13 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Mobile View */}
-        <div className="relative z-20 pointer-events-auto">
+        {/* Mobile View - only apply z-index to the cards themselves */}
+        <div className="relative">
           <MobileCarousel />
         </div>
 
         {/* Desktop View */}
-        <div className="hidden md:flex justify-center items-start gap-8 flex-wrap pointer-events-auto">
+        <div className="hidden md:flex justify-center items-start gap-8 flex-wrap">
           {user ? (
             // Logged in view - show cards
             <>
