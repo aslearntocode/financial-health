@@ -467,25 +467,33 @@ export default function Home() {
   // Add touchstart handlers for mobile buttons
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) { // Mobile only
-      const buttons = document.querySelectorAll('button, a, .dropdown-item');
+      const elements = document.querySelectorAll(`
+        button, 
+        a, 
+        .dropdown-item,
+        .card-button,
+        [role="button"],
+        .profile-dropdown *,
+        .card-content *
+      `);
       
-      buttons.forEach(button => {
-        button.addEventListener('touchstart', (e) => {
+      elements.forEach(element => {
+        element.addEventListener('touchstart', (e) => {
           e.preventDefault();
-          (button as HTMLElement).click();
+          (element as HTMLElement).click();
         }, { passive: false });
       });
 
       return () => {
-        buttons.forEach(button => {
-          button.removeEventListener('touchstart', (e) => {
+        elements.forEach(element => {
+          element.removeEventListener('touchstart', (e) => {
             e.preventDefault();
-            (button as HTMLElement).click();
+            (element as HTMLElement).click();
           });
         });
       };
     }
-  }, [isInvestmentDropdownOpen, isCreditDropdownOpen]); // Add dropdown states as dependencies
+  }, [isInvestmentDropdownOpen, isCreditDropdownOpen, isChatOpen]); // Added all relevant state dependencies
 
   return (
     <div className="min-h-screen bg-white">
