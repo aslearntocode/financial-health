@@ -58,6 +58,13 @@ interface CreditInquiry {
   "AMOUNT": string;
 }
 
+interface ScoreImpactSimulation {
+  action: string;
+  currentValue: number;
+  newValue: number;
+  impact: number;
+}
+
 const CreditScore = ({ score }: { score: number }) => {
   const getScoreColor = (score: number) => {
     if (score >= 750) return 'text-green-500';
@@ -73,6 +80,139 @@ const CreditScore = ({ score }: { score: number }) => {
       <div className={`text-6xl font-bold ${getScoreColor(score)} transition-colors duration-500`}>
         {score}
       </div>
+    </div>
+  );
+};
+
+const ScoreSimulator = ({ score, reportData }: { score: number, reportData: any }) => {
+  const [simulations, setSimulations] = useState<ScoreImpactSimulation[]>([]);
+  const [newLoanAmount, setNewLoanAmount] = useState<number>(0);
+  const [utilizationReduction, setUtilizationReduction] = useState<number>(0);
+  
+  const calculateScoreImpact = (action: string, amount: number): number => {
+    // These are approximate impacts based on common credit scoring models
+    switch (action) {
+      case 'new_loan':
+        return -5 - Math.floor(amount / 100000); // Larger loans have bigger negative impact
+      case 'pay_overdue':
+        return Math.min(30, Math.floor(amount / 10000)); // Cap positive impact at 30 points
+      case 'pay_writeoff':
+        return Math.min(50, Math.floor(amount / 10000)); // Cap positive impact at 50 points
+      case 'settle_writeoff':
+        return Math.min(35, Math.floor(amount / 10000)); // Cap positive impact at 35 points
+      case 'account_age':
+        return amount * 3; // Each year adds 3 points
+      case 'utilization':
+        return Math.floor((amount / 5) * -1); // Each 5% reduction adds 1 point
+      default:
+        return 0;
+    }
+  };
+
+  const simulateAction = (action: string, currentValue: number, newValue: number) => {
+    const impact = calculateScoreImpact(action, newValue);
+    setSimulations(prev => [...prev, { action, currentValue, newValue, impact }]);
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+      <h2 className="text-xl font-semibold mb-4">Credit Score Simulator</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {/* New Loan Simulation */}
+        <div className="border rounded-lg p-4">
+          <h3 className="font-medium mb-2">Simulate New Loan</h3>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              className="flex-1 border rounded px-3 py-2"
+              placeholder="Enter loan amount"
+              value={newLoanAmount || ''}
+              onChange={(e) => setNewLoanAmount(Number(e.target.value))}
+            />
+            <button
+              onClick={() => simulateAction('new_loan', 0, newLoanAmount)}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Simulate
+            </button>
+          </div>
+        </div>
+
+        {/* Credit Utilization Simulation */}
+        <div className="border rounded-lg p-4">
+          <h3 className="font-medium mb-2">Simulate Utilization Reduction</h3>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              className="flex-1 border rounded px-3 py-2"
+              placeholder="Reduction percentage"
+              max="100"
+              value={utilizationReduction || ''}
+              onChange={(e) => setUtilizationReduction(Number(e.target.value))}
+            />
+            <button
+              onClick={() => simulateAction('utilization', 0, utilizationReduction)}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Simulate
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Action Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <button
+          onClick={() => simulateAction('account_age', 0, 2)}
+          className="bg-gray-100 px-4 py-2 rounded hover:bg-gray-200"
+        >
+          +2 Years Account Age
+        </button>
+        <button
+          onClick={() => simulateAction('pay_overdue', 0, 50000)}
+          className="bg-gray-100 px-4 py-2 rounded hover:bg-gray-200"
+        >
+          Pay ₹50,000 Overdue
+        </button>
+        <button
+          onClick={() => simulateAction('settle_writeoff', 0, 100000)}
+          className="bg-gray-100 px-4 py-2 rounded hover:bg-gray-200"
+        >
+          Settle ₹1,00,000 Write-off
+        </button>
+      </div>
+
+      {/* Results */}
+      {simulations.length > 0 && (
+        <div className="border-t pt-4">
+          <h3 className="font-medium mb-3">Simulation Results</h3>
+          <div className="space-y-3">
+            {simulations.map((sim, index) => (
+              <div key={index} className="flex justify-between items-center bg-gray-50 p-3 rounded">
+                <span className="text-sm">
+                  {sim.action.replace('_', ' ').charAt(0).toUpperCase() + sim.action.slice(1).replace('_', ' ')}
+                </span>
+                <span className={`font-medium ${sim.impact > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                  {sim.impact > 0 ? '+' : ''}{sim.impact} points
+                </span>
+              </div>
+            ))}
+            <div className="flex justify-between items-center bg-gray-100 p-3 rounded font-medium">
+              <span>Estimated New Score</span>
+              <span className="text-blue-600">
+                {score + simulations.reduce((acc, sim) => acc + sim.impact, 0)}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={() => setSimulations([])}
+            className="mt-4 text-red-500 text-sm hover:text-red-600"
+          >
+            Clear Simulations
+          </button>
+        </div>
+      )}
     </div>
   );
 };
@@ -119,6 +259,140 @@ const isWithinLast6Months = (dateString: string) => {
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   return enquiryDate >= sixMonthsAgo;
+};
+
+// Add this new component before the main CreditScoreReportPage component
+const FloatingActionPopup = ({ score, router, reportData }: { score: number, router: any, reportData: any }) => {
+  const [isMinimized, setIsMinimized] = useState(false);
+
+  return (
+    <div 
+      className={`fixed bottom-4 md:bottom-4 right-4 z-[9999] bg-white rounded-lg shadow-xl transition-all duration-300 ${
+        isMinimized ? 'w-auto' : 'w-64'
+      } sm:bottom-4 bottom-20`}
+    >
+      {/* Header with minimize/maximize button */}
+      <div className="flex items-center justify-between p-3 bg-blue-500 text-white rounded-lg cursor-pointer"
+           onClick={() => setIsMinimized(!isMinimized)}>
+        <span className={`font-medium text-sm ${isMinimized ? 'mr-2' : ''}`}>
+          Quick Actions
+        </span>
+        <button className="text-white hover:text-gray-100">
+          {isMinimized ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Action buttons */}
+      <div className={`p-3 space-y-2 ${isMinimized ? 'hidden' : 'block'}`}>
+        {/* Conditional button based on score */}
+        {score < 700 ? (
+          <button 
+            onClick={() => router.push('/credit/improve')}
+            className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg 
+              transition-all duration-200 flex items-center justify-center space-x-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            <span>Improve Score</span>
+          </button>
+        ) : (
+          <button 
+            onClick={() => router.push('/credit/simplify')}
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg 
+              transition-all duration-200 flex items-center justify-center space-x-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+            <span>Simplify Finances</span>
+          </button>
+        )}
+
+        <button 
+          onClick={() => {
+            if (reportData) {
+              // Store report data in localStorage before navigation
+              // Create matching_blocks array from accounts
+              const matching_blocks = [
+                ...(reportData.accounts?.active || []).map((account: any) => ({
+                  account_type: account.account_type,
+                  account_number: account.account_number,
+                  full_details: {
+                    accountstatus: account.status || 'Active',
+                    creditguarantor: account.credit_grantor || account.lender,
+                    accounttype: account.account_type
+                  },
+                  overdue_amount: account.overdue_amount || 0,
+                  write_off_amount: account.write_off_amount || 0,
+                  current_balance: account.current_balance || 0
+                })),
+                ...(reportData.accounts?.closed || []).map((account: any) => ({
+                  account_type: account.account_type,
+                  account_number: account.account_number,
+                  full_details: {
+                    accountstatus: account.status || 'Closed',
+                    creditguarantor: account.credit_grantor || account.lender,
+                    accounttype: account.account_type
+                  },
+                  overdue_amount: account.overdue_amount || 0,
+                  write_off_amount: account.write_off_amount || 0,
+                  current_balance: account.current_balance || 0
+                }))
+              ];
+
+              // Create active_loans_by_lender object with proper typing
+              const active_loans_by_lender: Record<string, any[]> = {};
+              reportData.accounts?.active?.forEach((account: any) => {
+                const lender = account.credit_grantor || account.lender;
+                if (!active_loans_by_lender[lender]) {
+                  active_loans_by_lender[lender] = [];
+                }
+                active_loans_by_lender[lender].push(account);
+              });
+
+              const disputeData = {
+                matching_blocks,
+                active_loans_by_lender,
+                inquiry_history: reportData.inquiry_history || [],
+                credit_report_id: reportData.id
+              };
+
+              console.log('Storing dispute data:', disputeData); // Debug log
+              localStorage.setItem('creditReportData', JSON.stringify(disputeData));
+            }
+            router.push('/credit/dispute');
+          }}
+          className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg 
+            transition-all duration-200 flex items-center justify-center space-x-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>Dispute Report</span>
+        </button>
+
+        <button 
+          onClick={() => router.push('/credit/simulator')}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
+            transition-all duration-200 flex items-center justify-center space-x-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+          </svg>
+          <span>Score Simulator</span>
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default function CreditScoreReportPage() {
@@ -270,136 +544,8 @@ export default function CreditScoreReportPage() {
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      {/* Adjusted floating buttons with updated desktop positioning */}
-      <div className="fixed top-44 right-2 md:top-44 md:right-4 z-[9999] flex flex-col gap-2">
-        {/* Score Improvement Button - Only show if score is below 700 */}
-        {score < 700 ? (
-          <button 
-            onClick={() => router.push('/credit/improve')}
-            className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg shadow-lg 
-              transition-all duration-200 flex items-center space-x-2 group
-              hover:shadow-xl active:scale-95 text-xs md:text-sm whitespace-nowrap"
-          >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-4 w-4" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" 
-              />
-            </svg>
-            <span className="hidden md:inline">Improve Your Credit Score</span>
-            <span className="md:hidden">Improve Score</span>
-          </button>
-        ) : (
-          <button 
-            onClick={() => router.push('/credit/simplify')}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg shadow-lg 
-              transition-all duration-200 flex items-center space-x-2 group
-              hover:shadow-xl active:scale-95 text-xs md:text-sm whitespace-nowrap"
-          >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-4 w-4" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M19 9l-7 7-7-7" 
-              />
-            </svg>
-            <span className="hidden md:inline">Simplify Your Finances</span>
-            <span className="md:hidden">Simplify</span>
-          </button>
-        )}
-
-        {/* Existing Dispute Button */}
-        <button 
-          onClick={() => {
-            // Store report data in localStorage before navigation
-            if (reportData) {
-              // Create matching_blocks array from accounts
-              const matching_blocks = [
-                ...(reportData.accounts?.active || []).map((account: any) => ({
-                  account_type: account.account_type,
-                  account_number: account.account_number,
-                  full_details: {
-                    accountstatus: account.status || 'Active',
-                    creditguarantor: account.credit_grantor || account.lender,
-                    accounttype: account.account_type
-                  },
-                  overdue_amount: account.overdue_amount || 0,
-                  write_off_amount: account.write_off_amount || 0,
-                  current_balance: account.current_balance || 0
-                })),
-                ...(reportData.accounts?.closed || []).map((account: any) => ({
-                  account_type: account.account_type,
-                  account_number: account.account_number,
-                  full_details: {
-                    accountstatus: account.status || 'Closed',
-                    creditguarantor: account.credit_grantor || account.lender,
-                    accounttype: account.account_type
-                  },
-                  overdue_amount: account.overdue_amount || 0,
-                  write_off_amount: account.write_off_amount || 0,
-                  current_balance: account.current_balance || 0
-                }))
-              ];
-
-              // Create active_loans_by_lender object with proper typing
-              const active_loans_by_lender: Record<string, any[]> = {};
-              reportData.accounts?.active?.forEach((account: any) => {
-                const lender = account.credit_grantor || account.lender;
-                if (!active_loans_by_lender[lender]) {
-                  active_loans_by_lender[lender] = [];
-                }
-                active_loans_by_lender[lender].push(account);
-              });
-
-              const disputeData = {
-                matching_blocks,
-                active_loans_by_lender,
-                inquiry_history: reportData.inquiry_history || [],
-                credit_report_id: reportData.id
-              };
-
-              console.log('Storing dispute data:', disputeData); // Debug log
-              localStorage.setItem('creditReportData', JSON.stringify(disputeData));
-            }
-            router.push('/credit/dispute');
-          }}
-          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg shadow-lg 
-            transition-all duration-200 flex items-center space-x-2 group
-            hover:shadow-xl active:scale-95 text-xs md:text-sm whitespace-nowrap"
-        >
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-4 w-4" 
-            fill="none" 
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
-            />
-          </svg>
-          <span className="hidden md:inline">Found Inaccuracy - Dispute Here</span>
-          <span className="md:hidden">Dispute</span>
-        </button>
-      </div>
+      {/* Remove the existing floating buttons and add the new popup component */}
+      <FloatingActionPopup score={score} router={router} reportData={reportData} />
 
       <div className="flex-1 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

@@ -760,7 +760,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Credit Score</h4>
-                    <p className="text-gray-600">Understand Your Credit Score through our AI generated personalized video</p>
+                    <p className="text-gray-600">Understand Your Credit Score through our AI generated personalized video and summary</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -769,7 +769,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">Get Recommendations</h4>
-                    <p className="text-gray-600">Receive personalized recommendations for score improvement</p>
+                    <p className="text-gray-600">Receive personalized recommendations for score improvement and simplify account management</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -777,7 +777,7 @@ export default function Home() {
                     <span className="text-white text-lg font-bold">3</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-2">Apply for Loans</h4>
+                    <h4 className="font-semibold mb-2">Apply for Products</h4>
                     <p className="text-gray-600">Apply for secured and unsecured loans with higher chances of approval</p>
                   </div>
                 </div>
