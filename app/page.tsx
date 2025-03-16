@@ -474,7 +474,9 @@ export default function Home() {
         .card-button,
         [role="button"],
         .profile-dropdown *,
-        .card-content *
+        .card-content *,
+        [href="/investment"],
+        [href="/credit/score"]
       `);
       
       elements.forEach(element => {
@@ -493,7 +495,7 @@ export default function Home() {
         });
       };
     }
-  }, [isInvestmentDropdownOpen, isCreditDropdownOpen, isChatOpen]); // Added all relevant state dependencies
+  }, [isInvestmentDropdownOpen, isCreditDropdownOpen, isChatOpen]);
 
   return (
     <div className="min-h-screen bg-white">
