@@ -42,6 +42,8 @@ export default function Home() {
   const [latestAllocation, setLatestAllocation] = useState(null)
   const [reportData, setReportData] = useState<any>(null)
   const [activeCard, setActiveCard] = useState<'investment' | 'credit'>('investment')
+  const [isInvestmentDropdownOpen, setIsInvestmentDropdownOpen] = useState(false)
+  const [isCreditDropdownOpen, setIsCreditDropdownOpen] = useState(false)
 
   const testimonials = [
     {
@@ -465,7 +467,7 @@ export default function Home() {
   // Add touchstart handlers for mobile buttons
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) { // Mobile only
-      const buttons = document.querySelectorAll('button, a');
+      const buttons = document.querySelectorAll('button, a, .dropdown-item');
       
       buttons.forEach(button => {
         button.addEventListener('touchstart', (e) => {
@@ -483,7 +485,7 @@ export default function Home() {
         });
       };
     }
-  }, []);
+  }, [isInvestmentDropdownOpen, isCreditDropdownOpen]); // Add dropdown states as dependencies
 
   return (
     <div className="min-h-screen bg-white">
