@@ -462,6 +462,29 @@ export default function Home() {
     </div>
   );
 
+  // Add touchstart handlers for mobile buttons
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) { // Mobile only
+      const buttons = document.querySelectorAll('button, a');
+      
+      buttons.forEach(button => {
+        button.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          (button as HTMLElement).click();
+        }, { passive: false });
+      });
+
+      return () => {
+        buttons.forEach(button => {
+          button.removeEventListener('touchstart', (e) => {
+            e.preventDefault();
+            (button as HTMLElement).click();
+          });
+        });
+      };
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
