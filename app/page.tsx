@@ -263,10 +263,9 @@ export default function Home() {
 
   // Mobile Carousel
   const MobileCarousel = () => (
-    <div className="md:hidden px-4">
+    <div className="md:hidden px-4 relative">
       {!user ? (
-        // Non-logged in user buttons
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 relative z-30">
           <Link href="/investment" className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white hover:bg-blue-700">
             Get Funds Allocation Strategy <br />
             with Recommendations
@@ -280,7 +279,7 @@ export default function Home() {
       ) : (
         <>
           {/* Card Toggle Buttons */}
-          <div className="flex gap-2 mb-4 justify-center relative z-20">
+          <div className="flex gap-2 mb-4 justify-center relative z-30">
             <button
               onClick={() => setActiveCard('investment')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -306,8 +305,8 @@ export default function Home() {
           {/* Swipeable Cards Area */}
           <div 
             {...handlers} 
-            className="relative z-10"
-            onClick={(e) => e.stopPropagation()}
+            className="relative z-20"
+            style={{ touchAction: 'pan-y pinch-zoom' }}
           >
             <div className="transition-all duration-500 ease-in-out">
               {activeCard === 'investment' ? (
@@ -445,13 +444,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="relative z-30">
+      {/* Header with highest z-index */}
+      <div className="relative z-50">
         <Header />
       </div>
       
-      <main className="relative z-20">
+      <main className="relative z-10">
         {/* Hero Section */}
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center pointer-events-auto">
           <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4">
             Your AI-Powered Personalized Financial Health Solution
           </h1>
@@ -460,13 +460,13 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Mobile View with explicit z-index */}
-        <div className="relative z-10">
+        {/* Mobile View */}
+        <div className="relative z-20 pointer-events-auto">
           <MobileCarousel />
         </div>
 
         {/* Desktop View */}
-        <div className="hidden md:flex justify-center items-start gap-8 flex-wrap">
+        <div className="hidden md:flex justify-center items-start gap-8 flex-wrap pointer-events-auto">
           {user ? (
             // Logged in view - show cards
             <>
