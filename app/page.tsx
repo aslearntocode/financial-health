@@ -257,8 +257,9 @@ export default function Home() {
   const handlers = useSwipeable({
     onSwipedLeft: () => setActiveCard('investment'),
     onSwipedRight: () => setActiveCard('credit'),
-    preventScrollOnSwipe: true,
-    trackMouse: true
+    preventScrollOnSwipe: false,
+    trackMouse: false,
+    trackTouch: true
   });
 
   // Mobile Carousel
@@ -266,12 +267,12 @@ export default function Home() {
     <div className="md:hidden px-4">
       {!user ? (
         <div className="flex flex-col gap-4">
-          <Link href="/investment" className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white hover:bg-blue-700">
+          <Link href="/investment" className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-blue-700">
             Get Funds Allocation Strategy <br />
             with Recommendations
           </Link>
 
-          <Link href="/credit/score" className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-center text-base font-semibold text-white hover:bg-green-700">
+          <Link href="/credit/score" className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-green-700">
             Understand Your Credit Score <br />
             and Apply for Loans
           </Link>
@@ -282,31 +283,31 @@ export default function Home() {
           <div className="flex gap-2 mb-4 justify-center">
             <button
               onClick={() => setActiveCard('investment')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 activeCard === 'investment'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 text-gray-600 active:bg-gray-200'
               }`}
             >
               Investment
             </button>
             <button
               onClick={() => setActiveCard('credit')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 activeCard === 'credit'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  : 'bg-gray-100 text-gray-600 active:bg-gray-200'
               }`}
             >
               Credit
             </button>
           </div>
 
-          {/* Swipeable Cards Area - only apply z-index to the cards */}
+          {/* Cards Area */}
           <div {...handlers}>
             <div className="transition-all duration-500 ease-in-out">
               {activeCard === 'investment' ? (
-                <div className={`${cardStyles} relative z-10`}>
+                <div className={cardStyles}>
                   <div className="p-4 h-full flex flex-col justify-between">
                     <div>
                       <div className={headerStyles + " bg-blue-600/10"}>
@@ -367,7 +368,7 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <div className={`${cardStyles} relative z-10`}>
+                <div className={cardStyles}>
                   <div className="p-4 h-full flex flex-col justify-between">
                     <div>
                       <div className={headerStyles + " bg-green-600/10"}>
