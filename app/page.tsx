@@ -126,18 +126,24 @@ export default function Home() {
 
             const score = reportAnalysis?.first_block?.score_value || reportAnalysis?.score_details?.score || 0
             
+            // Fix: Properly format the date from Supabase
+            const formattedDate = new Date(data.created_at).toLocaleDateString('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            })
+            
             const report = {
-              date: new Date(data.created_at).toLocaleDateString(),
+              date: formattedDate, // Use the formatted date
               type: 'Credit Analysis',
               score: parseInt(score)
             }
             setLatestReport(report)
           } catch (parseError) {
-            console.log("No credit report found or error parsing data")
+            console.error("Error parsing report data:", parseError)
             setLatestReport(null)
           }
         } else {
-          // No data found - this is a normal case for new users
           setLatestReport(null)
         }
       } else {
@@ -188,7 +194,7 @@ export default function Home() {
                 <div className="flex justify-between items-center mb-2">
                   <div>
                     <p className="text-gray-600 text-sm">Generated on:</p>
-                    <p className="font-medium">{new Date(latestReport.date).toLocaleDateString()}</p>
+                    <p className="font-medium">{latestReport.date}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-gray-600 text-sm">Score:</p>
@@ -214,40 +220,42 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-2">
-                  <button className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2 hover:bg-blue-50 rounded-lg transition-colors">
+                  <div className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2 hover:bg-blue-50 rounded-lg transition-colors">
                     View Report
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                     </svg>
-                  </button>
+                  </div>
 
-                  <Link href={new Date().getTime() - new Date(latestReport.date).getTime() > 30 * 24 * 60 * 60 * 1000 ? "/credit/score" : "#"}>
-                    <button 
-                      className={`w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2 hover:bg-blue-50 rounded-lg transition-colors group ${
-                        new Date().getTime() - new Date(latestReport.date).getTime() <= 30 * 24 * 60 * 60 * 1000 
-                          ? 'opacity-50 cursor-not-allowed'
-                          : ''
-                      }`}
-                      disabled={new Date().getTime() - new Date(latestReport.date).getTime() <= 30 * 24 * 60 * 60 * 1000}
-                    >
-                      <div className="relative">
-                        Refresh Analysis
-                        <svg className="w-4 h-4 inline-block ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        
-                        {/* Desktop tooltip (hidden on mobile) */}
-                        <div className="hidden md:group-hover:block text-xs text-gray-500 mt-1">
-                          Latest report generated on {new Date(latestReport.date).toLocaleDateString()}
-                        </div>
-
-                        {/* Mobile text (visible only on mobile) */}
-                        <div className="block md:hidden text-xs text-gray-500 mt-1">
-                          Latest report generated on {new Date(latestReport.date).toLocaleDateString()}
-                        </div>
+                  <div 
+                    className={`w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2 hover:bg-blue-50 rounded-lg transition-colors group ${
+                      new Date().getTime() - new Date(latestReport.date).getTime() <= 30 * 24 * 60 * 60 * 1000 
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'cursor-pointer'
+                    }`}
+                    onClick={() => {
+                      if (new Date().getTime() - new Date(latestReport.date).getTime() > 30 * 24 * 60 * 60 * 1000) {
+                        window.location.href = '/credit/score';
+                      }
+                    }}
+                  >
+                    <div className="relative">
+                      Refresh Analysis
+                      <svg className="w-4 h-4 inline-block ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      
+                      {/* Desktop tooltip (hidden on mobile) */}
+                      <div className="hidden md:group-hover:block text-xs text-gray-500 mt-1">
+                        Latest report generated on {latestReport.date}
                       </div>
-                    </button>
-                  </Link>
+
+                      {/* Mobile text (visible only on mobile) */}
+                      <div className="block md:hidden text-xs text-gray-500 mt-1">
+                        Latest report generated on {latestReport.date}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
