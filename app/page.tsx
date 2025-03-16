@@ -10,7 +10,15 @@ import { ProfileDropdown } from "@/components/ProfileDropdown"
 import Testimonials from "@/components/Testimonials"
 import Header from "@/components/Header"
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { PieChart } from "@/components/PieChart"
+import { supabase } from '@/lib/supabase'
+import { useSwipeable } from 'react-swipeable'
 // import ReturnComparisonBox from "@/components/ReturnComparisonBox"
+
+interface AllocationItem {
+  name: string;
+  value: number;
+}
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState('distribution') // 'distribution' or 'offer'
@@ -21,12 +29,19 @@ export default function Home() {
     name: '',
     message: ''
   })
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<any>(null)
   const [latestReport, setLatestReport] = useState<null | {
     date: string;
     type: string;
     score?: number;
+    openAccounts?: number;
+    closedAccounts?: number;
+    totalCreditLimit?: string;
+    report_analysis?: any;
   }>(null)
+  const [latestAllocation, setLatestAllocation] = useState(null)
+  const [reportData, setReportData] = useState<any>(null)
+  const [activeCard, setActiveCard] = useState<'investment' | 'credit'>('investment')
 
   const testimonials = [
     {
@@ -154,6 +169,61 @@ export default function Home() {
     return () => unsubscribe()
   }, [])
 
+  useEffect(() => {
+    const fetchAllocation = async () => {
+      if (user) {
+        const supabase = createClientComponentClient()
+        const { data, error } = await supabase
+          .from('investment_records')
+          .select('allocation')
+          .eq('user_id', user.uid)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (!error && data?.allocation) {
+          setLatestAllocation(data.allocation);
+        }
+      }
+    };
+
+    fetchAllocation();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchReport = async () => {
+      if (user) {  // Only fetch if user is logged in
+        const { data: reports } = await supabase
+          .from('credit_reports')
+          .select('*')
+          .eq('user_id', user.uid)  // Filter by user_id
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (reports && reports[0]) {
+          // Format the date from created_at
+          const formattedDate = new Date(reports[0].created_at).toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          });
+
+          // Parse the report_analysis JSON if it's stored as a string
+          const parsedReport = {
+            ...reports[0],
+            report_analysis: typeof reports[0].report_analysis === 'string' 
+              ? JSON.parse(reports[0].report_analysis)
+              : reports[0].report_analysis,
+            formattedDate // Add the formatted date to the parsed report
+          };
+          setReportData(parsedReport);
+        }
+      }
+    };
+
+    fetchReport();
+  }, [user]); // Add user to dependency array
+
   // Debug log for render
   console.log("Render state:", { user: !!user, latestReport })
 
@@ -167,265 +237,395 @@ export default function Home() {
     setChatForm({ name: '', message: '' }) // Reset form
   }
 
-  return (
-    <main className="min-h-screen bg-white relative">
-      <Header />
-      
-      {/* Credit Score Alert Box - Static positioning */}
-      {user && latestReport && (latestReport.score ?? 0) > 0 && (
-        <div className="md:absolute relative md:top-36 md:right-6 z-40 md:w-[200px] w-full px-4 md:px-0 mb-6">
-          <Link href="/credit/score/report" className="block">
-            <div className="bg-blue-50 rounded-xl shadow-lg overflow-hidden">
-              <div className="p-4">
-                <div className="flex justify-between items-center mb-3">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                    </svg>
-                    <span className="text-blue-600 font-medium">Credit Report</span>
-                  </div>
-                  <button className="text-gray-400 hover:text-gray-500">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
+  // Common card styles
+  const cardStyles = "bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300 w-[320px] min-h-[400px]";
+  const headerStyles = "flex items-center gap-2 mb-4 p-2 rounded-lg";
+  const iconContainerStyles = "p-2 rounded-lg";
+  const titleStyles = "text-gray-900 font-semibold text-lg";
+  const buttonStyles = "w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors mt-2";
 
-                <div className="flex justify-between items-center mb-2">
+  // New useEffect for card switching
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveCard((prev) => prev === 'investment' ? 'credit' : 'investment');
+    }, 10000); // Switch every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Swipe handlers
+  const handlers = useSwipeable({
+    onSwipedLeft: () => setActiveCard('investment'),
+    onSwipedRight: () => setActiveCard('credit'),
+    preventScrollOnSwipe: true,
+    trackMouse: true
+  });
+
+  // Mobile Carousel
+  const MobileCarousel = () => (
+    <div className="md:hidden px-4" {...handlers}>
+      {!user ? (
+        // Non-logged in user buttons
+        <div className="flex flex-col gap-4">
+          <Link
+            href="/investment"
+            className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white hover:bg-blue-700"
+          >
+            Get Funds Allocation Strategy <br />
+            with Recommendations
+          </Link>
+
+          <Link
+            href="/credit/score"
+            className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-center text-base font-semibold text-white hover:bg-green-700"
+          >
+            Understand Your Credit Score <br />
+            and Apply for Loans
+          </Link>
+        </div>
+      ) : (
+        <>
+          {/* Card Toggle Buttons */}
+          <div className="flex gap-2 mb-4 justify-center">
+            <button
+              onClick={() => setActiveCard('investment')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeCard === 'investment'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Investment
+            </button>
+            <button
+              onClick={() => setActiveCard('credit')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeCard === 'credit'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              Credit
+            </button>
+          </div>
+
+          {/* Cards */}
+          <div className="transition-all duration-500 ease-in-out">
+            {activeCard === 'investment' ? (
+              <div className={cardStyles}>
+                <div className="p-4 h-full flex flex-col justify-between">
                   <div>
-                    <p className="text-gray-600 text-sm">Generated on:</p>
-                    <p className="font-medium">{latestReport.date}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-gray-600 text-sm">Score:</p>
-                    <p className={`font-medium ${
-                      (latestReport.score ?? 0) >= 750 ? 'text-green-600' :
-                      (latestReport.score ?? 0) >= 600 ? 'text-yellow-600' :
-                      'text-red-600'
-                    }`}>{latestReport.score}</p>
-                  </div>
-                </div>
+                    <div className={headerStyles + " bg-blue-600/10"}>
+                      <div className="bg-white p-1.5 rounded-lg">
+                        <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                        </svg>
+                      </div>
+                      <span className={titleStyles}>Investment Allocation</span>
+                    </div>
 
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full ${
-                        (latestReport.score ?? 0) >= 750 ? 'bg-green-500' :
-                        (latestReport.score ?? 0) >= 600 ? 'bg-yellow-500' :
-                        'bg-red-500'
-                      }`}
-                      style={{ width: `${(latestReport.score || 0) / 9}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2 hover:bg-blue-50 rounded-lg transition-colors">
-                    View Report
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                    </svg>
+                    <div className="space-y-2.5 my-4">
+                      {/* Ensure 6 rows by padding with empty rows if needed */}
+                      {[...Array(6)].map((_, index) => {
+                        const item = latestAllocation?.[index] as AllocationItem | undefined;
+                        return (
+                          <div key={item?.name || `empty-${index}`} className="flex justify-between items-center">
+                            <span className="text-gray-600">
+                              {item?.name || '\u00A0'} {/* Use non-breaking space for empty rows */}
+                            </span>
+                            <span className="font-semibold text-gray-900">
+                              {item?.value ? `${item.value}%` : ''}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <div 
-                    className={`w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2 hover:bg-blue-50 rounded-lg transition-colors group ${
-                      new Date().getTime() - new Date(latestReport.date).getTime() <= 30 * 24 * 60 * 60 * 1000 
-                        ? 'opacity-50 cursor-not-allowed'
-                        : 'cursor-pointer'
-                    }`}
-                    onClick={() => {
-                      if (new Date().getTime() - new Date(latestReport.date).getTime() > 30 * 24 * 60 * 60 * 1000) {
-                        window.location.href = '/credit/score';
-                      }
-                    }}
-                  >
-                    <div className="relative">
-                      Refresh Analysis
-                      <svg className="w-4 h-4 inline-block ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="space-y-2 pt-4">
+                    <Link href="/investment" className={buttonStyles}>
+                      View Full Investment Allocation
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                    <button className={buttonStyles} onClick={() => window.location.href = '/investment'}>
+                      Update Risk Profile
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
-                      
-                      {/* Desktop tooltip (hidden on mobile) */}
-                      <div className="hidden md:group-hover:block text-xs text-gray-500 mt-1">
-                        Latest report generated on {latestReport.date}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className={cardStyles}>
+                <div className="p-4 h-full flex flex-col justify-between">
+                  <div>
+                    <div className={headerStyles + " bg-green-600/10"}>
+                      <div className="bg-white p-1.5 rounded-lg">
+                        <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                        </svg>
                       </div>
+                      <span className={titleStyles}>Credit Report</span>
+                    </div>
 
-                      {/* Mobile text (visible only on mobile) */}
-                      <div className="block md:hidden text-xs text-gray-500 mt-1">
-                        Latest report generated on {latestReport.date}
+                    <div className="flex justify-between items-center mb-6">
+                      <div>
+                        <p className="text-gray-500">Generated on:</p>
+                        <p className="font-medium text-gray-900">{reportData?.formattedDate}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-gray-500">Score:</p>
+                        <p className={`font-semibold text-2xl ${
+                          (reportData?.report_analysis?.score_details?.score >= 750) ? 'text-green-600' :
+                          (reportData?.report_analysis?.score_details?.score >= 600) ? 'text-yellow-600' :
+                          'text-red-600'
+                        }`}>{reportData?.report_analysis?.score_details?.score}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 mb-8">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Open Accounts</span>
+                        <span className="font-semibold text-gray-900">
+                          {reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["ACTIVE-ACCOUNTS"] || 0}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Closed Accounts</span>
+                        <span className="font-semibold text-gray-900">
+                          {(parseInt(reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["NUMBER-OF-ACCOUNTS"] || "0") - 
+                           parseInt(reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["ACTIVE-ACCOUNTS"] || "0")) || 0}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Total Credit Limit</span>
+                        <span className="font-semibold text-gray-900">
+                          ₹{(parseInt(reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["TOTAL-CC-SANCTION-AMOUNT-ALL-ACCOUNT"] || "0"))?.toLocaleString('en-IN') || 0}
+                        </span>
                       </div>
                     </div>
                   </div>
+
+                  <div className="space-y-3">
+                    <Link href="/credit/score/report" className={buttonStyles}>
+                      View Full Report
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                    <button 
+                      className={`${buttonStyles} ${
+                        new Date().getTime() - new Date(reportData?.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000 
+                          ? 'opacity-50 cursor-not-allowed'
+                          : ''
+                      }`}
+                      onClick={() => {
+                        if (new Date().getTime() - new Date(reportData?.created_at).getTime() > 30 * 24 * 60 * 60 * 1000) {
+                          window.location.href = '/credit/score';
+                        }
+                      }}
+                    >
+                      Refresh Analysis
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        </div>
-      )}
-
-      {/* Add shimmer animation */}
-      <style jsx>{`
-        @keyframes shimmer {
-          0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-        .animate-shimmer {
-          animation: shimmer 2s infinite;
-        }
-      `}</style>
-
-      {/* Chat Popup */}
-      {isChatOpen && (
-        <div className="fixed bottom-24 right-6 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-[350px] overflow-hidden">
-            {/* Chat Header */}
-            <div className="bg-[#25D366] p-4 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="24" 
-                  height="24" 
-                  className="w-6 h-6 fill-white"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-                </svg>
-                <span className="text-white font-semibold">Chat with us</span>
-              </div>
-              <button 
-                onClick={() => setIsChatOpen(false)}
-                className="text-white hover:text-gray-200"
-                aria-label="Close chat"
-              >
-                <svg 
-                  className="w-6 h-6" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth="2" 
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* Chat Form */}
-            <div className="p-4">
-              <div className="mb-4 text-sm text-gray-600">
-                <p className="mb-2">👋 Hi there! We typically respond within 30 minutes.</p>
-                <p>Fill out the form below to start a WhatsApp chat with our team.</p>
-              </div>
-              
-              <form onSubmit={handleChatSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    value={chatForm.name}
-                    onChange={(e) => setChatForm(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-[#25D366] focus:border-[#25D366]"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                    Your Message
-                  </label>
-                  <textarea
-                    id="message"
-                    value={chatForm.message}
-                    onChange={(e) => setChatForm(prev => ({ ...prev, message: e.target.value }))}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-[#25D366] focus:border-[#25D366]"
-                    required
-                  />
-                </div>
-
-                <div className="text-xs text-gray-500 mb-4">
-                  By clicking "Start Chat", WhatsApp will open in a new tab with your message.
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-[#25D366] text-white py-2 px-4 rounded-md hover:bg-[#128C7E] transition-colors duration-300"
-                >
-                  Start Chat
-                </button>
-              </form>
-            </div>
+            )}
           </div>
-        </div>
+        </>
       )}
+    </div>
+  );
 
-      {/* WhatsApp floating button */}
-      <button 
-        onClick={() => setIsChatOpen(true)}
-        className="fixed bottom-6 right-6 z-50 bg-[#25D366] w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-full shadow-lg hover:bg-[#128C7E] transition-colors duration-300"
-        aria-label="Open chat"
-      >
-        <svg 
-          xmlns="http://www.w3.org/2000/svg" 
-          width="24" 
-          height="24" 
-          className="w-6 h-6 md:w-8 md:h-8 fill-white"
-          viewBox="0 0 24 24"
-        >
-          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-        </svg>
-      </button>
-
-      {/* Pro Tip Notification Banner */}
-      <div className="bg-green-50 border-y border-green-100 overflow-hidden relative h-10">
-        <div 
-          className="absolute py-2 px-4 whitespace-nowrap transition-all duration-1000 ease-linear"
-          style={{ transform: `translateX(${proTipPosition}%)` }}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-xl flex-shrink-0">💡</span>
-            <span className="text-green-700 text-sm md:text-base font-bold">
-              If you are planning to take a loan then do check loan options against your Mutual Funds (LAMF) or Fixed Deposits (LAFD) as they are offered at much lower interest rates
-            </span>
-          </div>
-        </div>
-      </div>
-
+  return (
+    <div className="min-h-screen bg-white relative">
+      <Header />
+      
       {/* Hero Section */}
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
         <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4">
           Your AI-Powered Personalized Financial Health Solution
         </h1>
         <p className="text-base md:text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
-          Get personalized recommendations for both investments and credit decisions. 
-          We help you build wealth and manage debt intelligently.
+          Get personalized recommendations for both investments and credit decisions. We help you build wealth and manage debt intelligently.
         </p>
-        <div className="flex justify-center gap-4 flex-wrap">
-          <Link
-            href="/investment"
-            className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-blue-700"
-          >
-            Get Funds Allocation Strategy <br />
-            with Recommendations
-          </Link>
-          <Link
-            href="/credit/score"
-            className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
-          >
-            Understand Your Credit Score <br />
-            and Apply for Loans
-          </Link>
-        </div>
+      </div>
+
+      {/* Mobile View */}
+      <MobileCarousel />
+
+      {/* Desktop View */}
+      <div className="hidden md:flex justify-center items-start gap-8 flex-wrap">
+        {user ? (
+          // Logged in view - show cards
+          <>
+            <div className="hidden md:block">
+              {latestAllocation ? (
+                <div className={cardStyles}>
+                  <div className="p-4 h-full flex flex-col justify-between">
+                    <div>
+                      <div className={headerStyles + " bg-blue-600/10"}>
+                        <div className="bg-white p-1.5 rounded-lg">
+                          <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                          </svg>
+                        </div>
+                        <span className={titleStyles}>Investment Allocation</span>
+                      </div>
+
+                      <div className="space-y-2.5 my-4">
+                        {/* Ensure 6 rows by padding with empty rows if needed */}
+                        {[...Array(6)].map((_, index) => {
+                          const item = latestAllocation?.[index] as AllocationItem | undefined;
+                          return (
+                            <div key={item?.name || `empty-${index}`} className="flex justify-between items-center">
+                              <span className="text-gray-600">
+                                {item?.name || '\u00A0'} {/* Use non-breaking space for empty rows */}
+                              </span>
+                              <span className="font-semibold text-gray-900">
+                                {item?.value ? `${item.value}%` : ''}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 pt-4">
+                      <Link href="/investment" className={buttonStyles}>
+                        View Full Investment Allocation
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                      <Link href="/investment" className={buttonStyles}>
+                        Update Risk Profile
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  href="/investment"
+                  className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-blue-700"
+                >
+                  Get Funds Allocation Strategy <br />
+                  with Recommendations
+                </Link>
+              )}
+            </div>
+
+            {latestReport && (latestReport.score ?? 0) > 0 && (
+              <div className="hidden md:block">
+                <div className={cardStyles}>
+                  <div className="p-4 h-full flex flex-col justify-between">
+                    <div>
+                      <div className={headerStyles + " bg-green-600/10"}>
+                        <div className="bg-white p-1.5 rounded-lg">
+                          <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                          </svg>
+                        </div>
+                        <span className={titleStyles}>Credit Report</span>
+                      </div>
+
+                      <div className="flex justify-between items-center mb-6">
+                        <div>
+                          <p className="text-gray-500">Generated on:</p>
+                          <p className="font-medium text-gray-900">{reportData?.formattedDate}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-gray-500">Score:</p>
+                          <p className={`font-semibold text-2xl ${
+                            (reportData?.report_analysis?.score_details?.score >= 750) ? 'text-green-600' :
+                            (reportData?.report_analysis?.score_details?.score >= 600) ? 'text-yellow-600' :
+                            'text-red-600'
+                          }`}>{reportData?.report_analysis?.score_details?.score}</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4 mb-8">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Open Accounts</span>
+                          <span className="font-semibold text-gray-900">
+                            {reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["ACTIVE-ACCOUNTS"] || 0}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Closed Accounts</span>
+                          <span className="font-semibold text-gray-900">
+                            {(parseInt(reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["NUMBER-OF-ACCOUNTS"] || "0") - 
+                             parseInt(reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["ACTIVE-ACCOUNTS"] || "0")) || 0}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-600">Total Credit Limit</span>
+                          <span className="font-semibold text-gray-900">
+                            ₹{(parseInt(reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["TOTAL-CC-SANCTION-AMOUNT-ALL-ACCOUNT"] || "0"))?.toLocaleString('en-IN') || 0}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Link href="/credit/score/report" className={buttonStyles}>
+                        View Full Report
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                      </Link>
+                      <button 
+                        className={`${buttonStyles} ${
+                          new Date().getTime() - new Date(reportData?.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000 
+                            ? 'opacity-50 cursor-not-allowed'
+                            : ''
+                        }`}
+                        onClick={() => {
+                          if (new Date().getTime() - new Date(reportData?.created_at).getTime() > 30 * 24 * 60 * 60 * 1000) {
+                            window.location.href = '/credit/score';
+                          }
+                        }}
+                      >
+                        Refresh Analysis
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          // Not logged in view - show both buttons
+          <>
+            <Link
+              href="/investment"
+              className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-blue-700"
+            >
+              Get Funds Allocation Strategy <br />
+              with Recommendations
+            </Link>
+
+            <Link
+              href="/credit/score"
+              className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
+            >
+              Understand Your Credit Score <br />
+              and Apply for Loans
+            </Link>
+          </>
+        )}
       </div>
 
       {/* Steps Container - Update to show both services */}
@@ -943,6 +1143,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

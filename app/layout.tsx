@@ -1,6 +1,5 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
-import Header from '@/components/Header'
 import { Analytics } from "@vercel/analytics/react"
 import Footer from "@/components/Footer"
 import { Toaster } from 'react-hot-toast'
@@ -33,8 +32,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head />
-      <body>
-        {children}
+      <body className="min-h-screen">
+        <main>
+          {children}
+        </main>
         <Footer />
         <Analytics />
         <Toaster />
