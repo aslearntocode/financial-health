@@ -341,13 +341,27 @@ export default function Home() {
                     </div>
 
                     <div className="space-y-2 pt-4">
-                      <Link href="/investment" className={buttonStyles}>
+                      <Link 
+                        href="/investment" 
+                        className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Add any additional handling if needed
+                        }}
+                      >
                         View Full Investment Allocation
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                         </svg>
                       </Link>
-                      <button className={buttonStyles} onClick={() => window.location.href = '/investment'}>
+                      
+                      <button 
+                        className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = '/investment';
+                        }}
+                      >
                         Update Risk Profile
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -407,20 +421,29 @@ export default function Home() {
                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                      <Link href="/credit/score/report" className={buttonStyles}>
+                    <div className="space-y-2 pt-4">
+                      <Link 
+                        href="/credit/score/report" 
+                        className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Add any additional handling if needed
+                        }}
+                      >
                         View Full Report
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                         </svg>
                       </Link>
+                      
                       <button 
-                        className={`${buttonStyles} ${
+                        className={`w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors ${
                           new Date().getTime() - new Date(reportData?.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000 
                             ? 'opacity-50 cursor-not-allowed'
                             : ''
                         }`}
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           if (new Date().getTime() - new Date(reportData?.created_at).getTime() > 30 * 24 * 60 * 60 * 1000) {
                             window.location.href = '/credit/score';
                           }
@@ -503,18 +526,32 @@ export default function Home() {
                       </div>
 
                       <div className="space-y-2 pt-4">
-                        <Link href="/investment" className={buttonStyles}>
+                        <Link 
+                          href="/investment" 
+                          className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Add any additional handling if needed
+                          }}
+                        >
                           View Full Investment Allocation
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                           </svg>
                         </Link>
-                        <Link href="/investment" className={buttonStyles}>
+                        
+                        <button 
+                          className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.location.href = '/investment';
+                          }}
+                        >
                           Update Risk Profile
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                           </svg>
-                        </Link>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -581,20 +618,29 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className="space-y-3">
-                        <Link href="/credit/score/report" className={buttonStyles}>
+                      <div className="space-y-2 pt-4">
+                        <Link 
+                          href="/credit/score/report" 
+                          className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Add any additional handling if needed
+                          }}
+                        >
                           View Full Report
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                           </svg>
                         </Link>
+                        
                         <button 
-                          className={`${buttonStyles} ${
+                          className={`w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors ${
                             new Date().getTime() - new Date(reportData?.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000 
                               ? 'opacity-50 cursor-not-allowed'
                               : ''
                           }`}
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             if (new Date().getTime() - new Date(reportData?.created_at).getTime() > 30 * 24 * 60 * 60 * 1000) {
                               window.location.href = '/credit/score';
                             }
