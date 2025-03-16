@@ -308,7 +308,7 @@ export default function CreditScoreSimulatorPage() {
             <div className="hidden md:block relative">
               <div className="sticky top-24">
                 <Image
-                  src="/creditsimulator.png"
+                  src="/CreditSimulator.png"
                   alt="Credit Score Simulation Illustration"
                   width={500}
                   height={500}
