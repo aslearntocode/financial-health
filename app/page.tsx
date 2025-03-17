@@ -243,14 +243,6 @@ export default function Home() {
   const buttonStyles = "w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors mt-2";
 
   const MobileCarousel = () => {
-    // Helper function to handle mobile clicks
-    const handleMobileClick = (action: () => void) => {
-      if (typeof window !== 'undefined' && window.innerWidth < 768) {
-        // For mobile, execute immediately without waiting for second click
-        action();
-      }
-    };
-
     return (
       <div className="md:hidden px-4">
         {!user ? (
@@ -258,10 +250,6 @@ export default function Home() {
             <Link 
               href="/investment" 
               className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-blue-700"
-              onClick={(e) => {
-                e.preventDefault();
-                handleMobileClick(() => window.location.href = '/investment');
-              }}
             >
               Get Funds Allocation Strategy <br />
               with Recommendations
@@ -270,10 +258,6 @@ export default function Home() {
             <Link 
               href="/credit/score" 
               className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-green-700"
-              onClick={(e) => {
-                e.preventDefault();
-                handleMobileClick(() => window.location.href = '/credit/score');
-              }}
             >
               Understand and Improve <br />
               Your Credit Score
@@ -283,7 +267,7 @@ export default function Home() {
           <>
             <div className="flex gap-2 mb-4 justify-center">
               <button
-                onClick={() => handleMobileClick(() => setActiveCard('investment'))}
+                onClick={() => setActiveCard('investment')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium ${
                   activeCard === 'investment'
                     ? 'bg-blue-600 text-white'
@@ -293,7 +277,7 @@ export default function Home() {
                 Investment
               </button>
               <button
-                onClick={() => handleMobileClick(() => setActiveCard('credit'))}
+                onClick={() => setActiveCard('credit')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium ${
                   activeCard === 'credit'
                     ? 'bg-blue-600 text-white'
@@ -307,15 +291,9 @@ export default function Home() {
             <div className="transition-all duration-500 ease-in-out">
               {activeCard === 'investment' ? (
                 <div className={cardStyles} onClick={(e) => e.stopPropagation()}>
-                  {/* Investment card content */}
-                  {/* Update all links inside to use handleMobileClick */}
                   <Link 
                     href="/investment" 
                     className={buttonStyles}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleMobileClick(() => window.location.href = '/investment');
-                    }}
                   >
                     View Full Investment Allocation
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -323,30 +301,21 @@ export default function Home() {
                     </svg>
                   </Link>
                   
-                  <button 
+                  <Link 
+                    href="/investment" 
                     className={buttonStyles}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleMobileClick(() => window.location.href = '/investment');
-                    }}
                   >
                     Update Risk Profile
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                  </button>
+                  </Link>
                 </div>
               ) : (
                 <div className={cardStyles} onClick={(e) => e.stopPropagation()}>
-                  {/* Credit card content */}
-                  {/* Update all links inside to use handleMobileClick */}
                   <Link 
                     href="/credit/score/report" 
                     className={buttonStyles}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleMobileClick(() => window.location.href = '/credit/score/report');
-                    }}
                   >
                     View Full Report
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -354,24 +323,19 @@ export default function Home() {
                     </svg>
                   </Link>
                   
-                  <button 
+                  <Link 
+                    href="/credit/score"
                     className={`${buttonStyles} ${
                       new Date().getTime() - new Date(reportData?.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000 
-                        ? 'opacity-50 cursor-not-allowed'
+                        ? 'opacity-50 pointer-events-none'
                         : ''
                     }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (new Date().getTime() - new Date(reportData?.created_at).getTime() > 30 * 24 * 60 * 60 * 1000) {
-                        handleMobileClick(() => window.location.href = '/credit/score');
-                      }
-                    }}
                   >
                     Refresh Analysis
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>
