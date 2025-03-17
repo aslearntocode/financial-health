@@ -246,44 +246,23 @@ export default function Home() {
   const titleStyles = "text-gray-900 font-semibold text-lg";
   const buttonStyles = "w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors mt-2";
 
-  // New useEffect for card switching
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveCard((prev) => prev === 'investment' ? 'credit' : 'investment');
-    }, 10000); // Switch every 10 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Update swipe handlers to be more specific and prevent event interference
+  // Simplify the swipe handlers and remove unnecessary event handling
   const handlers = useSwipeable({
-    onSwipedLeft: (e) => {
-      e.event.stopPropagation();
-      setActiveCard('investment');
-    },
-    onSwipedRight: (e) => {
-      e.event.stopPropagation();
-      setActiveCard('credit');
-    },
-    preventScrollOnSwipe: true,
+    onSwipedLeft: () => setActiveCard('investment'),
+    onSwipedRight: () => setActiveCard('credit'),
     trackMouse: false,
-    trackTouch: true,
-    delta: 50, // Increased to reduce false triggers
-    swipeDuration: 250
+    delta: 50
   });
 
-  // Mobile Carousel with updated click handlers
+  // Mobile Carousel with simplified event handling
   const MobileCarousel = () => (
-    <div className="md:hidden px-4">
+    <div className="md:hidden px-4" onClick={e => e.preventDefault()}>
       {!user ? (
         <div className="flex flex-col gap-4">
           <Link 
             href="/investment" 
             className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-blue-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.location.href = '/investment';
-            }}
+            replace
           >
             Get Funds Allocation Strategy <br />
             with Recommendations
@@ -292,10 +271,7 @@ export default function Home() {
           <Link 
             href="/credit/score" 
             className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-green-700"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.location.href = '/credit/score';
-            }}
+            replace
           >
             Understand Your Credit Score <br />
             and Apply for Loans
@@ -305,10 +281,7 @@ export default function Home() {
         <>
           <div className="flex gap-2 mb-4 justify-center">
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveCard('investment');
-              }}
+              onClick={() => setActiveCard('investment')}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 activeCard === 'investment'
                   ? 'bg-blue-600 text-white'
@@ -318,10 +291,7 @@ export default function Home() {
               Investment
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveCard('credit');
-              }}
+              onClick={() => setActiveCard('credit')}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 activeCard === 'credit'
                   ? 'bg-blue-600 text-white'
@@ -332,7 +302,7 @@ export default function Home() {
             </button>
           </div>
 
-          <div {...handlers} className="touch-none">
+          <div {...handlers}>
             <div className="transition-all duration-500 ease-in-out">
               {activeCard === 'investment' ? (
                 <div className={cardStyles}>
@@ -491,7 +461,7 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white" onClick={e => e.preventDefault()}>
       {/* Header */}
       <div className="relative z-[100]">
         <Header />
