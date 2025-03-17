@@ -255,13 +255,15 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Swipe handlers
+  // Swipe handlers with preventDefaultTouchmoveEvent set to true
   const handlers = useSwipeable({
     onSwipedLeft: () => setActiveCard('investment'),
     onSwipedRight: () => setActiveCard('credit'),
-    preventScrollOnSwipe: false,
+    preventDefaultTouchmoveEvent: true,
     trackMouse: false,
-    trackTouch: true
+    trackTouch: true,
+    delta: 10, // Minimum distance in pixels before a swipe starts
+    swipeDuration: 250 // Maximum time in milliseconds for a swipe
   });
 
   // Mobile Carousel
@@ -281,7 +283,7 @@ export default function Home() {
         </div>
       ) : (
         <>
-          {/* Card Toggle Buttons */}
+          {/* Card Toggle Buttons - Modified to prevent double triggers */}
           <div className="flex gap-2 mb-4 justify-center">
             <button
               onClick={() => setActiveCard('investment')}
@@ -305,7 +307,7 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Cards Area */}
+          {/* Cards Area - Modified swipeable implementation */}
           <div {...handlers}>
             <div className="transition-all duration-500 ease-in-out">
               {activeCard === 'investment' ? (
@@ -463,30 +465,6 @@ export default function Home() {
       )}
     </div>
   );
-
-  // Modify the touchstart handlers to be more specific and prevent double triggers
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) { // Mobile only
-      // Remove the general touchstart handlers
-      // Only add specific handlers where absolutely necessary
-      const profileDropdown = document.querySelector('.profile-dropdown');
-      if (profileDropdown) {
-        profileDropdown.addEventListener('touchstart', (e) => {
-          e.preventDefault();
-          (e.currentTarget as HTMLElement).click();
-        }, { passive: false });
-      }
-
-      return () => {
-        if (profileDropdown) {
-          profileDropdown.removeEventListener('touchstart', (e) => {
-            e.preventDefault();
-            (e.currentTarget as HTMLElement).click();
-          });
-        }
-      };
-    }
-  }, [isInvestmentDropdownOpen, isCreditDropdownOpen, isChatOpen]);
 
   return (
     <div className="min-h-screen bg-white">
