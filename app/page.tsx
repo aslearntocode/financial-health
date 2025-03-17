@@ -275,8 +275,8 @@ export default function Home() {
                 handleMobileClick(() => window.location.href = '/credit/score');
               }}
             >
-              Understand Your Credit Score <br />
-              and Apply for Loans
+              Understand and Improve <br />
+              Your Credit Score
             </Link>
           </div>
         ) : (
@@ -407,7 +407,7 @@ export default function Home() {
         {/* Desktop View */}
         <div className="hidden md:flex justify-center items-start gap-8 flex-wrap">
           {user ? (
-            // Logged in view - show cards
+            // Logged in view - show cards and/or buttons
             <>
               <div className="hidden md:block">
                 {latestAllocation ? (
@@ -482,7 +482,7 @@ export default function Home() {
                 )}
               </div>
 
-              {latestReport && (latestReport.score ?? 0) > 0 && (
+              {(latestReport && (latestReport.score ?? 0) > 0) ? (
                 <div className="hidden md:block">
                   <div className={cardStyles}>
                     <div className="p-4 h-full flex flex-col justify-between">
@@ -571,6 +571,14 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
+              ) : (
+                <Link
+                  href="/credit/score"
+                  className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
+                >
+                  Understand and Improve  <br />
+                  Your Credit Score
+                </Link>
               )}
             </>
           ) : (
@@ -588,8 +596,8 @@ export default function Home() {
                 href="/credit/score"
                 className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
               >
-                Understand Your Credit Score <br />
-                and Apply for Loans
+                Understand and Improve  <br />
+                Your Credit Score
               </Link>
             </>
           )}
