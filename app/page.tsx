@@ -242,208 +242,144 @@ export default function Home() {
   const titleStyles = "text-gray-900 font-semibold text-lg";
   const buttonStyles = "w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors mt-2";
 
-  const MobileCarousel = () => (
-    <div className="md:hidden px-4">
-      {!user ? (
-        <div className="flex flex-col gap-4">
-          <Link 
-            href="/investment" 
-            className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-blue-700"
-            replace
-          >
-            Get Funds Allocation Strategy <br />
-            with Recommendations
-          </Link>
+  const MobileCarousel = () => {
+    // Helper function to handle mobile clicks
+    const handleMobileClick = (action: () => void) => {
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        // For mobile, execute immediately without waiting for second click
+        action();
+      }
+    };
 
-          <Link 
-            href="/credit/score" 
-            className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-green-700"
-            replace
-          >
-            Understand Your Credit Score <br />
-            and Apply for Loans
-          </Link>
-        </div>
-      ) : (
-        <>
-          <div className="flex gap-2 mb-4 justify-center">
-            <button
-              onClick={() => setActiveCard('investment')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                activeCard === 'investment'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 active:bg-gray-200'
-              }`}
+    return (
+      <div className="md:hidden px-4">
+        {!user ? (
+          <div className="flex flex-col gap-4">
+            <Link 
+              href="/investment" 
+              className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-blue-700"
+              onClick={(e) => {
+                e.preventDefault();
+                handleMobileClick(() => window.location.href = '/investment');
+              }}
             >
-              Investment
-            </button>
-            <button
-              onClick={() => setActiveCard('credit')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                activeCard === 'credit'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-600 active:bg-gray-200'
-              }`}
+              Get Funds Allocation Strategy <br />
+              with Recommendations
+            </Link>
+
+            <Link 
+              href="/credit/score" 
+              className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-green-700"
+              onClick={(e) => {
+                e.preventDefault();
+                handleMobileClick(() => window.location.href = '/credit/score');
+              }}
             >
-              Credit
-            </button>
+              Understand Your Credit Score <br />
+              and Apply for Loans
+            </Link>
           </div>
+        ) : (
+          <>
+            <div className="flex gap-2 mb-4 justify-center">
+              <button
+                onClick={() => handleMobileClick(() => setActiveCard('investment'))}
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  activeCard === 'investment'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-600 active:bg-gray-200'
+                }`}
+              >
+                Investment
+              </button>
+              <button
+                onClick={() => handleMobileClick(() => setActiveCard('credit'))}
+                className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                  activeCard === 'credit'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-600 active:bg-gray-200'
+                }`}
+              >
+                Credit
+              </button>
+            </div>
 
-          <div className="transition-all duration-500 ease-in-out">
-            {activeCard === 'investment' ? (
-              <div className={cardStyles}>
-                <div className="p-4 h-full flex flex-col justify-between">
-                  <div>
-                    <div className={headerStyles + " bg-blue-600/10"}>
-                      <div className="bg-white p-1.5 rounded-lg">
-                        <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                        </svg>
-                      </div>
-                      <span className={titleStyles}>Investment Allocation</span>
-                    </div>
-
-                    <div className="space-y-2.5 my-4">
-                      {/* Ensure 6 rows by padding with empty rows if needed */}
-                      {[...Array(6)].map((_, index) => {
-                        const item = latestAllocation?.[index] as AllocationItem | undefined;
-                        return (
-                          <div key={item?.name || `empty-${index}`} className="flex justify-between items-center">
-                            <span className="text-gray-600">
-                              {item?.name || '\u00A0'} {/* Use non-breaking space for empty rows */}
-                            </span>
-                            <span className="font-semibold text-gray-900">
-                              {item?.value ? `${item.value}%` : ''}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 pt-4">
-                    <Link 
-                      href="/investment" 
-                      className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Add any additional handling if needed
-                      }}
-                    >
-                      View Full Investment Allocation
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
-                    
-                    <button 
-                      className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.location.href = '/investment';
-                      }}
-                    >
-                      Update Risk Profile
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                    </button>
-                  </div>
+            <div className="transition-all duration-500 ease-in-out">
+              {activeCard === 'investment' ? (
+                <div className={cardStyles} onClick={(e) => e.stopPropagation()}>
+                  {/* Investment card content */}
+                  {/* Update all links inside to use handleMobileClick */}
+                  <Link 
+                    href="/investment" 
+                    className={buttonStyles}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleMobileClick(() => window.location.href = '/investment');
+                    }}
+                  >
+                    View Full Investment Allocation
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                  
+                  <button 
+                    className={buttonStyles}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleMobileClick(() => window.location.href = '/investment');
+                    }}
+                  >
+                    Update Risk Profile
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
                 </div>
-              </div>
-            ) : (
-              <div className={cardStyles}>
-                <div className="p-4 h-full flex flex-col justify-between">
-                  <div>
-                    <div className={headerStyles + " bg-green-600/10"}>
-                      <div className="bg-white p-1.5 rounded-lg">
-                        <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                        </svg>
-                      </div>
-                      <span className={titleStyles}>Credit Report</span>
-                    </div>
-
-                    <div className="flex justify-between items-center mb-6">
-                      <div>
-                        <p className="text-gray-500">Generated on:</p>
-                        <p className="font-medium text-gray-900">{reportData?.formattedDate}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-gray-500">Score:</p>
-                        <p className={`font-semibold text-2xl ${
-                          (reportData?.report_analysis?.score_details?.score >= 750) ? 'text-green-600' :
-                          (reportData?.report_analysis?.score_details?.score >= 600) ? 'text-yellow-600' :
-                          'text-red-600'
-                        }`}>{reportData?.report_analysis?.score_details?.score}</p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4 mb-8">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">Open Accounts</span>
-                        <span className="font-semibold text-gray-900">
-                          {reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["ACTIVE-ACCOUNTS"] || 0}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">Closed Accounts</span>
-                        <span className="font-semibold text-gray-900">
-                          {(parseInt(reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["NUMBER-OF-ACCOUNTS"] || "0") - 
-                           parseInt(reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["ACTIVE-ACCOUNTS"] || "0")) || 0}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-600">Total Credit Limit</span>
-                        <span className="font-semibold text-gray-900">
-                          ₹{(parseInt(reportData?.report_analysis?.account_summary?.["PRIMARY-ACCOUNTS-SUMMARY"]?.["TOTAL-CC-SANCTION-AMOUNT-ALL-ACCOUNT"] || "0"))?.toLocaleString('en-IN') || 0}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 pt-4">
-                    <Link 
-                      href="/credit/score/report" 
-                      className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Add any additional handling if needed
-                      }}
-                    >
-                      View Full Report
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </Link>
-                    
-                    <button 
-                      className={`w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors ${
-                        new Date().getTime() - new Date(reportData?.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000 
-                          ? 'opacity-50 cursor-not-allowed'
-                          : ''
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (new Date().getTime() - new Date(reportData?.created_at).getTime() > 30 * 24 * 60 * 60 * 1000) {
-                          window.location.href = '/credit/score';
-                        }
-                      }}
-                    >
-                      Refresh Analysis
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                    </button>
-                  </div>
+              ) : (
+                <div className={cardStyles} onClick={(e) => e.stopPropagation()}>
+                  {/* Credit card content */}
+                  {/* Update all links inside to use handleMobileClick */}
+                  <Link 
+                    href="/credit/score/report" 
+                    className={buttonStyles}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleMobileClick(() => window.location.href = '/credit/score/report');
+                    }}
+                  >
+                    View Full Report
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </Link>
+                  
+                  <button 
+                    className={`${buttonStyles} ${
+                      new Date().getTime() - new Date(reportData?.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000 
+                        ? 'opacity-50 cursor-not-allowed'
+                        : ''
+                    }`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (new Date().getTime() - new Date(reportData?.created_at).getTime() > 30 * 24 * 60 * 60 * 1000) {
+                        handleMobileClick(() => window.location.href = '/credit/score');
+                      }
+                    }}
+                  >
+                    Refresh Analysis
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
                 </div>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  );
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-white">
