@@ -254,9 +254,9 @@ export default function Home() {
     delta: 50
   });
 
-  // Mobile Carousel with simplified event handling
+  // Mobile Carousel without preventDefault
   const MobileCarousel = () => (
-    <div className="md:hidden px-4" onClick={e => e.preventDefault()}>
+    <div className="md:hidden px-4">
       {!user ? (
         <div className="flex flex-col gap-4">
           <Link 
@@ -461,7 +461,7 @@ export default function Home() {
   );
 
   return (
-    <div className="min-h-screen bg-white" onClick={e => e.preventDefault()}>
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="relative z-[100]">
         <Header />
