@@ -23,6 +23,12 @@ interface MutualFund {
   }
 }
 
+interface MutualFundRecommendation {
+  id: string;
+  created_at: string;
+  recommendations: MutualFund[];
+}
+
 export default function MutualFundRecommendations() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -37,6 +43,7 @@ function MutualFundRecommendationsContent() {
   const [recommendations, setRecommendations] = useState<MutualFund[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [recommendationData, setRecommendationData] = useState<MutualFundRecommendation | null>(null)
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -57,7 +64,7 @@ function MutualFundRecommendationsContent() {
 
         const { data: recommendation, error } = await supabase
           .from('mutual_fund_recommendations')
-          .select('recommendations')
+          .select('*')
           .eq('id', recommendationId)
           .eq('user_id', user.uid)
           .single()
@@ -76,6 +83,7 @@ function MutualFundRecommendationsContent() {
         }
 
         console.log('Fetched recommendation:', recommendation)
+        setRecommendationData(recommendation)
         setRecommendations(recommendation.recommendations)
         setLoading(false)
       } catch (err) {
@@ -127,8 +135,15 @@ function MutualFundRecommendationsContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2 text-gray-900">Recommended Mutual Funds</h1>
-            <p className="text-gray-600 font-bold">Select 2 to 3 Mutual Funds from Varied Risk Categories</p>
+            <div className="flex items-center gap-4">
+              <h1 className="text-4xl font-bold text-gray-900">Recommended Mutual Funds</h1>
+              {recommendationData?.created_at && (
+                <span className="text-base text-gray-600">
+                  Generated on: {new Date(recommendationData.created_at).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+            <p className="text-gray-600 font-bold mt-2">Select 2 to 3 Mutual Funds from Varied Risk Categories</p>
           </div>
           <button
             onClick={() => router.push('/investment')}

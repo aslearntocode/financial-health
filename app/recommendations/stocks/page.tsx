@@ -20,6 +20,12 @@ interface Stock {
   rationale: string
 }
 
+interface StockRecommendation {
+  id: string;
+  created_at: string;
+  recommendations: Stock[];
+}
+
 export default function StockRecommendations() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
@@ -34,6 +40,7 @@ function StockRecommendationsContent() {
   const [recommendations, setRecommendations] = useState<Stock[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [recommendationData, setRecommendationData] = useState<StockRecommendation | null>(null)
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -52,7 +59,7 @@ function StockRecommendationsContent() {
 
         const { data: recommendation, error } = await supabase
           .from('stock_recommendations')
-          .select('recommendations')
+          .select('*')
           .eq('id', recommendationId)
           .eq('user_id', user.uid)
           .single()
@@ -70,6 +77,7 @@ function StockRecommendationsContent() {
           return
         }
 
+        setRecommendationData(recommendation)
         setRecommendations(recommendation.recommendations)
         setLoading(false)
       } catch (err) {
@@ -121,8 +129,15 @@ function StockRecommendationsContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2 text-gray-900">Recommended Stocks</h1>
-            <p className="text-gray-600 font-bold">Select 3 to 5 Stocks from Varied Risk Categories</p>
+            <div className="flex items-center gap-4">
+              <h1 className="text-4xl font-bold text-gray-900">Recommended Stocks</h1>
+              {recommendationData?.created_at && (
+                <span className="text-base text-gray-600">
+                  Generated on: {new Date(recommendationData.created_at).toLocaleDateString()}
+                </span>
+              )}
+            </div>
+            <p className="text-gray-600 font-bold mt-2">Select 3 to 5 Stocks from Varied Risk Categories</p>
           </div>
           <button
             onClick={() => router.push('/investment')}

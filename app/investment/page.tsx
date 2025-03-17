@@ -659,6 +659,7 @@ export default function InvestmentPage() {
             .single();
 
           if (latestRecord) {
+            setSavedRecord(latestRecord);
             // Update form data - ensure approximate_debt is converted to string
             setFormData({
               name: latestRecord.name || '',
@@ -1424,7 +1425,14 @@ export default function InvestmentPage() {
 
             {/* Chart Section - Add id for PDF generation */}
             <div id="dashboard-content" className="bg-white rounded-lg shadow-lg p-8">
-              <h2 className="text-2xl font-bold mb-4">Your Investment Allocation</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Your Investment Allocation</h2>
+                {showChart && chartData.allocation && chartData.allocation.length > 0 && (
+                  <span className="text-base text-gray-600">
+                    Generated on: {new Date(savedRecord?.created_at || new Date()).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
               {isLoading ? (
                 <p>Calculating your allocation...</p>
               ) : showChart && chartData.allocation && chartData.allocation.length > 0 ? (
