@@ -266,6 +266,81 @@ function extractRiskScore(data: any): number {
   }
 }
 
+// Add this new component before the main InvestmentPage component
+const FloatingActionPopup = ({ router, handleMutualFundClick, handleStockClick, showPopup }: { 
+  router: any, 
+  handleMutualFundClick: () => void, 
+  handleStockClick: () => void,
+  showPopup: boolean
+}) => {
+  const [isMinimized, setIsMinimized] = useState(false);
+
+  if (!showPopup) return null;
+
+  return (
+    <div 
+      className={`fixed bottom-4 md:bottom-4 right-4 z-[9999] bg-white rounded-lg shadow-xl transition-all duration-300 ${
+        isMinimized ? 'w-auto' : 'w-64'
+      } sm:bottom-4 bottom-20`}
+    >
+      {/* Header with minimize/maximize button */}
+      <div className="flex items-center justify-between p-3 bg-blue-500 text-white rounded-lg cursor-pointer"
+           onClick={() => setIsMinimized(!isMinimized)}>
+        <span className={`font-medium text-sm ${isMinimized ? 'mr-2' : ''}`}>
+          Generate New or View Existing Recommendations
+        </span>
+        <button className="text-white hover:text-gray-100">
+          {isMinimized ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
+            </svg>
+          )}
+        </button>
+      </div>
+
+      {/* Action buttons */}
+      <div className={`p-3 space-y-2 ${isMinimized ? 'hidden' : 'block'}`}>
+        <button 
+          onClick={handleMutualFundClick}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
+            transition-all duration-200 flex items-center justify-center space-x-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Mutual Funds</span>
+        </button>
+
+        <button 
+          onClick={handleStockClick}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
+            transition-all duration-200 flex items-center justify-center space-x-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          <span>Stocks</span>
+        </button>
+
+        <button 
+          onClick={() => router.push('/recommendations/bonds')}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg 
+            transition-all duration-200 flex items-center justify-center space-x-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <span>Bonds</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function InvestmentPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(auth.currentUser)
@@ -297,9 +372,12 @@ export default function InvestmentPage() {
     expected_return: 0
   });
 
+  // Add this state to track if we should show the popup
+  const [showRecommendationsPopup, setShowRecommendationsPopup] = useState(false);
+
   // Update useEffect for auth state changes
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
         // Update form data with user's name when they log in
@@ -308,6 +386,21 @@ export default function InvestmentPage() {
           name: currentUser.displayName || ''
         }));
         setUserName(currentUser.displayName || ''); // Also update userName state
+        
+        // Check if user has any previous allocations
+        try {
+          const { data: records } = await supabase
+            .from('investment_records')
+            .select('*')
+            .eq('user_id', currentUser.uid)
+            .limit(1);
+
+          setShowRecommendationsPopup(records && records.length > 0);
+        } catch (error) {
+          console.error('Error checking previous allocations:', error);
+        }
+      } else {
+        setShowRecommendationsPopup(false);
       }
     });
 
@@ -454,6 +547,9 @@ export default function InvestmentPage() {
         expected_return: responseData.expected_return
       });
       setShowChart(true);
+
+      // After successful calculation, show the popup
+      setShowRecommendationsPopup(true);
 
     } catch (error) {
       console.error('HandleCalculate error:', {
@@ -1156,274 +1252,272 @@ export default function InvestmentPage() {
   };
 
   return (
-    <div id="investment-page-container" className="min-h-screen bg-white">
-      <Header />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        {/* Add Download PDF button */}
-        {showChart && chartData.allocation && chartData.allocation.length > 0 && (
-          <div className="mb-4">
-            <Button 
-              onClick={generatePDF}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Download PDF Report
-            </Button>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {/* Form Section */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold mb-6">Investment Profile</h2>
-            {error && (
-              <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-md">
-                {error}
-              </div>
-            )}
-            <form 
-              onSubmit={handleSubmit} 
-              className="space-y-6"
-            >
-              <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Enter your full name"
-                  value={userName}
-                  readOnly
-                  className="form-input bg-gray-100"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="age">Age (in years)</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  placeholder="Enter your age"
-                  value={formData.age}
-                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="current_savings">Current Savings Uptil Now (in INR)</Label>
-                <Input
-                  id="current_savings"
-                  type="number"
-                  placeholder="Enter your current savings"
-                  value={formData.current_savings}
-                  onChange={(e) => setFormData({ ...formData, current_savings: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="monthly_savings">Monthly Savings Going Forward (in INR)</Label>
-                <Input
-                  id="monthly_savings"
-                  type="number"
-                  placeholder="Enter your monthly savings"
-                  value={formData.monthly_savings}
-                  onChange={(e) => setFormData({ ...formData, monthly_savings: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="investment_horizon_years">Investment Horizon (Years)</Label>
-                <Input
-                  id="investment_horizon_years"
-                  type="number"
-                  placeholder="Enter investment duration in years"
-                  value={formData.investment_horizon_years}
-                  onChange={(e) => setFormData({ ...formData, investment_horizon_years: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="financial_goal">Financial Goal</Label>
-                <Select 
-                  value={formData.financial_goal}
-                  onValueChange={(value) => setFormData({ ...formData, financial_goal: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your financial goal" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Retirement">Retirement</SelectItem>
-                    <SelectItem value="Education">Education</SelectItem>
-                    <SelectItem value="House">House Purchase</SelectItem>
-                    <SelectItem value="Wealth">Wealth Creation</SelectItem>
-                    <SelectItem value="Passive Income">Passive Income</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="approximate_debt">How much approximate debt do you have? (in INR)
-                  <br/> (This should include any Home Loan, Car Loan, Personal Loan, Credit Card Debt, etc.)
-                </Label>
-                <Input
-                  id="approximate_debt"
-                  type="number"
-                  placeholder="Enter your approximate debt amount"
-                  value={formData.approximate_debt}
-                  onChange={(e) => setFormData({ ...formData, approximate_debt: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="needs_money_during_horizon">Do you anticipate needing this money during your investment horizon?
-                  <br/> (This is important for us to understand your risk appetite)<br/>
-                </Label>
-                <Select 
-                  value={formData.needs_money_during_horizon}
-                  onValueChange={(value: 'Y' | 'N') => {
-                    console.log('Money needs selection:', value);
-                    setFormData(prev => ({ ...prev, needs_money_during_horizon: value }));
-                  }}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select yes or no" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Y">Yes</SelectItem>
-                    <SelectItem value="N">No</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="has_investment_experience">Do you have experience investing in equity market?</Label>
-                <Select 
-                  value={formData.has_investment_experience}
-                  onValueChange={(value: 'Y' | 'N') => {
-                    console.log('Investment experience selection:', value);
-                    setFormData(prev => ({ ...prev, has_investment_experience: value }));
-                  }}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select yes or no" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Y">Yes</SelectItem>
-                    <SelectItem value="N">No</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={isLoading}
+    <div className="min-h-screen flex flex-col">
+      {/* Add the FloatingActionPopup component */}
+      <FloatingActionPopup 
+        router={router} 
+        handleMutualFundClick={handleMutualFundClick} 
+        handleStockClick={handleStockClick} 
+        showPopup={showRecommendationsPopup}
+      />
+      
+      <div id="investment-page-container" className="min-h-screen bg-white">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {/* Form Section */}
+            <div className="bg-white rounded-lg shadow-lg p-8">
+              <h2 className="text-2xl font-bold mb-6">Investment Profile</h2>
+              {error && (
+                <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-md">
+                  {error}
+                </div>
+              )}
+              <form 
+                onSubmit={handleSubmit} 
+                className="space-y-6"
               >
-                {isLoading ? 'Calculating...' : 'Calculate Allocation'}
-              </Button>
-            </form>
-          </div>
-
-          {/* Chart Section - Add id for PDF generation */}
-          <div id="dashboard-content" className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold mb-4">Your Investment Allocation</h2>
-            {isLoading ? (
-              <p>Calculating your allocation...</p>
-            ) : showChart && chartData.allocation && chartData.allocation.length > 0 ? (
-              <div>
-                <div key={chartKey} className="pointer-events-none">
-                  <PieChart data={chartData.allocation} />
+                <div className="space-y-2">
+                  <Label htmlFor="name">Full Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Enter your full name"
+                    value={userName}
+                    readOnly
+                    className="form-input bg-gray-100"
+                  />
                 </div>
 
-                <div className="mt-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Risk Level Card */}
-                    <div className="p-4 bg-blue-50 rounded-lg shadow-sm border border-blue-100">
-                      <h3 className="font-semibold text-blue-800 text-base mb-2 flex items-center">
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Risk Level
-                      </h3>
-                      <div className="flex items-baseline">
-                        <p className="text-blue-600 text-2xl font-bold">
-                          {chartData.risk_score?.toFixed(0)}
-                        </p>
-                        <p className="text-blue-600 ml-2 text-sm">
-                          out of 10
-                        </p>
+                <div className="space-y-2">
+                  <Label htmlFor="age">Age (in years)</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    placeholder="Enter your age"
+                    value={formData.age}
+                    onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="current_savings">Current Savings Uptil Now (in INR)</Label>
+                  <Input
+                    id="current_savings"
+                    type="number"
+                    placeholder="Enter your current savings"
+                    value={formData.current_savings}
+                    onChange={(e) => setFormData({ ...formData, current_savings: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="monthly_savings">Monthly Savings Going Forward (in INR)</Label>
+                  <Input
+                    id="monthly_savings"
+                    type="number"
+                    placeholder="Enter your monthly savings"
+                    value={formData.monthly_savings}
+                    onChange={(e) => setFormData({ ...formData, monthly_savings: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="investment_horizon_years">Investment Horizon (Years)</Label>
+                  <Input
+                    id="investment_horizon_years"
+                    type="number"
+                    placeholder="Enter investment duration in years"
+                    value={formData.investment_horizon_years}
+                    onChange={(e) => setFormData({ ...formData, investment_horizon_years: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="financial_goal">Financial Goal</Label>
+                  <Select 
+                    value={formData.financial_goal}
+                    onValueChange={(value) => setFormData({ ...formData, financial_goal: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your financial goal" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Retirement">Retirement</SelectItem>
+                      <SelectItem value="Education">Education</SelectItem>
+                      <SelectItem value="House">House Purchase</SelectItem>
+                      <SelectItem value="Wealth">Wealth Creation</SelectItem>
+                      <SelectItem value="Passive Income">Passive Income</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="approximate_debt">How much approximate debt do you have? (in INR)
+                    <br/> (This should include any Home Loan, Car Loan, Personal Loan, Credit Card Debt, etc.)
+                  </Label>
+                  <Input
+                    id="approximate_debt"
+                    type="number"
+                    placeholder="Enter your approximate debt amount"
+                    value={formData.approximate_debt}
+                    onChange={(e) => setFormData({ ...formData, approximate_debt: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="needs_money_during_horizon">Do you anticipate needing this money during your investment horizon?
+                    <br/> (This is important for us to understand your risk appetite)<br/>
+                  </Label>
+                  <Select 
+                    value={formData.needs_money_during_horizon}
+                    onValueChange={(value: 'Y' | 'N') => {
+                      console.log('Money needs selection:', value);
+                      setFormData(prev => ({ ...prev, needs_money_during_horizon: value }));
+                    }}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select yes or no" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Y">Yes</SelectItem>
+                      <SelectItem value="N">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="has_investment_experience">Do you have experience investing in equity market?</Label>
+                  <Select 
+                    value={formData.has_investment_experience}
+                    onValueChange={(value: 'Y' | 'N') => {
+                      console.log('Investment experience selection:', value);
+                      setFormData(prev => ({ ...prev, has_investment_experience: value }));
+                    }}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select yes or no" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Y">Yes</SelectItem>
+                      <SelectItem value="N">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Calculating...' : 'Calculate Allocation'}
+                </Button>
+              </form>
+            </div>
+
+            {/* Chart Section - Add id for PDF generation */}
+            <div id="dashboard-content" className="bg-white rounded-lg shadow-lg p-8">
+              <h2 className="text-2xl font-bold mb-4">Your Investment Allocation</h2>
+              {isLoading ? (
+                <p>Calculating your allocation...</p>
+              ) : showChart && chartData.allocation && chartData.allocation.length > 0 ? (
+                <div>
+                  <div key={chartKey} className="pointer-events-none">
+                    <PieChart data={chartData.allocation} />
+                  </div>
+
+                  <div className="mt-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Risk Level Card */}
+                      <div className="p-4 bg-blue-50 rounded-lg shadow-sm border border-blue-100">
+                        <h3 className="font-semibold text-blue-800 text-base mb-2 flex items-center">
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Risk Level
+                        </h3>
+                        <div className="flex items-baseline">
+                          <p className="text-blue-600 text-2xl font-bold">
+                            {chartData.risk_score?.toFixed(0)}
+                          </p>
+                          <p className="text-blue-600 ml-2 text-sm">
+                            out of 10
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Expected Return Card */}
+                      <div className="p-4 bg-green-50 rounded-lg shadow-sm border border-green-100">
+                        <h3 className="font-semibold text-green-800 text-base mb-2 flex items-center">
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                          </svg>
+                          Expected Annual Return
+                        </h3>
+                        <div className="flex items-baseline">
+                          <p className="text-green-700 text-2xl font-bold">
+                            {chartData.expected_return?.toFixed(1)}
+                          </p>
+                          <p className="text-green-600 ml-1 text-base">
+                            %
+                          </p>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Expected Return Card */}
-                    <div className="p-4 bg-green-50 rounded-lg shadow-sm border border-green-100">
-                      <h3 className="font-semibold text-green-800 text-base mb-2 flex items-center">
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                        </svg>
-                        Expected Annual Return
-                      </h3>
-                      <div className="flex items-baseline">
-                        <p className="text-green-700 text-2xl font-bold">
-                          {chartData.expected_return?.toFixed(1)}
-                        </p>
-                        <p className="text-green-600 ml-1 text-base">
-                          %
-                        </p>
+                    {/* Investment Options Grid */}
+                    <div className="mt-8">
+                      <div className="text-center mb-4 p-4 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg text-lg">
+                        To get specific recommendations, click on the financial instruments below 
+                        <br/>(we are currently live with Stocks and Mutual Funds)
+                      </div>
+                      
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4">
+                        <button 
+                          onClick={handleMutualFundClick}
+                          className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
+                        >
+                          MUTUAL FUNDS
+                        </button>
+                        <button 
+                          onClick={handleStockClick}
+                          className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
+                        >
+                          STOCKS
+                        </button>
+                        <button 
+                          onClick={() => router.push('/recommendations/bonds')}
+                          className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
+                        >
+                          BONDS
+                        </button>
+                        <button 
+                          onClick={() => router.push('/recommendations/fixed-deposit')}
+                          className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
+                        >
+                          FIXED DEPOSITS
+                        </button>
+                        <button 
+                          onClick={() => router.push('/recommendations/etf')}
+                          className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium whitespace-nowrap col-span-2 md:col-span-1"
+                        >
+                          ETF
+                        </button>
                       </div>
                     </div>
                   </div>
-
-                  {/* Investment Options Grid */}
-                  <div className="mt-8">
-                    <div className="text-center mb-4 p-4 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg text-lg">
-                      To get specific recommendations, click on the financial instruments below 
-                      <br/>(we are currently live with Stocks and Mutual Funds)
-                    </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4">
-                      <button 
-                        onClick={handleMutualFundClick}
-                        className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
-                      >
-                        MUTUAL FUNDS
-                      </button>
-                      <button 
-                        onClick={handleStockClick}
-                        className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
-                      >
-                        STOCKS
-                      </button>
-                      <button 
-                        onClick={() => router.push('/recommendations/bonds')}
-                        className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
-                      >
-                        BONDS
-                      </button>
-                      <button 
-                        onClick={() => router.push('/recommendations/fixed-deposit')}
-                        className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
-                      >
-                        FIXED DEPOSITS
-                      </button>
-                      <button 
-                        onClick={() => router.push('/recommendations/etf')}
-                        className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium whitespace-nowrap col-span-2 md:col-span-1"
-                      >
-                        ETF
-                      </button>
-                    </div>
-                  </div>
                 </div>
-              </div>
-            ) : (
-              <p>Fill out the form and calculate to see your allocation</p>
-            )}
+              ) : (
+                <p>Fill out the form and calculate to see your allocation</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

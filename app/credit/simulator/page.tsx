@@ -53,7 +53,7 @@ const SIMULATION_OPTIONS: SimulationOption[] = [
   },
   {
     id: 'account_age',
-    name: 'Account Age Increase',
+    name: 'Account Age Increase with Timely Payments',
     description: 'Simulate the impact of account aging',
     type: 'years',
     placeholder: 'Enter number of years',
