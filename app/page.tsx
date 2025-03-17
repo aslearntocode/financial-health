@@ -255,15 +255,15 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Swipe handlers with preventDefaultTouchmoveEvent set to true
+  // Update swipe handlers with correct property names
   const handlers = useSwipeable({
     onSwipedLeft: () => setActiveCard('investment'),
     onSwipedRight: () => setActiveCard('credit'),
-    preventDefaultTouchmoveEvent: true,
+    preventScrollOnSwipe: true,  // Changed from preventDefaultTouchmoveEvent
     trackMouse: false,
     trackTouch: true,
-    delta: 10, // Minimum distance in pixels before a swipe starts
-    swipeDuration: 250 // Maximum time in milliseconds for a swipe
+    delta: 10,
+    swipeDuration: 250
   });
 
   // Mobile Carousel
