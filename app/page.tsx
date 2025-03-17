@@ -464,35 +464,26 @@ export default function Home() {
     </div>
   );
 
-  // Add touchstart handlers for mobile buttons
+  // Modify the touchstart handlers to be more specific and prevent double triggers
   useEffect(() => {
     if (typeof window !== 'undefined' && window.innerWidth < 768) { // Mobile only
-      const elements = document.querySelectorAll(`
-        button, 
-        a, 
-        .dropdown-item,
-        .card-button,
-        [role="button"],
-        .profile-dropdown *,
-        .card-content *,
-        [href="/investment"],
-        [href="/credit/score"]
-      `);
-      
-      elements.forEach(element => {
-        element.addEventListener('touchstart', (e) => {
+      // Remove the general touchstart handlers
+      // Only add specific handlers where absolutely necessary
+      const profileDropdown = document.querySelector('.profile-dropdown');
+      if (profileDropdown) {
+        profileDropdown.addEventListener('touchstart', (e) => {
           e.preventDefault();
-          (element as HTMLElement).click();
+          (e.currentTarget as HTMLElement).click();
         }, { passive: false });
-      });
+      }
 
       return () => {
-        elements.forEach(element => {
-          element.removeEventListener('touchstart', (e) => {
+        if (profileDropdown) {
+          profileDropdown.removeEventListener('touchstart', (e) => {
             e.preventDefault();
-            (element as HTMLElement).click();
+            (e.currentTarget as HTMLElement).click();
           });
-        });
+        }
       };
     }
   }, [isInvestmentDropdownOpen, isCreditDropdownOpen, isChatOpen]);
