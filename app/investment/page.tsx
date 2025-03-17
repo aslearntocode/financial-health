@@ -1264,21 +1264,21 @@ export default function InvestmentPage() {
       
       <div id="investment-page-container" className="min-h-screen bg-white">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {/* Form Section */}
-            <div className="bg-white rounded-lg shadow-lg p-8">
-              <h2 className="text-2xl font-bold mb-6">Investment Profile</h2>
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-2xl font-bold mb-4">Investment Profile</h2>
               {error && (
-                <div className="mb-4 p-4 text-red-700 bg-red-100 rounded-md">
+                <div className="mb-3 p-3 text-red-700 bg-red-100 rounded-md">
                   {error}
                 </div>
               )}
               <form 
                 onSubmit={handleSubmit} 
-                className="space-y-6"
+                className="space-y-3"
               >
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="name">Full Name</Label>
                   <Input
                     id="name"
@@ -1290,7 +1290,7 @@ export default function InvestmentPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="age">Age (in years)</Label>
                   <Input
                     id="age"
@@ -1302,7 +1302,7 @@ export default function InvestmentPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="current_savings">Current Savings Uptil Now (in INR)</Label>
                   <Input
                     id="current_savings"
@@ -1314,7 +1314,7 @@ export default function InvestmentPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="monthly_savings">Monthly Savings Going Forward (in INR)</Label>
                   <Input
                     id="monthly_savings"
@@ -1326,7 +1326,7 @@ export default function InvestmentPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="investment_horizon_years">Investment Horizon (Years)</Label>
                   <Input
                     id="investment_horizon_years"
@@ -1338,7 +1338,7 @@ export default function InvestmentPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="financial_goal">Financial Goal</Label>
                   <Select 
                     value={formData.financial_goal}
@@ -1357,7 +1357,7 @@ export default function InvestmentPage() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="approximate_debt">How much approximate debt do you have? (in INR)
                     <br/> (This should include any Home Loan, Car Loan, Personal Loan, Credit Card Debt, etc.)
                   </Label>
@@ -1371,9 +1371,9 @@ export default function InvestmentPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="needs_money_during_horizon">Do you anticipate needing this money during your investment horizon?
-                    <br/> (This is important for us to understand your risk appetite)<br/>
+                    <br/> (This is important for us to understand your risk appetite)
                   </Label>
                   <Select 
                     value={formData.needs_money_during_horizon}
@@ -1393,7 +1393,7 @@ export default function InvestmentPage() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="has_investment_experience">Do you have experience investing in equity market?</Label>
                   <Select 
                     value={formData.has_investment_experience}
@@ -1415,7 +1415,7 @@ export default function InvestmentPage() {
 
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full mt-4"
                   disabled={isLoading}
                 >
                   {isLoading ? 'Calculating...' : 'Calculate Allocation'}
@@ -1477,47 +1477,6 @@ export default function InvestmentPage() {
                             %
                           </p>
                         </div>
-                      </div>
-                    </div>
-
-                    {/* Investment Options Grid */}
-                    <div className="mt-8">
-                      <div className="text-center mb-4 p-4 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg text-lg">
-                        To get specific recommendations, click on the financial instruments below 
-                        <br/>(we are currently live with Stocks and Mutual Funds)
-                      </div>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4">
-                        <button 
-                          onClick={handleMutualFundClick}
-                          className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
-                        >
-                          MUTUAL FUNDS
-                        </button>
-                        <button 
-                          onClick={handleStockClick}
-                          className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
-                        >
-                          STOCKS
-                        </button>
-                        <button 
-                          onClick={() => router.push('/recommendations/bonds')}
-                          className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
-                        >
-                          BONDS
-                        </button>
-                        <button 
-                          onClick={() => router.push('/recommendations/fixed-deposit')}
-                          className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium"
-                        >
-                          FIXED DEPOSITS
-                        </button>
-                        <button 
-                          onClick={() => router.push('/recommendations/etf')}
-                          className="p-2 md:p-3 text-center bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg hover:opacity-90 transition-opacity text-xs md:text-sm font-medium whitespace-nowrap col-span-2 md:col-span-1"
-                        >
-                          ETF
-                        </button>
                       </div>
                     </div>
                   </div>
