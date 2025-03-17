@@ -76,19 +76,39 @@ export default function CreditScoreSimulatorPage() {
   const [simulationValue, setSimulationValue] = useState<number>(0)
   
   const calculateScoreImpact = (action: string, amount: number): number => {
+    const MAX_SCORE = 900;
+    
     switch (action) {
       case 'new_loan':
-        return -5 - Math.floor(amount / 100000);
+        // New account impact (14.8%) + Inquiry impact (13.1%)
+        const baseImpact = Math.floor(MAX_SCORE * -0.279);
+        return Math.max(baseImpact, -25 - Math.floor(amount / 100000));
+        
       case 'pay_overdue':
-        return Math.min(30, Math.floor(amount / 10000));
+        // Overdue accounts impact (14.5%)
+        const overdueImpact = Math.floor(MAX_SCORE * 0.145);
+        return Math.min(overdueImpact, Math.floor(amount / 5000));
+        
       case 'pay_writeoff':
-        return Math.min(50, Math.floor(amount / 10000));
+        // Write-offs impact (15.1%)
+        const writeoffImpact = Math.floor(MAX_SCORE * 0.151);
+        return Math.min(writeoffImpact, Math.floor(amount / 5000));
+        
       case 'settle_writeoff':
-        return Math.min(35, Math.floor(amount / 10000));
+        // Partial write-off impact (15.1% * 0.7 for settlement)
+        const settlementImpact = Math.floor(MAX_SCORE * 0.151 * 0.7);
+        return Math.min(settlementImpact, Math.floor(amount / 7000));
+        
       case 'account_age':
-        return amount * 3;
+        // Credit history length impact (16.0%)
+        const ageImpact = Math.floor((MAX_SCORE * 0.16) / 10); // Spread over 10 years
+        return Math.min(amount * ageImpact, Math.floor(MAX_SCORE * 0.16));
+        
       case 'utilization':
-        return Math.floor((amount / 5) * -1);
+        // Current balance impact (7.0%)
+        const utilizationImpact = Math.floor(MAX_SCORE * 0.07);
+        return Math.min(Math.floor(amount * 0.7), utilizationImpact);
+        
       default:
         return 0;
     }

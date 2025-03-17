@@ -90,20 +90,39 @@ const ScoreSimulator = ({ score, reportData }: { score: number, reportData: any 
   const [utilizationReduction, setUtilizationReduction] = useState<number>(0);
   
   const calculateScoreImpact = (action: string, amount: number): number => {
-    // These are approximate impacts based on common credit scoring models
+    const MAX_SCORE = 900;
+    
     switch (action) {
       case 'new_loan':
-        return -5 - Math.floor(amount / 100000); // Larger loans have bigger negative impact
+        // Combined impact of new account and inquiry
+        const baseImpact = Math.floor(MAX_SCORE * -0.279);
+        return Math.max(baseImpact, -25 - Math.floor(amount / 100000));
+        
       case 'pay_overdue':
-        return Math.min(30, Math.floor(amount / 10000)); // Cap positive impact at 30 points
+        // 14.5% weightage for overdue accounts
+        const overdueImpact = Math.floor(MAX_SCORE * 0.145);
+        return Math.min(overdueImpact, Math.floor(amount / 5000));
+        
       case 'pay_writeoff':
-        return Math.min(50, Math.floor(amount / 10000)); // Cap positive impact at 50 points
+        // 15.1% weightage for write-offs
+        const writeoffImpact = Math.floor(MAX_SCORE * 0.151);
+        return Math.min(writeoffImpact, Math.floor(amount / 5000));
+        
       case 'settle_writeoff':
-        return Math.min(35, Math.floor(amount / 10000)); // Cap positive impact at 35 points
+        // 70% of write-off impact for settlements
+        const settlementImpact = Math.floor(MAX_SCORE * 0.151 * 0.7);
+        return Math.min(settlementImpact, Math.floor(amount / 7000));
+        
       case 'account_age':
-        return amount * 3; // Each year adds 3 points
+        // 16% weightage for credit history length
+        const ageImpact = Math.floor((MAX_SCORE * 0.16) / 10);
+        return Math.min(amount * ageImpact, Math.floor(MAX_SCORE * 0.16));
+        
       case 'utilization':
-        return Math.floor((amount / 5) * -1); // Each 5% reduction adds 1 point
+        // 7% weightage for current balance/utilization
+        const utilizationImpact = Math.floor(MAX_SCORE * 0.07);
+        return Math.min(Math.floor(amount * 0.7), utilizationImpact);
+        
       default:
         return 0;
     }

@@ -295,21 +295,19 @@ export default function Header() {
                   >
                     <span className="text-base">Generate Credit Score Video</span>
                   </Link>
+                  <Link
+                    href="/credit/simulator"
+                    className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                  >
+                    <span className="text-base">Credit Score Simulator</span>
+                  </Link>
                   {Boolean(user) && Boolean(hasCreditReport) && (
-                    <>
-                      <Link
-                        href="/credit/score/report"
-                        className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
-                      >
-                        <span className="text-base">View Credit Report Video</span>
-                      </Link>
-                      <Link
-                        href="/credit/simulator"
-                        className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
-                      >
-                        <span className="text-base">Credit Score Simulator</span>
-                      </Link>
-                    </>
+                    <Link
+                      href="/credit/score/report"
+                      className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                    >
+                      <span className="text-base">View Credit Report Video</span>
+                    </Link>
                   )}
                   {Boolean(user) && Boolean(hasDisputes) && (
                     <Link
@@ -412,21 +410,19 @@ export default function Header() {
                   >
                     Generate Credit Score Video
                   </Link>
+                  <Link
+                    href="/credit/simulator"
+                    className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
+                  >
+                    Credit Score Simulator
+                  </Link>
                   {Boolean(user) && Boolean(hasCreditReport) && (
-                    <>
-                      <Link
-                        href="/credit/score/report"
-                        className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
-                      >
-                        View Credit Report Video
-                      </Link>
-                      <Link
-                        href="/credit/simulator"
-                        className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
-                      >
-                        Credit Score Simulator
-                      </Link>
-                    </>
+                    <Link
+                      href="/credit/score/report"
+                      className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
+                    >
+                      View Credit Report Video
+                    </Link>
                   )}
                   {Boolean(user) && Boolean(hasDisputes) && (
                     <Link
