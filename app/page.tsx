@@ -541,7 +541,7 @@ export default function Home() {
                   className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
                 >
                   Understand and Improve  <br />
-                  Your Credit Score
+                  Your Credit Score 
                 </Link>
               )}
             </>

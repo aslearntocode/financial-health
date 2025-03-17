@@ -279,9 +279,9 @@ const FloatingActionPopup = ({ router, handleMutualFundClick, handleStockClick, 
 
   return (
     <div 
-      className={`fixed bottom-4 md:bottom-4 right-4 z-[9999] bg-white rounded-lg shadow-xl transition-all duration-300 ${
+      className={`fixed bottom-20 md:bottom-4 right-4 z-[9999] bg-white rounded-lg shadow-xl transition-all duration-300 ${
         isMinimized ? 'w-auto' : 'w-64'
-      } sm:bottom-4 bottom-20`}
+      }`}
     >
       {/* Header with minimize/maximize button */}
       <div className="flex items-center justify-between p-3 bg-blue-500 text-white rounded-lg cursor-pointer"
@@ -1425,14 +1425,14 @@ export default function InvestmentPage() {
 
             {/* Chart Section - Add id for PDF generation */}
             <div id="dashboard-content" className="bg-white rounded-lg shadow-lg p-8">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Your Investment Allocation</h2>
-                {showChart && chartData.allocation && chartData.allocation.length > 0 && (
-                  <span className="text-base text-gray-600">
+              {showChart && chartData.allocation && chartData.allocation.length > 0 && (
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+                  <h2 className="text-2xl font-bold">Your Investment Allocation</h2>
+                  <span className="text-xs sm:text-base text-gray-600 mt-1 sm:mt-0">
                     Generated on: {new Date(savedRecord?.created_at || new Date()).toLocaleDateString()}
                   </span>
-                )}
-              </div>
+                </div>
+              )}
               {isLoading ? (
                 <p>Calculating your allocation...</p>
               ) : showChart && chartData.allocation && chartData.allocation.length > 0 ? (

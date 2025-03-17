@@ -286,9 +286,9 @@ const FloatingActionPopup = ({ score, router, reportData }: { score: number, rou
 
   return (
     <div 
-      className={`fixed bottom-4 md:bottom-4 right-4 z-[9999] bg-white rounded-lg shadow-xl transition-all duration-300 ${
+      className={`fixed bottom-20 md:bottom-4 right-4 z-[9999] bg-white rounded-lg shadow-xl transition-all duration-300 ${
         isMinimized ? 'w-auto' : 'w-64'
-      } sm:bottom-4 bottom-20`}
+      }`}
     >
       {/* Header with minimize/maximize button */}
       <div className="flex items-center justify-between p-3 bg-blue-500 text-white rounded-lg cursor-pointer"
