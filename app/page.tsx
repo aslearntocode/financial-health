@@ -255,38 +255,60 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // Update swipe handlers with correct property names
+  // Update swipe handlers to be more specific and prevent event interference
   const handlers = useSwipeable({
-    onSwipedLeft: () => setActiveCard('investment'),
-    onSwipedRight: () => setActiveCard('credit'),
-    preventScrollOnSwipe: true,  // Changed from preventDefaultTouchmoveEvent
+    onSwipedLeft: (e) => {
+      e.event.stopPropagation();
+      setActiveCard('investment');
+    },
+    onSwipedRight: (e) => {
+      e.event.stopPropagation();
+      setActiveCard('credit');
+    },
+    preventScrollOnSwipe: true,
     trackMouse: false,
     trackTouch: true,
-    delta: 10,
+    delta: 50, // Increased to reduce false triggers
     swipeDuration: 250
   });
 
-  // Mobile Carousel
+  // Mobile Carousel with updated click handlers
   const MobileCarousel = () => (
     <div className="md:hidden px-4">
       {!user ? (
         <div className="flex flex-col gap-4">
-          <Link href="/investment" className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-blue-700">
+          <Link 
+            href="/investment" 
+            className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-blue-700"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = '/investment';
+            }}
+          >
             Get Funds Allocation Strategy <br />
             with Recommendations
           </Link>
 
-          <Link href="/credit/score" className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-green-700">
+          <Link 
+            href="/credit/score" 
+            className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-green-700"
+            onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = '/credit/score';
+            }}
+          >
             Understand Your Credit Score <br />
             and Apply for Loans
           </Link>
         </div>
       ) : (
         <>
-          {/* Card Toggle Buttons - Modified to prevent double triggers */}
           <div className="flex gap-2 mb-4 justify-center">
             <button
-              onClick={() => setActiveCard('investment')}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveCard('investment');
+              }}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 activeCard === 'investment'
                   ? 'bg-blue-600 text-white'
@@ -296,7 +318,10 @@ export default function Home() {
               Investment
             </button>
             <button
-              onClick={() => setActiveCard('credit')}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveCard('credit');
+              }}
               className={`px-4 py-2 rounded-lg text-sm font-medium ${
                 activeCard === 'credit'
                   ? 'bg-blue-600 text-white'
@@ -307,8 +332,7 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Cards Area - Modified swipeable implementation */}
-          <div {...handlers}>
+          <div {...handlers} className="touch-none">
             <div className="transition-all duration-500 ease-in-out">
               {activeCard === 'investment' ? (
                 <div className={cardStyles}>
