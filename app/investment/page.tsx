@@ -395,7 +395,7 @@ export default function InvestmentPage() {
             .eq('user_id', currentUser.uid)
             .limit(1);
 
-          setShowRecommendationsPopup(records && records.length > 0);
+          setShowRecommendationsPopup(Boolean(records && records.length > 0));
         } catch (error) {
           console.error('Error checking previous allocations:', error);
         }

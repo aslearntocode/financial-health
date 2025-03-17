@@ -369,20 +369,10 @@ export default function Home() {
         </div>
 
         {/* Desktop View */}
-        <div className="hidden md:flex justify-center items-start gap-8 flex-wrap relative">
+        <div className="hidden md:flex justify-center items-start gap-8 flex-wrap">
           {user ? (
             // Logged in view - show cards and/or buttons
             <>
-              {/* Add gradient background when user has data */}
-              {(latestAllocation || (latestReport && (latestReport.score ?? 0) > 0)) && (
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 rounded-3xl -z-10" 
-                  style={{ 
-                    transform: 'scale(1.1)',
-                    filter: 'blur(20px)',
-                    opacity: '0.7'
-                  }} 
-                />
-              )}
               <div className="hidden md:block">
                 {latestAllocation ? (
                   <div className={cardStyles}>
@@ -550,7 +540,7 @@ export default function Home() {
                   href="/credit/score"
                   className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
                 >
-                  Understand and Improve <br />
+                  Understand and Improve  <br />
                   Your Credit Score
                 </Link>
               )}
@@ -570,7 +560,7 @@ export default function Home() {
                 href="/credit/score"
                 className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
               >
-                Understand and Improve <br />
+                Understand and Improve  <br />
                 Your Credit Score
               </Link>
             </>
