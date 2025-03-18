@@ -12,6 +12,7 @@ interface Stock {
   sector: string
   market_cap: string
   current_price: number
+  price_at_recommendation?: number
   '52w_low': number
   '52w_high': number
   pe_ratio: string
@@ -132,7 +133,7 @@ function StockRecommendationsContent() {
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Recommended Stocks</h1>
               {recommendationData?.created_at && (
-                <span className="text-xs sm:text-base text-gray-600">
+                <span className="text-sm text-gray-600">
                   Generated on: {new Date(recommendationData.created_at).toLocaleDateString()}
                 </span>
               )}
@@ -149,88 +150,99 @@ function StockRecommendationsContent() {
             <span>Back to Investment Allocation</span>
           </button>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {recommendations.map((stock, index) => (
-            <div 
-              key={index}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
-            >
-              {/* Stock Header */}
-              <div className="p-5 bg-gradient-to-r from-blue-50 to-blue-100">
-                <div className="flex items-start justify-between">
-                  <div className="h-[60px] flex flex-col justify-start">
-                    <h2 className="text-lg font-bold text-blue-600 leading-tight mb-2">{stock.stock_name}</h2>
-                    <p className="text-sm text-gray-600">{stock.ticker}</p>
-                  </div>
-                  <div className={`px-3 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                    stock.risk_level.toLowerCase() === 'high' ? 'bg-red-100 text-red-700' :
-                    stock.risk_level.toLowerCase() === 'moderate' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
-                    {stock.risk_level} Risk
-                  </div>
-                </div>
-              </div>
 
-              {/* Stock Details */}
-              <div className="p-5">
-                {/* Sector and Market Cap */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p className="text-gray-600 text-sm mb-1">Sector</p>
-                    <div className="h-[40px] flex items-center">
-                      <p className="text-base font-bold leading-tight">{stock.sector}</p>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-gray-600 text-sm mb-1">Market Cap</p>
-                    <div className="h-[40px] flex items-center">
-                      <p className="text-base font-bold">{stock.market_cap}</p>
-                    </div>
-                  </div>
-                </div>
+        <div className="overflow-x-auto shadow-xl rounded-lg border border-gray-200">
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr className="bg-gradient-to-r from-blue-600 to-blue-700">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Stock Details</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Sector & Risk</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Key Metrics</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Market Cap</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Buy Recommendation Date</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Performance Since Recommendation</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {recommendations.map((stock, index) => {
+                const priceChange = stock.price_at_recommendation && stock.current_price
+                  ? ((stock.current_price - stock.price_at_recommendation) / stock.price_at_recommendation) * 100
+                  : null;
 
-                {/* Price Information */}
-                <div className="mb-4">
-                  <h3 className="text-gray-600 text-sm mb-2">Price Details</h3>
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="flex justify-between items-center mb-2">
-                      <p className="text-gray-600 text-sm">Current Price</p>
-                      <p className="text-lg font-bold text-blue-600">₹{stock.current_price.toLocaleString()}</p>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      52-Week Range: 
-                      <span className="font-medium ml-2">
-                        ₹{stock['52w_low'].toLocaleString()} - ₹{stock['52w_high'].toLocaleString()}
+                return (
+                  <tr key={index} className="hover:bg-blue-50 transition-colors duration-200">
+                    <td className="px-6 py-5">
+                      <div className="font-semibold text-gray-900 mb-1">{stock.stock_name}</div>
+                      <div className="text-sm text-blue-600">{stock.ticker}</div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="text-sm text-gray-900 mb-2">{stock.sector}</div>
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                        stock.risk_level.toLowerCase() === 'high' 
+                          ? 'bg-red-100 text-red-800 border border-red-200' :
+                        stock.risk_level.toLowerCase() === 'moderate' 
+                          ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                          'bg-green-100 text-green-800 border border-green-200'
+                      }`}>
+                        {stock.risk_level} Risk
                       </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Key Metrics */}
-                <div className="mb-4">
-                  <h3 className="text-gray-600 text-sm mb-2">Key Metrics</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <p className="text-gray-600 text-xs mb-1">P/E Ratio</p>
-                      <p className="text-lg font-bold text-gray-700">{stock.pe_ratio}</p>
-                    </div>
-                    <div className="bg-green-50 p-3 rounded-lg">
-                      <p className="text-gray-600 text-xs mb-1">Dividend Yield</p>
-                      <p className="text-lg font-bold text-green-600">{stock.dividend_yield}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Rationale */}
-                <div className="pt-3 border-t border-gray-200">
-                  <h3 className="text-gray-600 text-sm mb-2">Why This Stock</h3>
-                  <p className="text-gray-700 text-sm">{stock.rationale}</p>
-                </div>
-              </div>
-            </div>
-          ))}
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="text-sm space-y-1">
+                        <div className="flex items-center">
+                          <span className="text-gray-600">P/E:</span>
+                          <span className="ml-2 font-medium text-gray-900">{stock.pe_ratio}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-gray-600">Dividend:</span>
+                          <span className="ml-2 font-medium text-gray-900">{stock.dividend_yield}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                        stock.market_cap.toLowerCase().includes('large') 
+                          ? 'bg-purple-100 text-purple-800 border border-purple-200' :
+                        stock.market_cap.toLowerCase().includes('mid') 
+                          ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+                          'bg-gray-100 text-gray-800 border border-gray-200'
+                      }`}>
+                        {stock.market_cap} Cap
+                      </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      {recommendationData?.created_at && (
+                        <div className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-1 rounded-md border border-gray-200">
+                          {new Date(recommendationData.created_at).toLocaleDateString()}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-5">
+                      {priceChange !== null ? (
+                        <div className="space-y-1">
+                          <div className={`text-sm font-semibold ${priceChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {priceChange >= 0 ? '↑' : '↓'} {Math.abs(priceChange).toFixed(2)}%
+                          </div>
+                          <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded-md border border-gray-200">
+                            <div className="flex justify-between">
+                              <span>Current:</span>
+                              <span className="font-medium">₹{stock.current_price.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between mt-1">
+                              <span>Initial:</span>
+                              <span className="font-medium">₹{stock.price_at_recommendation?.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-500 italic">Price data unavailable</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

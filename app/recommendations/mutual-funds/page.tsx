@@ -16,6 +16,8 @@ interface MutualFund {
   expense_ratio: string
   rationale: string
   fund_house: string
+  nav_at_recommendation?: number
+  current_nav?: number
   asset_allocation?: {
     equity: number
     debt: number
@@ -138,7 +140,7 @@ function MutualFundRecommendationsContent() {
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Recommended Mutual Funds</h1>
               {recommendationData?.created_at && (
-                <span className="text-xs sm:text-base text-gray-600">
+                <span className="text-sm text-gray-600">
                   Generated on: {new Date(recommendationData.created_at).toLocaleDateString()}
                 </span>
               )}
@@ -155,76 +157,100 @@ function MutualFundRecommendationsContent() {
             <span>Back to Investment Allocation</span>
           </button>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {recommendations.map((fund, index) => (
-            <div 
-              key={index}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
-            >
-              {/* Fund Header */}
-              <div className="p-5 bg-gradient-to-r from-blue-50 to-blue-100">
-                <div className="flex items-start justify-between">
-                  <div className="h-[60px] flex flex-col justify-start">
-                    <h2 className="text-lg font-bold text-blue-600 leading-tight mb-2">{fund.fund_name}</h2>
-                    <p className="text-sm text-gray-600">{fund.fund_house}</p>
-                  </div>
-                  <div className={`px-3 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                    fund.risk_level.toLowerCase() === 'high' ? 'bg-red-100 text-red-700' :
-                    fund.risk_level.toLowerCase() === 'moderate' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-green-100 text-green-700'
-                  }`}>
-                    {fund.risk_level} Risk
-                  </div>
-                </div>
-              </div>
 
-              {/* Fund Details */}
-              <div className="p-5">
-                {/* Category and Expense Ratio */}
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p className="text-gray-600 text-sm mb-1">Category</p>
-                    <div className="h-[40px] flex items-center">
-                      <p className="text-base font-bold leading-tight">{fund.category}</p>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-gray-600 text-sm mb-1">Expense Ratio</p>
-                    <div className="h-[40px] flex items-center">
-                      <p className="text-base font-bold">{fund.expense_ratio}</p>
-                    </div>
-                  </div>
-                </div>
+        <div className="overflow-x-auto shadow-xl rounded-lg border border-gray-200">
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr className="bg-gradient-to-r from-blue-600 to-blue-700">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Fund Details</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Category & Risk</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Historical Returns</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Investment Details</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Buy Recommendation Date</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Performance Since Recommendation</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {recommendations.map((fund, index) => {
+                const navChange = fund.current_nav && fund.nav_at_recommendation
+                  ? ((fund.current_nav - fund.nav_at_recommendation) / fund.nav_at_recommendation) * 100
+                  : null;
 
-                {/* Historical Returns */}
-                <div className="mb-4">
-                  <h3 className="text-gray-600 text-sm mb-2">Historical Returns</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-green-50 p-3 rounded-lg">
-                      <p className="text-gray-600 text-xs mb-1">3 Years</p>
-                      <p className="text-lg font-bold text-green-600">{fund.returns_3yr}</p>
-                    </div>
-                    <div className="bg-green-50 p-3 rounded-lg">
-                      <p className="text-gray-600 text-xs mb-1">5 Years</p>
-                      <p className="text-lg font-bold text-green-600">{fund.returns_5yr}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Minimum Investment */}
-                <div className="flex justify-between items-center py-3 border-t border-gray-200">
-                  <p className="text-gray-600 text-sm">Minimum Investment</p>
-                  <p className="text-base font-bold">₹{fund.min_investment.toLocaleString()}</p>
-                </div>
-
-                {/* Rationale */}
-                <div className="pt-3 border-t border-gray-200">
-                  <p className="text-gray-600 italic text-sm">"{fund.rationale}"</p>
-                </div>
-              </div>
-            </div>
-          ))}
+                return (
+                  <tr key={index} className="hover:bg-blue-50 transition-colors duration-200">
+                    <td className="px-6 py-5">
+                      <div className="font-semibold text-gray-900 mb-1">{fund.fund_name}</div>
+                      <div className="text-sm text-blue-600">{fund.fund_house}</div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="text-sm text-gray-900 mb-2">{fund.category}</div>
+                      <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                        fund.risk_level.toLowerCase() === 'high' 
+                          ? 'bg-red-100 text-red-800 border border-red-200' :
+                        fund.risk_level.toLowerCase() === 'moderate' 
+                          ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                          'bg-green-100 text-green-800 border border-green-200'
+                      }`}>
+                        {fund.risk_level} Risk
+                      </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="text-sm space-y-1">
+                        <div className="flex items-center">
+                          <span className="text-gray-600">3Y:</span>
+                          <span className="ml-2 font-medium text-gray-900">{fund.returns_3yr}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-gray-600">5Y:</span>
+                          <span className="ml-2 font-medium text-gray-900">{fund.returns_5yr}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="text-sm space-y-1">
+                        <div className="flex items-center">
+                          <span className="text-gray-600">Min:</span>
+                          <span className="ml-2 font-medium text-gray-900">₹{fund.min_investment.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="text-gray-600">Expense:</span>
+                          <span className="ml-2 font-medium text-gray-900">{fund.expense_ratio}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
+                      {recommendationData?.created_at && (
+                        <div className="text-sm font-medium text-gray-900 bg-gray-50 px-3 py-1 rounded-md border border-gray-200">
+                          {new Date(recommendationData.created_at).toLocaleDateString()}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-6 py-5">
+                      {navChange !== null ? (
+                        <div className="space-y-1">
+                          <div className={`text-sm font-semibold ${navChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {navChange >= 0 ? '↑' : '↓'} {Math.abs(navChange).toFixed(2)}%
+                          </div>
+                          <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded-md border border-gray-200">
+                            <div className="flex justify-between">
+                              <span>Current:</span>
+                              <span className="font-medium">₹{fund.current_nav?.toFixed(2)}</span>
+                            </div>
+                            <div className="flex justify-between mt-1">
+                              <span>Initial:</span>
+                              <span className="font-medium">₹{fund.nav_at_recommendation?.toFixed(2)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-500 italic">NAV data unavailable</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

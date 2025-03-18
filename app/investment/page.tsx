@@ -1373,7 +1373,8 @@ export default function InvestmentPage() {
 
                 <div className="space-y-1">
                   <Label htmlFor="needs_money_during_horizon">Do you anticipate needing this money during your investment horizon?
-                    <br/> (This is important for us to understand your risk appetite)
+                    <br/> (This is important for us to understand your risk appetite. 
+                    If you have any short term goals like buying a car, rennovating your house, etc., you should select 'Yes')
                   </Label>
                   <Select 
                     value={formData.needs_money_during_horizon}
