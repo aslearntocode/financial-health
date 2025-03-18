@@ -167,6 +167,7 @@ function MutualFundRecommendationsContent() {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Historical Returns</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Investment Details</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Buy Recommendation Date</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Sell Recommendation Date</th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Performance Since Recommendation</th>
               </tr>
             </thead>
@@ -226,6 +227,11 @@ function MutualFundRecommendationsContent() {
                       )}
                     </td>
                     <td className="px-6 py-5">
+                      <div className="text-sm font-medium text-gray-500 bg-gray-50 px-3 py-1 rounded-md border border-gray-200">
+                        NA
+                      </div>
+                    </td>
+                    <td className="px-6 py-5">
                       {navChange !== null ? (
                         <div className="space-y-1">
                           <div className={`text-sm font-semibold ${navChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
@@ -252,6 +258,9 @@ function MutualFundRecommendationsContent() {
             </tbody>
           </table>
         </div>
+      </div>
+      <div className="text-center py-4 text-sm text-gray-600 border-t border-gray-200">
+        Powered by Financial Health
       </div>
     </div>
   )
