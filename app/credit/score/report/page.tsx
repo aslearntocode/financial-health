@@ -427,18 +427,7 @@ export default function CreditScoreReportPage() {
         setIsLoading(true)
         setError(null)
 
-        // First try to get data from localStorage (for immediate display)
-        const cachedReport = localStorage.getItem('latestCreditReport')
-        if (cachedReport) {
-          const parsedReport = JSON.parse(cachedReport)
-          setReportData(parsedReport)
-          setAudioUrl(parsedReport.audio_url) // Set audio URL from cached data
-          localStorage.removeItem('latestCreditReport') // Clear after using
-          setIsLoading(false)
-          return
-        }
-
-        // If no cached data, fetch from Supabase
+        // Remove localStorage check since we want real-time data
         const user = auth.currentUser
         if (!user) {
           setError('Please login to view your report')
@@ -448,7 +437,7 @@ export default function CreditScoreReportPage() {
 
         const { data, error: supabaseError } = await supabase
           .from('credit_reports')
-          .select('report_analysis, audio_url') // Add audio_url to the selection
+          .select('report_analysis, audio_url')
           .eq('user_id', user.uid)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -465,7 +454,7 @@ export default function CreditScoreReportPage() {
         }
 
         setReportData(data.report_analysis)
-        setAudioUrl(data.audio_url) // Set audio URL from Supabase data
+        setAudioUrl(data.audio_url)
         setIsLoading(false)
       } catch (err) {
         console.error('Error fetching report:', err)

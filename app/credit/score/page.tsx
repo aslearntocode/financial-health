@@ -197,6 +197,30 @@ export default function CreditScorePage() {
     }
   }
 
+  const handleOTPVerification = async () => {
+    try {
+      // 1. Verify OTP
+      // 2. Generate report
+      // 3. Wait for audio generation
+      // 4. Save everything to Supabase
+      // 5. Only then redirect to report page
+      
+      const reportData = await generateReport();
+      const audioUrl = await generateAudio(reportData);
+      
+      await supabase.from('credit_reports').insert({
+        user_id: auth.currentUser?.uid,
+        report_analysis: reportData,
+        audio_url: audioUrl
+      });
+
+      // Now redirect to report page
+      router.push('/credit/score/report');
+    } catch (error) {
+      // Handle error
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
