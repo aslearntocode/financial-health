@@ -197,6 +197,16 @@ export default function CreditScorePage() {
     }
   }
 
+  const generateReport = async () => {
+    // TODO: Implement report generation
+    return {};
+  };
+
+  const generateAudio = async (reportData: any) => {
+    // TODO: Implement audio generation
+    return '';
+  };
+
   const handleOTPVerification = async () => {
     try {
       // 1. Verify OTP
@@ -214,10 +224,10 @@ export default function CreditScorePage() {
         audio_url: audioUrl
       });
 
-      // Now redirect to report page
       router.push('/credit/score/report');
     } catch (error) {
-      // Handle error
+      console.error('Error during OTP verification:', error);
+      alert('An error occurred during OTP verification. Please try again.');
     }
   };
 
