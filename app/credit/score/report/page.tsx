@@ -430,7 +430,9 @@ export default function CreditScoreReportPage() {
         // First try to get data from localStorage (for immediate display)
         const cachedReport = localStorage.getItem('latestCreditReport')
         if (cachedReport) {
-          setReportData(JSON.parse(cachedReport))
+          const parsedReport = JSON.parse(cachedReport)
+          setReportData(parsedReport)
+          setAudioUrl(parsedReport.audio_url) // Set audio URL from cached data
           localStorage.removeItem('latestCreditReport') // Clear after using
           setIsLoading(false)
           return
@@ -446,7 +448,7 @@ export default function CreditScoreReportPage() {
 
         const { data, error: supabaseError } = await supabase
           .from('credit_reports')
-          .select('*')
+          .select('report_analysis, audio_url') // Add audio_url to the selection
           .eq('user_id', user.uid)
           .order('created_at', { ascending: false })
           .limit(1)
@@ -463,6 +465,7 @@ export default function CreditScoreReportPage() {
         }
 
         setReportData(data.report_analysis)
+        setAudioUrl(data.audio_url) // Set audio URL from Supabase data
         setIsLoading(false)
       } catch (err) {
         console.error('Error fetching report:', err)
@@ -473,15 +476,6 @@ export default function CreditScoreReportPage() {
 
     fetchReport()
   }, [])
-
-  useEffect(() => {
-    // Construct the URL with any necessary parameters
-    const audioUrl = `/api/get_audio?${new URLSearchParams({
-      // Add any required parameters here
-      // For example: reportId: reportData.id
-    })}`
-    setAudioUrl(audioUrl)
-  }, [/* dependencies */])
 
   // Loading state
   if (isLoading) {
@@ -592,7 +586,7 @@ export default function CreditScoreReportPage() {
           </div>
 
           {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="font-semibold text-gray-600">Active Accounts</h3>
               <p className="text-3xl font-bold text-green-600">{activeAccounts}</p>
@@ -604,6 +598,33 @@ export default function CreditScoreReportPage() {
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="font-semibold text-gray-600">Total Accounts</h3>
               <p className="text-3xl font-bold text-blue-600">{totalAccounts}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="font-semibold text-gray-600">Credit History</h3>
+              <p className="text-3xl font-bold text-orange-600">
+                {(() => {
+                  const years = Number(reportData?.score_details?.perform_attributes?.find(
+                    (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-YEAR"
+                  )?.["ATTR-VALUE"] || "0");
+                  
+                  const months = Number(reportData?.score_details?.perform_attributes?.find(
+                    (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-MONTH"
+                  )?.["ATTR-VALUE"] || "0");
+                  
+                  const totalYears = years + (months / 12);
+                  return totalYears.toFixed(1);
+                })()}
+              </p>
+              <p className="text-sm text-gray-500">Years</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="font-semibold text-gray-600">New Accounts</h3>
+              <p className="text-3xl font-bold text-teal-600">
+                {reportData?.score_details?.perform_attributes?.find(
+                  (attr: any) => attr["ATTR-NAME"] === "NEW-ACCOUNTS-IN-LAST-SIX-MONTHS"
+                )?.["ATTR-VALUE"] || "0"}
+              </p>
+              <p className="text-sm text-gray-500">Last 6 months</p>
             </div>
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="font-semibold text-gray-600">Recent Enquiries</h3>

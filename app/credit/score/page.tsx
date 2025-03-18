@@ -129,24 +129,53 @@ export default function CreditScorePage() {
 
       const analysisData = await analysisResponse.json()
 
-      // Save to Supabase
-      const { data, error } = await supabase
-        .from('credit_reports')
-        .insert({
-          user_id: user.uid,
-          name: formData.name,
-          dob: formattedDate,
-          pan: formData.pan.toUpperCase(),
+      // Save to Supabase with better error handling
+      const saveReportToSupabase = async (reportData: any) => {
+        const audioUrl = "https://rruaznytrgasfzkvahyr.supabase.co/storage/v1/object/public/credit_audio_files//synthesis%20(1).wav";
+        
+        console.log('Saving report with audio URL:', {
+          user_id: auth.currentUser?.uid,
+          audio_url: audioUrl,
+          report_analysis: reportData,
           mobile: formData.mobile,
-          report_analysis: analysisData,
+          name: formData.name,
+          dob: formData.dob,
+          pan: formData.pan,
           created_at: new Date().toISOString()
-        })
-        .select('*')
-        .single()
+        });
+        
+        try {
+          const { data, error } = await supabase
+            .from('credit_reports')
+            .insert({
+              user_id: auth.currentUser?.uid,
+              report_analysis: reportData,
+              audio_url: audioUrl,
+              mobile: formData.mobile,
+              name: formData.name,
+              dob: formData.dob,
+              pan: formData.pan.toUpperCase(),  // Store PAN in uppercase
+              created_at: new Date().toISOString()
+            })
 
-      if (error) {
-        throw new Error('Failed to save credit report')
-      }
+          if (error) {
+            console.error('Supabase error details:', error);
+            throw error;
+          }
+          return data;
+        } catch (error: any) {
+          console.error('Error saving report:', {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code
+          });
+          throw error;
+        }
+      };
+
+      const reportData = await saveReportToSupabase(analysisData);
+      console.log('Successfully saved report:', reportData);
 
       // Store the analysis data in localStorage for immediate access
       localStorage.setItem('latestCreditReport', JSON.stringify(analysisData))
@@ -154,8 +183,13 @@ export default function CreditScorePage() {
       // Redirect to report page
       router.push('/credit/score/report')
 
-    } catch (err) {
-      console.error('Error:', err)
+    } catch (err: any) {
+      console.error('Error details:', {
+        message: err.message,
+        stack: err.stack,
+        details: err.details,
+        code: err.code
+      });
       alert('An error occurred while processing your request. Please try again.')
     } finally {
       submitButton.disabled = false
