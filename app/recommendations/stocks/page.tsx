@@ -63,15 +63,16 @@ function StockRecommendationsContent() {
             return;
           }
 
-          // Add timeout to the Supabase query
+          // Add timeout to the Supabase query with proper typing
           const { data: recommendation, error } = await Promise.race([
             supabase
               .from('stock_recommendations')
               .select('*')
               .eq('id', recommendationId)
               .eq('user_id', user.uid)
-              .single(),
-            new Promise((_, reject) => 
+              .single()
+              .then((response): { data: StockRecommendation | null; error: any } => response),
+            new Promise<{ data: StockRecommendation | null; error: any }>((_, reject) => 
               setTimeout(() => reject(new Error('Request timeout')), 15000)
             )
           ]);
