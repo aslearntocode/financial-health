@@ -79,7 +79,7 @@ function StockRecommendationsContent() {
           if (error) throw error;
 
           if (!recommendation) {
-            console.log('No recommendation found');
+            console.error('No recommendation found for ID:', recommendationId);
             router.push('/investment');
             return;
           }
