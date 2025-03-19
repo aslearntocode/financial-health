@@ -771,6 +771,7 @@ export default function InvestmentPage() {
         expected_return: responseData.expected_return
       });
       setShowChart(true);
+      setShowRecommendationsPopup(true); // Show popup after successful API call
 
     } catch (error) {
       console.error('Error in callApiAndSaveData:', error);
@@ -812,10 +813,12 @@ export default function InvestmentPage() {
           expected_return: existingRecord.expected_return || 0
         });
         setShowChart(true);
+        setShowRecommendationsPopup(true); // Show popup for existing records
       } else {
         // IMPORTANT: Call API and save data if no existing record
         console.log('No existing record found - calling API...');
         await callApiAndSaveData();
+        setShowRecommendationsPopup(true); // Show popup after new allocation is generated
       }
     } catch (error) {
       console.error('Error in handleSubmit:', error);

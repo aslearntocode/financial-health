@@ -25,6 +25,7 @@ interface StockRecommendation {
   id: string;
   created_at: string;
   recommendations: Stock[];
+  historical_prices?: { ticker: string; price: number }[];
 }
 
 export default function StockRecommendations() {
@@ -45,51 +46,66 @@ function StockRecommendationsContent() {
 
   useEffect(() => {
     const fetchRecommendations = async () => {
-      try {
-        const user = auth.currentUser
-        if (!user) {
-          router.push('/login')
-          return
+      const maxRetries = 3;
+      let currentTry = 0;
+
+      while (currentTry < maxRetries) {
+        try {
+          const user = auth.currentUser;
+          if (!user) {
+            router.push('/login');
+            return;
+          }
+
+          const recommendationId = searchParams.get('id');
+          if (!recommendationId) {
+            router.push('/investment');
+            return;
+          }
+
+          // Add timeout to the Supabase query
+          const { data: recommendation, error } = await Promise.race([
+            supabase
+              .from('stock_recommendations')
+              .select('*')
+              .eq('id', recommendationId)
+              .eq('user_id', user.uid)
+              .single(),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Request timeout')), 15000)
+            )
+          ]);
+
+          if (error) throw error;
+
+          if (!recommendation) {
+            console.log('No recommendation found');
+            router.push('/investment');
+            return;
+          }
+
+          setRecommendationData(recommendation);
+          setRecommendations(recommendation.recommendations);
+          setLoading(false);
+          return; // Success, exit the retry loop
+
+        } catch (err) {
+          currentTry++;
+          console.error(`Attempt ${currentTry} failed:`, err);
+          
+          if (currentTry === maxRetries) {
+            setError('Unable to load recommendations. Please try again later.');
+            setLoading(false);
+          } else {
+            // Wait before retrying (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, currentTry)));
+          }
         }
-
-        const recommendationId = searchParams.get('id')
-        if (!recommendationId) {
-          router.push('/investment')
-          return
-        }
-
-        const { data: recommendation, error } = await supabase
-          .from('stock_recommendations')
-          .select('*')
-          .eq('id', recommendationId)
-          .eq('user_id', user.uid)
-          .single()
-
-        if (error) {
-          console.error('Error fetching recommendation:', error)
-          setError('Failed to load recommendations')
-          setLoading(false)
-          return
-        }
-
-        if (!recommendation) {
-          console.log('No recommendation found')
-          router.push('/investment')
-          return
-        }
-
-        setRecommendationData(recommendation)
-        setRecommendations(recommendation.recommendations)
-        setLoading(false)
-      } catch (err) {
-        console.error('Error:', err)
-        setError('Failed to load recommendations')
-        setLoading(false)
       }
-    }
+    };
 
-    fetchRecommendations()
-  }, [router, searchParams])
+    fetchRecommendations();
+  }, [router, searchParams]);
 
   if (loading) {
     return (
@@ -238,6 +254,16 @@ function StockRecommendationsContent() {
                               <span>Initial:</span>
                               <span className="font-medium">₹{stock.price_at_recommendation?.toFixed(2)}</span>
                             </div>
+                            {recommendationData?.historical_prices && (
+                              <div className="flex justify-between mt-1">
+                                <span>EOD Price:</span>
+                                <span className="font-medium">
+                                  ₹{recommendationData.historical_prices
+                                    .find(hp => hp.ticker === stock.ticker)
+                                    ?.price?.toFixed(2) || 'N/A'}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ) : (
