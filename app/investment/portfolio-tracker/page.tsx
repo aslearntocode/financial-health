@@ -672,10 +672,10 @@ export default function PortfolioTracker() {
                     <td className="px-3 py-2 whitespace-nowrap">{investment.sell_price ? formatCurrency(investment.sell_price) : '-'}</td>
                     <td className="px-3 py-2 whitespace-nowrap">{formatCurrency(totalValue)}</td>
                     <td className={`px-3 py-2 whitespace-nowrap font-medium ${(investment.holding_period_return ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatPercentage(investment.holding_period_return)}
+                      {formatPercentage(investment.holding_period_return ?? 0)}
                     </td>
                     <td className={`px-3 py-2 whitespace-nowrap font-medium ${(investment.annual_return ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {formatPercentage(investment.annual_return)}
+                      {formatPercentage(investment.annual_return ?? 0)}
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap text-right space-x-2">
                       <button
