@@ -565,6 +565,28 @@ export default function PortfolioTracker() {
     }
   };
 
+  const calculatePortfolioMetrics = (investments: Investment[]) => {
+    const totalInvestment = investments.reduce((sum, inv) => 
+      sum + (inv.quantity * inv.purchase_price), 0);
+    
+    const totalCurrentValue = investments.reduce((sum, inv) => 
+      sum + (inv.quantity * (inv.sell_price || inv.purchase_price)), 0);
+      
+    const holdingPeriodReturn = ((totalCurrentValue - totalInvestment) / totalInvestment) * 100;
+    
+    // Calculate weighted average annual return
+    const weightedAnnualReturn = investments.reduce((sum, inv) => {
+      const investmentValue = inv.quantity * inv.purchase_price;
+      return sum + ((inv.annual_return ?? 0) * (investmentValue / totalInvestment));
+    }, 0);
+
+    return {
+      totalValue: totalCurrentValue,
+      holdingPeriodReturn,
+      annualReturn: weightedAnnualReturn
+    };
+  };
+
   return (
     <div>
       <Header />
@@ -647,15 +669,15 @@ export default function PortfolioTracker() {
             <thead className="bg-blue-600 text-white">
               <tr>
                 <th className="px-3 py-3 text-left font-semibold uppercase tracking-wider">Symbol</th>
-                <th className="px-3 py-3 text-left font-semibold uppercase tracking-wider">Quantity</th>
-                <th className="px-3 py-3 text-left font-semibold uppercase tracking-wider">Purchase Date</th>
-                <th className="px-3 py-3 text-left font-semibold uppercase tracking-wider">Purchase Price</th>
-                <th className="px-3 py-3 text-left font-semibold uppercase tracking-wider">Sell Date</th>
-                <th className="px-3 py-3 text-left font-semibold uppercase tracking-wider">Sell Price</th>
-                <th className="px-3 py-3 text-left font-semibold uppercase tracking-wider">Total Value</th>
-                <th className="px-3 py-3 text-left font-semibold uppercase tracking-wider">Holdig Period Return</th>
-                <th className="px-3 py-3 text-left font-semibold uppercase tracking-wider">Annual Return</th>
-                <th className="px-3 py-3 text-right font-semibold uppercase tracking-wider">Actions</th>
+                <th className="px-3 py-3 text-center font-semibold uppercase tracking-wider">Quantity</th>
+                <th className="px-3 py-3 text-center font-semibold uppercase tracking-wider">Purchase Date</th>
+                <th className="px-3 py-3 text-center font-semibold uppercase tracking-wider">Purchase Price</th>
+                <th className="px-3 py-3 text-center font-semibold uppercase tracking-wider">Sell Date</th>
+                <th className="px-3 py-3 text-center font-semibold uppercase tracking-wider">Sell Price</th>
+                <th className="px-3 py-3 text-center font-semibold uppercase tracking-wider">Total Value</th>
+                <th className="px-3 py-3 text-center font-semibold uppercase tracking-wider">Holding Period Return</th>
+                <th className="px-3 py-3 text-center font-semibold uppercase tracking-wider">Annual Return</th>
+                <th className="px-3 py-3 text-center font-semibold uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -665,19 +687,19 @@ export default function PortfolioTracker() {
                 return (
                   <tr key={index} className={index % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'}>
                     <td className="px-3 py-2 whitespace-nowrap font-medium text-blue-600">{investment.symbol}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{investment.quantity.toLocaleString()}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{new Date(investment.purchase_date).toLocaleDateString()}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{formatCurrency(investment.purchase_price)}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{investment.sell_date ? new Date(investment.sell_date).toLocaleDateString() : '-'}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{investment.sell_price ? formatCurrency(investment.sell_price) : '-'}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">{formatCurrency(totalValue)}</td>
-                    <td className={`px-3 py-2 whitespace-nowrap font-medium ${(investment.holding_period_return ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <td className="px-3 py-2 whitespace-nowrap text-center">{investment.quantity.toLocaleString()}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-center">{new Date(investment.purchase_date).toLocaleDateString()}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-center">{formatCurrency(investment.purchase_price)}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-center">{investment.sell_date ? new Date(investment.sell_date).toLocaleDateString() : '-'}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-center">{investment.sell_price ? formatCurrency(investment.sell_price) : '-'}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-center">{formatCurrency(totalValue)}</td>
+                    <td className={`px-3 py-2 whitespace-nowrap font-medium text-center ${(investment.holding_period_return ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {formatPercentage(investment.holding_period_return ?? 0)}
                     </td>
-                    <td className={`px-3 py-2 whitespace-nowrap font-medium ${(investment.annual_return ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <td className={`px-3 py-2 whitespace-nowrap font-medium text-center ${(investment.annual_return ?? 0) > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {formatPercentage(investment.annual_return ?? 0)}
                     </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-right space-x-2">
+                    <td className="px-3 py-2 whitespace-nowrap text-center space-x-2">
                       <button
                         onClick={() => {
                           setEditingInvestment(investment);
@@ -698,6 +720,29 @@ export default function PortfolioTracker() {
                 );
               })}
             </tbody>
+            <tfoot className="bg-gray-50 font-semibold border-t-2 border-gray-200">
+              {(() => {
+                const metrics = calculatePortfolioMetrics(investments);
+                return (
+                  <tr>
+                    <td className="px-3 py-3 whitespace-nowrap">Portfolio Total</td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center"></td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center"></td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center"></td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center"></td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center"></td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center">{formatCurrency(metrics.totalValue)}</td>
+                    <td className={`px-3 py-3 whitespace-nowrap text-center ${metrics.holdingPeriodReturn > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatPercentage(metrics.holdingPeriodReturn)}
+                    </td>
+                    <td className={`px-3 py-3 whitespace-nowrap text-center ${metrics.annualReturn > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatPercentage(metrics.annualReturn)}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap text-center"></td>
+                  </tr>
+                );
+              })()}
+            </tfoot>
           </table>
         </div>
 
