@@ -237,6 +237,14 @@ export default function Header() {
                   >
                     <span className="text-base">Investment Allocation</span>
                   </Link>
+                  {Boolean(user) && (
+                    <Link 
+                      href="/investment/portfolio-tracker" 
+                      className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                    >
+                      <span className="text-base">External Portfolio Tracker</span>
+                    </Link>
+                  )}
                   {Boolean(user) && Boolean(hasRecommendationAccess) && (
                     <button
                       onClick={handleMutualFundsDashboard}
@@ -293,7 +301,7 @@ export default function Header() {
                     href="/credit/score" 
                     className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
                   >
-                    <span className="text-base">Generate Credit Score Video</span>
+                    <span className="text-base">Generate Credit Score Summary</span>
                   </Link>
                   <Link
                     href="/credit/simulator"
@@ -306,7 +314,7 @@ export default function Header() {
                       href="/credit/score/report"
                       className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
                     >
-                      <span className="text-base">View Credit Report Video</span>
+                      <span className="text-base">View Credit Report Summary</span>
                     </Link>
                   )}
                   {Boolean(user) && Boolean(hasDisputes) && (
@@ -372,6 +380,14 @@ export default function Header() {
                   >
                     Investment Allocation
                   </Link>
+                  {Boolean(user) && (
+                    <Link 
+                      href="/investment/portfolio-tracker" 
+                      className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
+                    >
+                      Portfolio Tracker
+                    </Link>
+                  )}
                   {Boolean(user) && Boolean(hasRecommendationAccess) && (
                     <button
                       onClick={handleMutualFundsDashboard}
@@ -408,7 +424,7 @@ export default function Header() {
                     href="/credit/score" 
                     className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
                   >
-                    Generate Credit Score Video
+                    Generate Credit Score Summary
                   </Link>
                   <Link
                     href="/credit/simulator"
@@ -421,7 +437,7 @@ export default function Header() {
                       href="/credit/score/report"
                       className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
                     >
-                      View Credit Report Video
+                      View Credit Report Summary
                     </Link>
                   )}
                   {Boolean(user) && Boolean(hasDisputes) && (
