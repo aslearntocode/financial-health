@@ -651,20 +651,6 @@ export default function CreditScoreReportPage() {
                       <p className="font-semibold">{account.credit_grantor}</p>
                       <p className="text-sm text-gray-600">Type: {account.account_type}</p>
                       <p className="text-red-600">Overdue Amount: ₹{account.overdue_amount.toLocaleString()}</p>
-                      <select 
-                        className="mt-2 w-full p-2 border rounded-lg text-sm"
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            router.push(`/credit/resolve?account=${account.account_number}&action=${e.target.value}`);
-                          }
-                        }}
-                        defaultValue=""
-                      >
-                        <option value="" disabled>Select Resolution Option</option>
-                        <option value="pay_full">Pay In Full</option>
-                        <option value="settle">Settle The Account</option>
-                        <option value="connect">Connect With Lender</option>
-                      </select>
                     </div>
                   ))}
               </div>
@@ -683,20 +669,6 @@ export default function CreditScoreReportPage() {
                       <p className="font-semibold">{account.credit_grantor}</p>
                       <p className="text-sm text-gray-600">Type: {account.account_type}</p>
                       <p className="text-red-800">Written Off Amount: ₹{account.write_off_amount.toLocaleString()}</p>
-                      <select 
-                        className="mt-2 w-full p-2 border rounded-lg text-sm"
-                        onChange={(e) => {
-                          if (e.target.value) {
-                            router.push(`/credit/resolve?account=${account.account_number}&action=${e.target.value}`);
-                          }
-                        }}
-                        defaultValue=""
-                      >
-                        <option value="" disabled>Select Resolution Option</option>
-                        <option value="pay_full">Pay In Full</option>
-                        <option value="settle">Settle The Account</option>
-                        <option value="connect">Connect With Lender</option>
-                      </select>
                     </div>
                   ))}
               </div>
