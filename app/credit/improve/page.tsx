@@ -160,7 +160,12 @@ export default function CreditScoreImprovePage() {
                               className="w-full p-2 text-xs border rounded-lg bg-gray-50 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                               onChange={(e) => {
                                 if (e.target.value) {
-                                  router.push(`/credit/resolve?account=${account.account_number}&action=${e.target.value}`);
+                                  const route = {
+                                    'pay_full': '/credit/resolve/pay-full',
+                                    'settle': '/credit/resolve/settle',
+                                    'connect': '/credit/resolve/connect'
+                                  }[e.target.value];
+                                  router.push(`${route}?account=${account.account_number}`);
                                 }
                               }}
                               defaultValue=""
@@ -204,7 +209,12 @@ export default function CreditScoreImprovePage() {
                               className="w-full p-2 text-xs border rounded-lg bg-gray-50 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                               onChange={(e) => {
                                 if (e.target.value) {
-                                  router.push(`/credit/resolve?account=${account.account_number}&action=${e.target.value}`);
+                                  const route = {
+                                    'pay_full': '/credit/resolve/pay-full',
+                                    'settle': '/credit/resolve/settle',
+                                    'connect': '/credit/resolve/connect'
+                                  }[e.target.value];
+                                  router.push(`${route}?account=${account.account_number}`);
                                 }
                               }}
                               defaultValue=""

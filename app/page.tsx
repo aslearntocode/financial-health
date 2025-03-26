@@ -40,6 +40,7 @@ export default function Home() {
   const [latestAllocation, setLatestAllocation] = useState(null)
   const [reportData, setReportData] = useState<any>(null)
   const [activeCard, setActiveCard] = useState<'investment' | 'credit'>('investment')
+  const [touchStartTime, setTouchStartTime] = useState(0)
 
   const testimonials = [
     {
@@ -444,8 +445,32 @@ export default function Home() {
     );
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartTime(Date.now())
+  }
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touchEndTime = Date.now()
+    const touchDuration = touchEndTime - touchStartTime
+    
+    // If touch duration is less than 500ms, treat it as a tap
+    if (touchDuration < 500) {
+      e.preventDefault() // Prevent default touch behavior
+      const target = e.target as HTMLElement
+      const clickableElement = target.closest('a, button') as HTMLElement
+      
+      if (clickableElement) {
+        clickableElement.click()
+      }
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-white">
+    <div 
+      className="min-h-screen bg-white"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       {/* Header */}
       <div className="relative z-[100]">
         <Header />

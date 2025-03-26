@@ -174,6 +174,12 @@ export default function Header() {
     }
   }
 
+  const navigationItems = [
+    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Stocks Dashboard', href: '/stocks-dashboard' },
+    { name: 'Existing Portfolio Tracker', href: '/investment/portfolio-tracker' }
+  ]
+
   return (
     <header className="bg-white w-full overflow-x-hidden border-b border-gray-200">
       <nav className="max-w-7xl mx-auto px-1 sm:px-2 lg:px-2">
@@ -237,14 +243,6 @@ export default function Header() {
                   >
                     <span className="text-base">Investment Allocation</span>
                   </Link>
-                  {Boolean(user) && (
-                    <Link 
-                      href="/investment/portfolio-tracker" 
-                      className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
-                    >
-                      <span className="text-base">External Portfolio Tracker</span>
-                    </Link>
-                  )}
                   {Boolean(user) && Boolean(hasRecommendationAccess) && (
                     <button
                       onClick={handleMutualFundsDashboard}
@@ -260,6 +258,14 @@ export default function Header() {
                     >
                       <span className="text-base">Stocks Dashboard</span>
                     </button>
+                  )}
+                  {Boolean(user) && (
+                    <Link 
+                      href="/investment/portfolio-tracker" 
+                      className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                    >
+                      <span className="text-base">Existing Portfolio Tracker</span>
+                    </Link>
                   )}
                 </div>
               </div>
