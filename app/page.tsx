@@ -243,6 +243,10 @@ export default function Home() {
   const buttonStyles = "w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors mt-2";
 
   const MobileCarousel = () => {
+    const handleCardSwitch = (card: 'investment' | 'credit') => {
+      setActiveCard(card);
+    };
+
     return (
       <div className="md:hidden px-4">
         {!user ? (
@@ -267,21 +271,21 @@ export default function Home() {
           <>
             <div className="flex gap-2 mb-4 justify-center">
               <button
-                onClick={() => setActiveCard('investment')}
+                onClick={() => handleCardSwitch('investment')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium ${
                   activeCard === 'investment'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 active:bg-gray-200'
+                    : 'bg-gray-100 text-gray-600'
                 }`}
               >
                 Investment
               </button>
               <button
-                onClick={() => setActiveCard('credit')}
+                onClick={() => handleCardSwitch('credit')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium ${
                   activeCard === 'credit'
                     ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600 active:bg-gray-200'
+                    : 'bg-gray-100 text-gray-600'
                 }`}
               >
                 Credit
