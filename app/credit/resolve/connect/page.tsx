@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/Header'
 import { auth } from '@/lib/firebase'
 import { supabase } from '@/lib/supabase'
 
-export default function ConnectWithLenderPage() {
+// Create a separate component for the part that uses useSearchParams
+function ConnectContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const accountNumber = searchParams.get('account')
@@ -226,5 +227,14 @@ export default function ConnectWithLenderPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Main page component
+export default function Connect() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ConnectContent />
+    </Suspense>
   )
 } 
