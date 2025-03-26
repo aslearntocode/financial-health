@@ -40,7 +40,6 @@ export default function Home() {
   const [latestAllocation, setLatestAllocation] = useState(null)
   const [reportData, setReportData] = useState<any>(null)
   const [activeCard, setActiveCard] = useState<'investment' | 'credit'>('investment')
-  const [touchStartTime, setTouchStartTime] = useState(0)
 
   const testimonials = [
     {
@@ -445,38 +444,8 @@ export default function Home() {
     );
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    // Only handle touch events for specific interactive elements
-    const target = e.target as HTMLElement;
-    if (target.closest('a, button')) {
-      setTouchStartTime(Date.now());
-    }
-  }
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const target = e.target as HTMLElement;
-    // Only handle touch events for specific interactive elements
-    if (target.closest('a, button')) {
-      const touchEndTime = Date.now();
-      const touchDuration = touchEndTime - touchStartTime;
-      
-      // If touch duration is less than 500ms, treat it as a tap
-      if (touchDuration < 500) {
-        const clickableElement = target.closest('a, button') as HTMLElement;
-        if (clickableElement) {
-          e.preventDefault(); // Only prevent default for clickable elements
-          clickableElement.click();
-        }
-      }
-    }
-  }
-
   return (
-    <div 
-      className="min-h-screen bg-white"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="relative z-[100]">
         <Header />
