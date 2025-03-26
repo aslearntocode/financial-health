@@ -727,7 +727,7 @@ export default function PortfolioTracker() {
           console.error('Error parsing error response:', parseError)
           
           // If it's a SyntaxError, try to provide context around the error
-          if (parseError instanceof SyntaxError) {
+          if (parseError instanceof Error) {
             const match = parseError.message.match(/position (\d+)/)
             if (match) {
               const position = parseInt(match[1])
@@ -740,9 +740,10 @@ export default function PortfolioTracker() {
                 contextAfter: responseText.substring(position + 1, end)
               })
             }
+            errorMessage = `Upload failed: ${parseError.message}`
+          } else {
+            errorMessage = 'Upload failed: Unknown parsing error'
           }
-          
-          errorMessage = `Upload failed: ${parseError.message}`
         }
         throw new Error(errorMessage)
       }
@@ -781,7 +782,8 @@ export default function PortfolioTracker() {
         console.error('JSON parse error:', parseError)
         
         // If it's a SyntaxError, provide detailed context
-        if (parseError instanceof SyntaxError) {
+        let errorMessage = 'Failed to parse server response';
+        if (parseError instanceof Error) {
           const match = parseError.message.match(/position (\d+)/)
           if (match) {
             const position = parseInt(match[1])
@@ -794,9 +796,10 @@ export default function PortfolioTracker() {
               contextAfter: responseText.substring(position + 1, end)
             })
           }
+          errorMessage = `Failed to parse server response: ${parseError.message}`
         }
         
-        throw new Error(`Failed to parse server response: ${parseError.message}`)
+        throw new Error(errorMessage)
       }
 
       if (!data) {
