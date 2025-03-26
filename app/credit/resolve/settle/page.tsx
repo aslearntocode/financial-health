@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/Header'
 import { auth } from '@/lib/firebase'
 import { supabase } from '@/lib/supabase'
 
-export default function SettleAccountPage() {
+// Create a separate component for the part that uses useSearchParams
+function SettleContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const accountNumber = searchParams.get('account')
@@ -173,5 +174,21 @@ export default function SettleAccountPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+// Main page component
+export default function Settle() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    }>
+      <SettleContent />
+    </Suspense>
   )
 } 
