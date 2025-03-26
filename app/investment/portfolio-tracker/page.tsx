@@ -969,7 +969,17 @@ export default function PortfolioTracker() {
         const errorMessage = error.response?.data?.message || error.message
         setUploadError(`Upload failed: ${errorMessage}`)
       } else {
-        setUploadError(error instanceof Error ? error.message : 'Failed to upload and parse PDF. Please try again.')
+        let errorMessage = 'Upload failed: An unknown error occurred';
+        
+        if (error instanceof Error) {
+          errorMessage = `Upload failed: ${error.message}`;
+        } else if (typeof error === 'string') {
+          errorMessage = `Upload failed: ${error}`;
+        } else if (error && typeof error === 'object' && 'message' in error) {
+          errorMessage = `Upload failed: ${error.message}`;
+        }
+        
+        setUploadError(errorMessage)
       }
     } finally {
       setIsUploading(false)
