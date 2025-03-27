@@ -252,6 +252,15 @@ export default function Home() {
   const buttonStyles = "w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors mt-2";
 
   const MobileCarousel = () => {
+    const handleCardClick = (e: React.MouseEvent | React.TouchEvent) => {
+      const target = e.target as HTMLElement;
+      const link = target.closest('a');
+      if (link) {
+        e.preventDefault();
+        window.location.href = link.getAttribute('href') || '';
+      }
+    };
+
     return (
       <div className="md:hidden px-4">
         {!user ? (
@@ -285,7 +294,7 @@ export default function Home() {
 
             <div className="transition-all duration-500 ease-in-out">
               {activeCard === 'investment' ? (
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 w-full">
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 w-full" onClick={handleCardClick}>
                   {latestAllocation ? (
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-4 p-2 rounded-lg bg-blue-600/10">
@@ -317,6 +326,7 @@ export default function Home() {
                         <Link 
                           href="/investment" 
                           className={buttonStyles}
+                          onClick={(e) => e.stopPropagation()}
                         >
                           View Full Investment Allocation
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -327,6 +337,7 @@ export default function Home() {
                         <Link 
                           href="/investment" 
                           className={buttonStyles}
+                          onClick={(e) => e.stopPropagation()}
                         >
                           Update Risk Profile
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -379,7 +390,7 @@ export default function Home() {
                   )}
                 </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 w-full">
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 w-full" onClick={handleCardClick}>
                   {latestReport && (latestReport.score ?? 0) > 0 ? (
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-4 p-2 rounded-lg bg-green-600/10">
@@ -432,6 +443,7 @@ export default function Home() {
                         <Link 
                           href="/credit/score/report" 
                           className={buttonStyles}
+                          onClick={(e) => e.stopPropagation()}
                         >
                           View Full Report
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -446,6 +458,7 @@ export default function Home() {
                               ? 'opacity-50 pointer-events-none'
                               : ''
                           }`}
+                          onClick={(e) => e.stopPropagation()}
                         >
                           Refresh Analysis
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
