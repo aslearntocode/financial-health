@@ -184,13 +184,31 @@ export default function CreditScorePage() {
       router.push('/credit/score/report')
 
     } catch (err: any) {
-      console.error('Error details:', {
-        message: err.message,
-        stack: err.stack,
-        details: err.details,
-        code: err.code
-      });
-      alert('An error occurred while processing your request. Please try again.')
+      // Log the raw error first
+      console.error('Raw error:', err);
+
+      // Create a safe error object with fallbacks
+      const errorDetails = {
+        message: err?.message || 'Unknown error occurred',
+        stack: err?.stack || '',
+        details: err?.details || {},
+        code: err?.code || '',
+        name: err?.name || 'Error'
+      };
+
+      console.error('Structured error details:', errorDetails);
+      
+      // Show a more specific error message to the user
+      let userMessage = 'An error occurred while processing your request. ';
+      if (err?.message?.includes('network')) {
+        userMessage += 'Please check your internet connection.';
+      } else if (err?.message?.includes('validation')) {
+        userMessage += 'Please check your input details.';
+      } else {
+        userMessage += 'Please try again later.';
+      }
+      
+      alert(userMessage);
     } finally {
       submitButton.disabled = false
       submitButton.textContent = 'Send OTP'

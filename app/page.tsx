@@ -46,6 +46,7 @@ export default function Home() {
   const [lastTouchTime, setLastTouchTime] = useState(0)
   const TOUCH_DELAY = 500 // Minimum time between touches in milliseconds
   const TOUCH_THRESHOLD = 10 // Pixel threshold to determine if it's a tap or scroll
+  const [activeServiceCard, setActiveServiceCard] = useState('credit') // Add this new state
 
   const testimonials = [
     {
@@ -242,7 +243,7 @@ export default function Home() {
   }
 
   // Common card styles
-  const cardStyles = "bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300 w-[320px] min-h-[400px]";
+  const cardStyles = "bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300 w-[380px] min-h-[400px]";
   const headerStyles = "flex items-center gap-2 mb-4 p-2 rounded-lg";
   const iconContainerStyles = "p-2 rounded-lg";
   const titleStyles = "text-gray-900 font-semibold text-lg";
@@ -253,21 +254,7 @@ export default function Home() {
       <div className="md:hidden px-4">
         {!user ? (
           <div className="flex flex-col gap-4">
-            <Link 
-              href="/investment" 
-              className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-blue-700"
-            >
-              Get Funds Allocation Strategy <br />
-              with Recommendations
-            </Link>
-
-            <Link 
-              href="/credit/score" 
-              className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-center text-base font-semibold text-white active:bg-green-700"
-            >
-              Understand and Improve <br />
-              Your Credit Score
-            </Link>
+            {/* Remove standalone buttons */}
           </div>
         ) : (
           <>
@@ -296,11 +283,11 @@ export default function Home() {
 
             <div className="transition-all duration-500 ease-in-out">
               {activeCard === 'investment' ? (
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 p-4">
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 w-full">
                   {latestAllocation ? (
-                    <div>
+                    <div className="p-4">
                       <div className="flex items-center gap-2 mb-4 p-2 rounded-lg bg-blue-600/10">
-                        <div className="bg-white p-1.5 rounded-lg">
+                        <div className="p-2 rounded-lg">
                           <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                           </svg>
@@ -327,7 +314,7 @@ export default function Home() {
                       <div className="space-y-2 pt-4">
                         <Link 
                           href="/investment" 
-                          className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                          className={buttonStyles}
                         >
                           View Full Investment Allocation
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -337,7 +324,7 @@ export default function Home() {
                         
                         <Link 
                           href="/investment" 
-                          className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                          className={buttonStyles}
                         >
                           Update Risk Profile
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -347,21 +334,54 @@ export default function Home() {
                       </div>
                     </div>
                   ) : (
-                    <Link
-                      href="/investment"
-                      className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-blue-700"
-                    >
-                      Get Funds Allocation Strategy <br />
-                      with Recommendations
-                    </Link>
+                    <div className="bg-blue-50 p-6 w-full">
+                      <h3 className="text-xl font-bold text-blue-600 mb-4">Investment Planning</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-base font-bold">1</span>
+                          </div>
+                          <div>
+                            <h4 className="text-base font-semibold mb-1">Fill Investment Form</h4>
+                            <p className="text-sm text-gray-600">Share your financial goals and risk appetite by filling our investment form</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-base font-bold">2</span>
+                          </div>
+                          <div>
+                            <h4 className="text-base font-semibold mb-1">Get Portfolio Strategy</h4>
+                            <p className="text-sm text-gray-600">Receive AI-driven fund distribution recommendations to allocate your funds optimally</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-base font-bold">3</span>
+                          </div>
+                          <div>
+                            <h4 className="text-base font-semibold mb-1">Start Investing</h4>
+                            <p className="text-sm text-gray-600">Get specific investment recommendations and begin your journey</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-6">
+                        <Link 
+                          href="/investment" 
+                          className="w-full inline-block text-center rounded-md bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+                        >
+                          Start Investment Planning
+                        </Link>
+                      </div>
+                    </div>
                   )}
                 </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 p-4">
-                  {(latestReport && (latestReport.score ?? 0) > 0) ? (
-                    <div>
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 w-full">
+                  {latestReport && (latestReport.score ?? 0) > 0 ? (
+                    <div className="p-4">
                       <div className="flex items-center gap-2 mb-4 p-2 rounded-lg bg-green-600/10">
-                        <div className="bg-white p-1.5 rounded-lg">
+                        <div className="p-2 rounded-lg">
                           <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                           </svg>
@@ -409,7 +429,7 @@ export default function Home() {
                       <div className="space-y-2 pt-4">
                         <Link 
                           href="/credit/score/report" 
-                          className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+                          className={buttonStyles}
                         >
                           View Full Report
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -419,7 +439,7 @@ export default function Home() {
                         
                         <Link 
                           href="/credit/score"
-                          className={`w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors ${
+                          className={`${buttonStyles} ${
                             new Date().getTime() - new Date(reportData?.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000 
                               ? 'opacity-50 pointer-events-none'
                               : ''
@@ -433,13 +453,46 @@ export default function Home() {
                       </div>
                     </div>
                   ) : (
-                    <Link
-                      href="/credit/score"
-                      className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
-                    >
-                      Understand and Improve <br />
-                      Your Credit Score
-                    </Link>
+                    <div className="bg-green-50 p-6 w-full">
+                      <h3 className="text-xl font-bold text-green-600 mb-4">Credit Solutions</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-base font-bold">1</span>
+                          </div>
+                          <div>
+                            <h4 className="text-base font-semibold mb-1">Credit Score</h4>
+                            <p className="text-sm text-gray-600">Understand Your Credit Score through our AI generated personalized video and summary</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-base font-bold">2</span>
+                          </div>
+                          <div>
+                            <h4 className="text-base font-semibold mb-1">Get Recommendations</h4>
+                            <p className="text-sm text-gray-600">Receive personalized recommendations for score improvement and simplify account management</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-white text-base font-bold">3</span>
+                          </div>
+                          <div>
+                            <h4 className="text-base font-semibold mb-1">Apply for Products</h4>
+                            <p className="text-sm text-gray-600">Apply for secured and unsecured loans with higher chances of approval</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-6">
+                        <Link 
+                          href="/credit/score" 
+                          className="w-full inline-block text-center rounded-md bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
+                        >
+                          Get Started with Credit Solutions
+                        </Link>
+                      </div>
+                    </div>
                   )}
                 </div>
               )}
@@ -502,105 +555,35 @@ export default function Home() {
       
       <main>
         {/* Hero Section - no special z-index needed */}
-        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-          <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-gray-900 mb-4">
+        <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 mb-2">
             Your AI-Powered Personalized Financial Health Solution
           </h1>
-          <p className="text-base md:text-lg text-gray-600 mb-8 max-w-3xl mx-auto">
+          <p className="text-base md:text-lg text-gray-600 max-w-3xl mx-auto">
             Get personalized recommendations for both investments and credit decisions. We help you build wealth and manage debt intelligently.
           </p>
         </div>
 
         {/* Mobile View - only apply z-index to the cards themselves */}
-        <div className="relative">
-          <MobileCarousel />
+        <div className="relative mb-8">
+          {user && (latestAllocation || latestReport) ? (
+            <MobileCarousel />
+          ) : null}
         </div>
 
         {/* Desktop View */}
-        <div className="hidden md:flex justify-center items-start gap-8 flex-wrap">
-          {user ? (
-            // Logged in view - show cards and/or buttons
+        <div className="hidden md:flex justify-center items-start gap-8 flex-wrap mb-8">
+          {user && (latestAllocation || latestReport) ? (
+            // Logged in view with at least one recommendation
             <>
-              <div className="hidden md:block">
-                {latestAllocation ? (
-                  <div className={cardStyles}>
-                    <div className="p-4 h-full flex flex-col justify-between">
-                      <div>
-                        <div className={headerStyles + " bg-blue-600/10"}>
-                          <div className="bg-white p-1.5 rounded-lg">
-                            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-                            </svg>
-                          </div>
-                          <span className={titleStyles}>Investment Allocation</span>
-                        </div>
-
-                        <div className="space-y-2.5 my-4">
-                          {/* Ensure 6 rows by padding with empty rows if needed */}
-                          {[...Array(6)].map((_, index) => {
-                            const item = latestAllocation?.[index] as AllocationItem | undefined;
-                            return (
-                              <div key={item?.name || `empty-${index}`} className="flex justify-between items-center">
-                                <span className="text-gray-600">
-                                  {item?.name || '\u00A0'} {/* Use non-breaking space for empty rows */}
-                                </span>
-                                <span className="font-semibold text-gray-900">
-                                  {item?.value ? `${item.value}%` : ''}
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 pt-4">
-                        <Link 
-                          href="/investment" 
-                          className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Add any additional handling if needed
-                          }}
-                        >
-                          View Full Investment Allocation
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                          </svg>
-                        </Link>
-                        
-                        <button 
-                          className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.location.href = '/investment';
-                          }}
-                        >
-                          Update Risk Profile
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <Link
-                    href="/investment"
-                    className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-blue-700"
-                  >
-                    Get Funds Allocation Strategy <br />
-                    with Recommendations
-                  </Link>
-                )}
-              </div>
-
-              {(latestReport && (latestReport.score ?? 0) > 0) ? (
+              {/* Credit Card - Always First */}
+              {latestReport && (latestReport.score ?? 0) > 0 ? (
                 <div className="hidden md:block">
                   <div className={cardStyles}>
                     <div className="p-4 h-full flex flex-col justify-between">
                       <div>
-                        <div className={headerStyles + " bg-green-600/10"}>
-                          <div className="bg-white p-1.5 rounded-lg">
+                        <div className={`${headerStyles} bg-green-600/10`}>
+                          <div className={iconContainerStyles}>
                             <svg className="w-4 h-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                             </svg>
@@ -649,11 +632,7 @@ export default function Home() {
                       <div className="space-y-2 pt-4">
                         <Link 
                           href="/credit/score/report" 
-                          className="w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Add any additional handling if needed
-                          }}
+                          className={buttonStyles}
                         >
                           View Full Report
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -662,9 +641,9 @@ export default function Home() {
                         </Link>
                         
                         <button 
-                          className={`w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors ${
+                          className={`${buttonStyles} ${
                             new Date().getTime() - new Date(reportData?.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000 
-                              ? 'opacity-50 cursor-not-allowed'
+                              ? 'opacity-50 pointer-events-none'
                               : ''
                           }`}
                           onClick={(e) => {
@@ -684,125 +663,274 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <Link
-                  href="/credit/score"
-                  className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
-                >
-                  Understand and Improve  <br />
-                  Your Credit Score 
-                </Link>
+                <div className="bg-green-50 rounded-xl p-6 w-[380px] min-h-[400px] shadow-lg border border-gray-100">
+                  <h3 className="text-xl font-bold text-green-600 mb-4">Credit Solutions</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-base font-bold">1</span>
+                      </div>
+                      <div>
+                        <h4 className="text-base font-semibold mb-1">Credit Score</h4>
+                        <p className="text-sm text-gray-600">Understand Your Credit Score through our AI generated personalized video and summary</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-base font-bold">2</span>
+                      </div>
+                      <div>
+                        <h4 className="text-base font-semibold mb-1">Get Recommendations</h4>
+                        <p className="text-sm text-gray-600">Receive personalized recommendations for score improvement and simplify account management</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-base font-bold">3</span>
+                      </div>
+                      <div>
+                        <h4 className="text-base font-semibold mb-1">Apply for Products</h4>
+                        <p className="text-sm text-gray-600">Apply for secured and unsecured loans with higher chances of approval</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-[72px]">
+                    <Link 
+                      href="/credit/score" 
+                      className="w-full inline-block text-center rounded-md bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
+                    >
+                      Get Started with Credit Solutions
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              {/* Investment Card - Always Second */}
+              {latestAllocation ? (
+                <div className="hidden md:block">
+                  <div className={cardStyles}>
+                    <div className="p-4 h-full flex flex-col justify-between">
+                      <div>
+                        <div className={`${headerStyles} bg-blue-600/10`}>
+                          <div className={iconContainerStyles}>
+                            <svg className="w-4 h-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                            </svg>
+                          </div>
+                          <span className={titleStyles}>Investment Allocation</span>
+                        </div>
+
+                        <div className="space-y-2.5 my-4">
+                          {[...Array(6)].map((_, index) => {
+                            const item = latestAllocation?.[index] as AllocationItem | undefined;
+                            return (
+                              <div key={item?.name || `empty-${index}`} className="flex justify-between items-center">
+                                <span className="text-gray-600">
+                                  {item?.name || '\u00A0'}
+                                </span>
+                                <span className="font-semibold text-gray-900">
+                                  {item?.value ? `${item.value}%` : ''}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 pt-4">
+                        <Link 
+                          href="/investment" 
+                          className={buttonStyles}
+                        >
+                          View Full Investment Allocation
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </Link>
+                        
+                        <Link 
+                          href="/investment" 
+                          className={buttonStyles}
+                        >
+                          Update Risk Profile
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-blue-50 rounded-xl p-6 w-[380px] min-h-[400px] shadow-lg border border-gray-100">
+                  <h3 className="text-xl font-bold text-blue-600 mb-4">Investment Planning</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-base font-bold">1</span>
+                      </div>
+                      <div>
+                        <h4 className="text-base font-semibold mb-1">Fill Investment Form</h4>
+                        <p className="text-sm text-gray-600">Share your financial goals and risk appetite by filling our investment form</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-base font-bold">2</span>
+                      </div>
+                      <div>
+                        <h4 className="text-base font-semibold mb-1">Get Portfolio Strategy</h4>
+                        <p className="text-sm text-gray-600">Receive AI-driven fund distribution recommendations to allocate your funds optimally</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-base font-bold">3</span>
+                      </div>
+                      <div>
+                        <h4 className="text-base font-semibold mb-1">Start Investing</h4>
+                        <p className="text-sm text-gray-600">Get specific investment recommendations and begin your journey</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Link 
+                      href="/investment" 
+                      className="w-full inline-block text-center rounded-md bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+                    >
+                      Start Investment Planning
+                    </Link>
+                  </div>
+                </div>
               )}
             </>
-          ) : (
-            // Not logged in view - show both buttons
-            <>
-              <Link
-                href="/investment"
-                className="inline-block rounded-md bg-blue-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-blue-700"
-              >
-                Get Funds Allocation Strategy <br />
-                with Recommendations
-              </Link>
-
-              <Link
-                href="/credit/score"
-                className="inline-block rounded-md bg-green-600 px-6 py-2.5 text-base font-semibold text-white hover:bg-green-700"
-              >
-                Understand and Improve  <br />
-                Your Credit Score
-              </Link>
-            </>
-          )}
+          ) : null}
         </div>
 
         {/* Steps Container - Update to show both services */}
-        <div className="max-w-6xl mx-auto mt-12 mb-20">
-          <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-10">Our Services</h2>
-          
-          <div className="grid md:grid-cols-2 gap-8 px-4">
-            {/* Investment Service */}
-            <div className="bg-blue-50 rounded-xl p-8">
-              <h3 className="text-2xl font-bold text-blue-600 mb-6">Investment Planning</h3>
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-lg font-bold">1</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Fill Investment Form</h4>
-                    <p className="text-gray-600">Share your financial goals and risk appetite by filling our investment form</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-lg font-bold">2</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Get Portfolio Strategy</h4>
-                    <p className="text-gray-600">Receive AI-driven fund distribution recommendations to allocate your funds optimally</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-lg font-bold">3</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Start Investing</h4>
-                    <p className="text-gray-600">Get specific investment recommendations and begin your journey</p>
-                  </div>
-                </div>
-              </div>
+        {(!user || (!latestAllocation && !latestReport)) && (
+          <div className="max-w-6xl mx-auto mt-0 mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-6">Our Services</h2>
+            
+            {/* Mobile View Controls */}
+            <div className="flex justify-center gap-4 mb-4 md:hidden">
+              <button
+                onClick={() => setActiveServiceCard('credit')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeServiceCard === 'credit'
+                    ? 'bg-green-600 text-white'
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+              >
+                Credit
+              </button>
+              <button
+                onClick={() => setActiveServiceCard('investment')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  activeServiceCard === 'investment'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-600'
+                }`}
+              >
+                Investment
+              </button>
             </div>
 
-            {/* Credit Service */}
-            <div className="bg-green-50 rounded-xl p-8">
-              <h3 className="text-2xl font-bold text-green-600 mb-6">Credit Solutions</h3>
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-lg font-bold">1</span>
+            <div className="md:grid md:grid-cols-2 gap-4 md:gap-8 px-4">
+              {/* Credit Service */}
+              <div className={`bg-green-50 rounded-xl p-6 md:p-8 shadow-lg transition-all duration-300 ${
+                activeServiceCard === 'credit' || window.innerWidth >= 768
+                  ? 'block'
+                  : 'hidden'
+              }`}>
+                <h3 className="text-xl md:text-2xl font-bold text-green-600 mb-4 md:mb-6">Credit Solutions</h3>
+                <div className="space-y-4 md:space-y-6">
+                  <div className="flex items-start gap-3 md:gap-4">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-base md:text-lg font-bold">1</span>
+                    </div>
+                    <div>
+                      <h4 className="text-base md:font-semibold mb-1 md:mb-2">Credit Score</h4>
+                      <p className="text-sm md:text-base text-gray-600">Understand Your Credit Score through our AI generated personalized video and summary</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Credit Score</h4>
-                    <p className="text-gray-600">Understand Your Credit Score through our AI generated personalized video and summary</p>
+                  <div className="flex items-start gap-3 md:gap-4">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-base md:text-lg font-bold">2</span>
+                    </div>
+                    <div>
+                      <h4 className="text-base md:font-semibold mb-1 md:mb-2">Get Recommendations</h4>
+                      <p className="text-sm md:text-base text-gray-600">Receive personalized recommendations for score improvement and simplify account management</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 md:gap-4">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-base md:text-lg font-bold">3</span>
+                    </div>
+                    <div>
+                      <h4 className="text-base md:font-semibold mb-1 md:mb-2">Apply for Products</h4>
+                      <p className="text-sm md:text-base text-gray-600">Apply for secured and unsecured loans with higher chances of approval</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-lg font-bold">2</span>
+                <div className="mt-6 md:mt-8">
+                  <Link 
+                    href="/credit/score" 
+                    className="w-full inline-block text-center rounded-md bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
+                  >
+                    Get Started with Credit Solutions
+                  </Link>
+                </div>
+              </div>
+
+              {/* Investment Service */}
+              <div className={`bg-blue-50 rounded-xl p-6 md:p-8 shadow-lg transition-all duration-300 ${
+                activeServiceCard === 'investment' || window.innerWidth >= 768
+                  ? 'block'
+                  : 'hidden'
+              }`}>
+                <h3 className="text-xl md:text-2xl font-bold text-blue-600 mb-4 md:mb-6">Investment Planning</h3>
+                <div className="space-y-4 md:space-y-6">
+                  <div className="flex items-start gap-3 md:gap-4">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-base md:text-lg font-bold">1</span>
+                    </div>
+                    <div>
+                      <h4 className="text-base md:font-semibold mb-1 md:mb-2">Fill Investment Form</h4>
+                      <p className="text-sm md:text-base text-gray-600">Share your financial goals and risk appetite by filling our investment form</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Get Recommendations</h4>
-                    <p className="text-gray-600">Receive personalized recommendations for score improvement and simplify account management</p>
+                  <div className="flex items-start gap-3 md:gap-4">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-base md:text-lg font-bold">2</span>
+                    </div>
+                    <div>
+                      <h4 className="text-base md:font-semibold mb-1 md:mb-2">Get Portfolio Strategy</h4>
+                      <p className="text-sm md:text-base text-gray-600">Receive AI-driven fund distribution recommendations to allocate your funds optimally</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 md:gap-4">
+                    <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-base md:text-lg font-bold">3</span>
+                    </div>
+                    <div>
+                      <h4 className="text-base md:font-semibold mb-1 md:mb-2">Start Investing</h4>
+                      <p className="text-sm md:text-base text-gray-600">Get specific investment recommendations and begin your journey</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-lg font-bold">3</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Apply for Products</h4>
-                    <p className="text-gray-600">Apply for secured and unsecured loans with higher chances of approval</p>
-                  </div>
+                <div className="mt-6 md:mt-8">
+                  <Link 
+                    href="/investment" 
+                    className="w-full inline-block text-center rounded-md bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+                  >
+                    Start Investment Planning
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Dashboard Image
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="relative">
-            <Image
-              src="/HomePageDashboard.png"
-              alt="Investment Dashboard Preview"
-              width={900}
-              height={450}
-              priority
-              className="rounded-lg shadow-2xl w-full h-auto blur-[1px]"
-            />
-          </div>
-        </div> */}
+        )}
 
         {/* Sliding Sections Container */}
         <div className="relative overflow-hidden mb-16">

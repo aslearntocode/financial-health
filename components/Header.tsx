@@ -206,6 +206,70 @@ export default function Header() {
               <div className="relative" style={{ zIndex: 50 }}>
                 <div className="flex items-center">
                   <button 
+                    onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
+                    className="text-black hover:text-gray-700 py-2 text-lg mr-1"
+                  >
+                    Credit
+                  </button>
+                  <button 
+                    onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
+                    className="p-1"
+                  >
+                    <svg 
+                      width="24" 
+                      height="24" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      className={`transition-transform duration-200 ${isCreditDropdownOpen ? 'rotate-180' : ''}`}
+                    >
+                      <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+                <div 
+                  className={`
+                    fixed w-64 bg-white rounded-lg shadow-lg py-2
+                    ${isCreditDropdownOpen ? 'block' : 'hidden'}
+                  `}
+                  style={{
+                    zIndex: 1000,
+                    top: '4rem',
+                    left: '28rem'
+                  }}
+                >
+                  <Link 
+                    href="/credit/score" 
+                    className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                  >
+                    <span className="text-base">Generate Credit Score Summary</span>
+                  </Link>
+                  <Link
+                    href="/credit/simulator"
+                    className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                  >
+                    <span className="text-base">Credit Score Simulator</span>
+                  </Link>
+                  {Boolean(user) && Boolean(hasCreditReport) && (
+                    <Link
+                      href="/credit/score/report"
+                      className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                    >
+                      <span className="text-base">View Credit Report Summary</span>
+                    </Link>
+                  )}
+                  {Boolean(user) && Boolean(hasDisputes) && (
+                    <Link
+                      href="/credit/disputes"
+                      className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                    >
+                      <span className="text-base">Your Disputes</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
+              <div className="relative" style={{ zIndex: 50 }}>
+                <div className="flex items-center">
+                  <button 
                     onClick={() => setIsInvestmentDropdownOpen(!isInvestmentDropdownOpen)}
                     className="text-black hover:text-gray-700 py-2 text-lg mr-1"
                   >
@@ -234,7 +298,7 @@ export default function Header() {
                   style={{
                     zIndex: 1000,
                     top: '4rem',
-                    left: '28rem'
+                    left: '36rem'
                   }}
                 >
                   <Link 
@@ -265,70 +329,6 @@ export default function Header() {
                       className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
                     >
                       <span className="text-base">Existing Portfolio Tracker</span>
-                    </Link>
-                  )}
-                </div>
-              </div>
-              <div className="relative" style={{ zIndex: 50 }}>
-                <div className="flex items-center">
-                  <button 
-                    onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
-                    className="text-black hover:text-gray-700 py-2 text-lg mr-1"
-                  >
-                    Credit
-                  </button>
-                  <button 
-                    onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
-                    className="p-1"
-                  >
-                    <svg 
-                      width="24" 
-                      height="24" 
-                      viewBox="0 0 24 24" 
-                      fill="none" 
-                      className={`transition-transform duration-200 ${isCreditDropdownOpen ? 'rotate-180' : ''}`}
-                    >
-                      <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                </div>
-                <div 
-                  className={`
-                    fixed w-64 bg-white rounded-lg shadow-lg py-2
-                    ${isCreditDropdownOpen ? 'block' : 'hidden'}
-                  `}
-                  style={{
-                    zIndex: 1000,
-                    top: '4rem',
-                    left: '36rem'
-                  }}
-                >
-                  <Link 
-                    href="/credit/score" 
-                    className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
-                  >
-                    <span className="text-base">Generate Credit Score Summary</span>
-                  </Link>
-                  <Link
-                    href="/credit/simulator"
-                    className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
-                  >
-                    <span className="text-base">Credit Score Simulator</span>
-                  </Link>
-                  {Boolean(user) && Boolean(hasCreditReport) && (
-                    <Link
-                      href="/credit/score/report"
-                      className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
-                    >
-                      <span className="text-base">View Credit Report Summary</span>
-                    </Link>
-                  )}
-                  {Boolean(user) && Boolean(hasDisputes) && (
-                    <Link
-                      href="/credit/disputes"
-                      className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
-                    >
-                      <span className="text-base">Your Disputes</span>
                     </Link>
                   )}
                 </div>
@@ -367,6 +367,50 @@ export default function Header() {
               </svg>
               <span className="text-xs mt-1">About</span>
             </Link>
+
+            <div className="relative">
+              <button 
+                onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
+                className="text-black hover:text-gray-700 flex flex-col items-center"
+              >
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                <span className="text-xs mt-1">Credit</span>
+              </button>
+              {isCreditDropdownOpen && (
+                <div className="absolute bottom-full mb-2 w-48 bg-white rounded-lg shadow-lg py-2" style={{ left: '50%', transform: 'translateX(-50%)' }}>
+                  <Link 
+                    href="/credit/score" 
+                    className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
+                  >
+                    Generate Credit Score Summary
+                  </Link>
+                  <Link
+                    href="/credit/simulator"
+                    className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
+                  >
+                    Credit Score Simulator
+                  </Link>
+                  {Boolean(user) && Boolean(hasCreditReport) && (
+                    <Link
+                      href="/credit/score/report"
+                      className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
+                    >
+                      View Credit Report Summary
+                    </Link>
+                  )}
+                  {Boolean(user) && Boolean(hasDisputes) && (
+                    <Link
+                      href="/credit/disputes"
+                      className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
+                    >
+                      Your Disputes
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
 
             <div className="relative">
               <button 
@@ -409,50 +453,6 @@ export default function Header() {
                     >
                       Stocks Dashboard
                     </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="relative">
-              <button 
-                onClick={() => setIsCreditDropdownOpen(!isCreditDropdownOpen)}
-                className="text-black hover:text-gray-700 flex flex-col items-center"
-              >
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                <span className="text-xs mt-1">Credit</span>
-              </button>
-              {isCreditDropdownOpen && (
-                <div className="absolute bottom-full mb-2 w-48 bg-white rounded-lg shadow-lg py-2" style={{ left: '50%', transform: 'translateX(-50%)' }}>
-                  <Link 
-                    href="/credit/score" 
-                    className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
-                  >
-                    Generate Credit Score Summary
-                  </Link>
-                  <Link
-                    href="/credit/simulator"
-                    className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
-                  >
-                    Credit Score Simulator
-                  </Link>
-                  {Boolean(user) && Boolean(hasCreditReport) && (
-                    <Link
-                      href="/credit/score/report"
-                      className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
-                    >
-                      View Credit Report Summary
-                    </Link>
-                  )}
-                  {Boolean(user) && Boolean(hasDisputes) && (
-                    <Link
-                      href="/credit/disputes"
-                      className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
-                    >
-                      Your Disputes
-                    </Link>
                   )}
                 </div>
               )}
