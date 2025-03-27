@@ -512,8 +512,6 @@ export default function Home() {
   }
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault() // Prevent default touch behavior
-    
     const now = Date.now()
     const touchEndX = e.changedTouches[0].clientX
     const touchEndY = e.changedTouches[0].clientY
@@ -530,14 +528,13 @@ export default function Home() {
       return // Ignore touches that are too close together
     }
     
-    // Only handle as tap if:
-    // 1. Touch duration is less than 500ms
-    // 2. Touch distance is less than threshold (to differentiate from scrolling)
-    if (touchDuration < 500 && touchDistance < TOUCH_THRESHOLD) {
+    // Handle as tap if touch distance is less than threshold (to differentiate from scrolling)
+    if (touchDistance < TOUCH_THRESHOLD) {
       const target = e.target as HTMLElement
       const clickableElement = target.closest('a, button') as HTMLElement
       
       if (clickableElement) {
+        e.preventDefault() // Prevent default only when we find a clickable element
         setLastTouchTime(now)
         clickableElement.click()
       }
