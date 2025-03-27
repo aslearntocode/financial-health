@@ -47,6 +47,7 @@ export default function Home() {
   const TOUCH_DELAY = 500 // Minimum time between touches in milliseconds
   const TOUCH_THRESHOLD = 10 // Pixel threshold to determine if it's a tap or scroll
   const [activeServiceCard, setActiveServiceCard] = useState('credit') // Add this new state
+  const [isMobile, setIsMobile] = useState(true)
 
   const testimonials = [
     {
@@ -87,13 +88,14 @@ export default function Home() {
   ]
 
   useEffect(() => {
-    if (window.innerWidth >= 768) {  // Only run on desktop
-      const timer = setInterval(() => {
-        setActiveSection((current) => current === 'distribution' ? 'offer' : 'distribution')
-      }, 10000) // Switch every 10 seconds
-
-      return () => clearInterval(timer)
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
     }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   useEffect(() => {
@@ -542,6 +544,16 @@ export default function Home() {
     }
   }
 
+  useEffect(() => {
+    if (!isMobile) {  // Only run on desktop
+      const timer = setInterval(() => {
+        setActiveSection((current) => current === 'distribution' ? 'offer' : 'distribution')
+      }, 10000) // Switch every 10 seconds
+
+      return () => clearInterval(timer)
+    }
+  }, [isMobile])
+
   return (
     <div 
       className="min-h-screen bg-white"
@@ -839,9 +851,7 @@ export default function Home() {
             <div className="md:grid md:grid-cols-2 gap-4 md:gap-8 px-4">
               {/* Credit Service */}
               <div className={`bg-green-50 rounded-xl p-6 md:p-8 shadow-lg transition-all duration-300 ${
-                activeServiceCard === 'credit' || window.innerWidth >= 768
-                  ? 'block'
-                  : 'hidden'
+                activeServiceCard === 'credit' || !isMobile ? 'block' : 'hidden'
               }`}>
                 <h3 className="text-xl md:text-2xl font-bold text-green-600 mb-4 md:mb-6">Credit Solutions</h3>
                 <div className="space-y-4 md:space-y-6">
@@ -885,9 +895,7 @@ export default function Home() {
 
               {/* Investment Service */}
               <div className={`bg-blue-50 rounded-xl p-6 md:p-8 shadow-lg transition-all duration-300 ${
-                activeServiceCard === 'investment' || window.innerWidth >= 768
-                  ? 'block'
-                  : 'hidden'
+                activeServiceCard === 'investment' || !isMobile ? 'block' : 'hidden'
               }`}>
                 <h3 className="text-xl md:text-2xl font-bold text-blue-600 mb-4 md:mb-6">Investment Planning</h3>
                 <div className="space-y-4 md:space-y-6">
@@ -936,10 +944,10 @@ export default function Home() {
         <div className="relative overflow-hidden mb-16">
           {/* Why Distribution Matters Section */}
           <div className={`transition-all duration-3000 ${
-            activeSection === 'distribution' || window.innerWidth < 768
+            activeSection === 'distribution' || isMobile
               ? 'translate-x-0 opacity-100' 
               : '-translate-x-full opacity-0'
-          } absolute w-full ${activeSection === 'offer' && window.innerWidth >= 768 ? 'pointer-events-none' : ''}`}>
+          } absolute w-full ${activeSection === 'offer' && !isMobile ? 'pointer-events-none' : ''}`}>
             <div className="bg-gray-50 py-16">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <h2 className="text-3xl font-bold text-center mb-12">Why Distribution Matters</h2>
