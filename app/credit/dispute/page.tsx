@@ -403,8 +403,34 @@ export default function DisputePage() {
       <Header />
       
       <div className="flex-1 w-full max-w-[1400px] mx-auto px-6 md:px-8 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Dispute Credit Report Inaccuracies</h1>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900">Dispute Credit Report Inaccuracies</h1>
+          <p className="text-gray-600 text-base">
+            Select any accounts you wish to dispute. Our team will review and respond within 7-10 business days.
+          </p>
+          <button
+            onClick={() => router.push('/credit/score/report')}
+            className="mt-4 inline-flex items-center space-x-2 text-gray-600 hover:text-gray-800 
+              bg-white px-4 py-2 rounded-lg shadow hover:shadow-md transition-all duration-200"
+          >
+            <svg 
+              className="w-5 h-5" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+              />
+            </svg>
+            <span>Back to Report</span>
+          </button>
+        </div>
+
+        <div className="flex items-center justify-end mb-4">
           <div className="text-sm text-gray-500">
             {selectedAccounts.length} account{selectedAccounts.length !== 1 ? 's' : ''} selected
           </div>
@@ -428,7 +454,7 @@ export default function DisputePage() {
             <div>
               <p className="text-blue-800 font-medium">How to dispute?</p>
               <p className="text-blue-600 text-sm mt-1">
-                Select the accounts you want to dispute. You can select multiple accounts at once.
+                Select any accounts you wish to dispute from your Active or Closed accounts list.
                 Our team will review your dispute and get back to you within 7-10 business days.
               </p>
             </div>
@@ -437,8 +463,6 @@ export default function DisputePage() {
 
         {renderAccountSection('Active Accounts', accounts.active, 'active')}
         {renderAccountSection('Closed Accounts', accounts.closed, 'closed')}
-        {renderAccountSection('Overdue Accounts', accounts.overdue, 'overdue')}
-        {renderAccountSection('Written Off Accounts', accounts.writtenOff, 'writtenoff')}
 
         {selectedAccounts.length > 0 && (
           <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[9999]">
@@ -496,7 +520,7 @@ export default function DisputePage() {
           </div>
         )}
 
-        {/* Add Back to Report Button */}
+        {/* Back to Report Button at bottom */}
         <div className="flex justify-center pt-8">
           <button
             onClick={() => router.push('/credit/score/report')}

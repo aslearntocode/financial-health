@@ -252,15 +252,6 @@ export default function Home() {
   const buttonStyles = "w-full flex items-center justify-center gap-2 text-blue-600 font-medium py-2.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors mt-2";
 
   const MobileCarousel = () => {
-    const handleCardClick = (e: React.MouseEvent | React.TouchEvent) => {
-      const target = e.target as HTMLElement;
-      const link = target.closest('a');
-      if (link) {
-        e.preventDefault();
-        window.location.href = link.getAttribute('href') || '';
-      }
-    };
-
     return (
       <div className="md:hidden px-4">
         {!user ? (
@@ -294,7 +285,7 @@ export default function Home() {
 
             <div className="transition-all duration-500 ease-in-out">
               {activeCard === 'investment' ? (
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 w-full" onClick={handleCardClick}>
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 w-full">
                   {latestAllocation ? (
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-4 p-2 rounded-lg bg-blue-600/10">
@@ -326,7 +317,6 @@ export default function Home() {
                         <Link 
                           href="/investment" 
                           className={buttonStyles}
-                          onClick={(e) => e.stopPropagation()}
                         >
                           View Full Investment Allocation
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -337,7 +327,6 @@ export default function Home() {
                         <Link 
                           href="/investment" 
                           className={buttonStyles}
-                          onClick={(e) => e.stopPropagation()}
                         >
                           Update Risk Profile
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -390,7 +379,7 @@ export default function Home() {
                   )}
                 </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 w-full" onClick={handleCardClick}>
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 w-full">
                   {latestReport && (latestReport.score ?? 0) > 0 ? (
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-4 p-2 rounded-lg bg-green-600/10">
@@ -443,7 +432,6 @@ export default function Home() {
                         <Link 
                           href="/credit/score/report" 
                           className={buttonStyles}
-                          onClick={(e) => e.stopPropagation()}
                         >
                           View Full Report
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -458,7 +446,6 @@ export default function Home() {
                               ? 'opacity-50 pointer-events-none'
                               : ''
                           }`}
-                          onClick={(e) => e.stopPropagation()}
                         >
                           Refresh Analysis
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -525,6 +512,8 @@ export default function Home() {
   }
 
   const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault() // Prevent default touch behavior
+    
     const now = Date.now()
     const touchEndX = e.changedTouches[0].clientX
     const touchEndY = e.changedTouches[0].clientY
@@ -541,13 +530,14 @@ export default function Home() {
       return // Ignore touches that are too close together
     }
     
-    // Handle as tap if touch distance is less than threshold (to differentiate from scrolling)
-    if (touchDistance < TOUCH_THRESHOLD) {
+    // Only handle as tap if:
+    // 1. Touch duration is less than 500ms
+    // 2. Touch distance is less than threshold (to differentiate from scrolling)
+    if (touchDuration < 500 && touchDistance < TOUCH_THRESHOLD) {
       const target = e.target as HTMLElement
       const clickableElement = target.closest('a, button') as HTMLElement
       
       if (clickableElement) {
-        e.preventDefault() // Prevent default only when we find a clickable element
         setLastTouchTime(now)
         clickableElement.click()
       }

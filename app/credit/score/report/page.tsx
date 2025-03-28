@@ -4,7 +4,7 @@ import Header from "@/components/Header"
 import Image from "next/image"
 import { useRouter } from 'next/navigation'
 import { auth } from '@/lib/firebase'
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { supabase } from "@/lib/supabase"
 
 interface CreditReport {
@@ -65,7 +65,22 @@ interface ScoreImpactSimulation {
   impact: number;
 }
 
-const CreditScore = ({ score }: { score: number }) => {
+interface HighlightState {
+  name: boolean;
+  score: boolean;
+  activeAccounts: boolean;
+  closedAccounts: boolean;
+  totalAccounts: boolean;
+  creditHistory: boolean;
+  newAccounts: boolean;
+  recentEnquiries: boolean;
+  overdueAccounts: boolean;
+  writtenOffAccounts: boolean;
+  creditCards: boolean;
+  improvementTips: boolean;
+}
+
+const CreditScore = ({ score, isHighlighted }: { score: number, isHighlighted?: boolean }) => {
   const getScoreColor = (score: number) => {
     if (score >= 750) return 'text-green-500';
     if (score >= 600) return 'text-yellow-500';
@@ -73,12 +88,113 @@ const CreditScore = ({ score }: { score: number }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full">
+    <div className={`flex flex-col items-center justify-center w-full transition-all duration-500 rounded-lg p-4 ${
+      isHighlighted ? 'bg-blue-50 shadow-lg scale-105' : ''
+    }`}>
       <div className="text-sm font-medium text-gray-500 tracking-wide mb-2">
         CREDIT SCORE
       </div>
-      <div className={`text-6xl font-bold ${getScoreColor(score)} transition-colors duration-500`}>
+      <div className={`text-6xl font-bold ${getScoreColor(score)} transition-all duration-500 ${
+        isHighlighted ? 'animate-pulse transform scale-110' : ''
+      }`}>
         {score}
+      </div>
+    </div>
+  );
+};
+
+const SyncedAudioPlayer = ({ audioUrl, onTimeUpdate, onEnded }: { 
+  audioUrl: string, 
+  onTimeUpdate: (time: number) => void,
+  onEnded: () => void
+}) => {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.addEventListener('loadedmetadata', () => {
+        setDuration(audioRef.current?.duration || 0);
+      });
+    }
+  }, []);
+
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+      onTimeUpdate(audioRef.current.currentTime);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div className="w-full">
+      <audio 
+        ref={audioRef}
+        src={audioUrl}
+        onTimeUpdate={handleTimeUpdate}
+        onEnded={() => {
+          setIsPlaying(false);
+          onEnded();
+        }}
+        className="hidden"
+      />
+      
+      <div className="flex items-center space-x-4">
+        <button
+          onClick={togglePlayPause}
+          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          {isPlaying ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          )}
+        </button>
+
+        <div className="flex-1">
+          <div className="w-full bg-gray-200 rounded-full h-2 cursor-pointer"
+               onClick={(e) => {
+                 if (audioRef.current) {
+                   const rect = e.currentTarget.getBoundingClientRect();
+                   const x = e.clientX - rect.left;
+                   const percentage = x / rect.width;
+                   audioRef.current.currentTime = percentage * duration;
+                 }
+               }}>
+            <div 
+              className="bg-blue-500 h-2 rounded-full transition-all duration-100"
+              style={{ width: `${(currentTime / duration) * 100}%` }}
+            />
+          </div>
+          <div className="flex justify-between text-sm text-gray-500 mt-1">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -414,12 +530,38 @@ const FloatingActionPopup = ({ score, router, reportData }: { score: number, rou
   );
 };
 
+// Add this at the top of your file with other styles
+const styles = `
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+`;
+
 export default function CreditScoreReportPage() {
   const router = useRouter()
   const [reportData, setReportData] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [highlightedElements, setHighlightedElements] = useState<HighlightState>({
+    name: false,
+    score: false,
+    activeAccounts: false,
+    closedAccounts: false,
+    totalAccounts: false,
+    creditHistory: false,
+    newAccounts: false,
+    recentEnquiries: false,
+    overdueAccounts: false,
+    writtenOffAccounts: false,
+    creditCards: false,
+    improvementTips: false
+  });
+  const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
     const fetchReport = async () => {
@@ -465,6 +607,56 @@ export default function CreditScoreReportPage() {
 
     fetchReport()
   }, [])
+
+  const handleAudioTimeUpdate = (time: number) => {
+    // Reset all highlights
+    const baseState = Object.keys(highlightedElements).reduce((acc, key) => ({
+      ...acc,
+      [key]: false
+    }), {} as HighlightState);
+
+    // Update highlights based on audio timestamp
+    if (time < 10) {
+      setHighlightedElements({ ...baseState, name: true });
+    } else if (time < 22) {
+      setHighlightedElements({ ...baseState, score: true });
+    } else if (time < 27) {
+      setHighlightedElements({ ...baseState, recentEnquiries: true });
+    } else if (time < 30) {
+      setHighlightedElements({ ...baseState, totalAccounts: true });
+    } else if (time < 35) {
+      setHighlightedElements({ ...baseState, activeAccounts: true });
+    } else if (time < 38) {
+      setHighlightedElements({ ...baseState, closedAccounts: true });
+    } else if (time < 85) {
+      setHighlightedElements({ ...baseState, writtenOffAccounts: true });
+    } else if (time < 130) {
+      setHighlightedElements({ ...baseState, overdueAccounts: true });
+    } else if (time < 160) {
+      setHighlightedElements({ ...baseState, creditCards: true });
+    } else {
+      // Show improvement tips after all other sections
+      setHighlightedElements({ ...baseState, improvementTips: true });
+      setCurrentTime(time); // Add this to track time for tips rotation
+    }
+  };
+
+  const handleAudioEnded = () => {
+    setHighlightedElements({
+      name: false,
+      score: false,
+      activeAccounts: false,
+      closedAccounts: false,
+      totalAccounts: false,
+      creditHistory: false,
+      newAccounts: false,
+      recentEnquiries: false,
+      overdueAccounts: false,
+      writtenOffAccounts: false,
+      creditCards: false,
+      improvementTips: false
+    });
+  };
 
   // Loading state
   if (isLoading) {
@@ -542,217 +734,461 @@ export default function CreditScoreReportPage() {
     )?.["ATTR-VALUE"] ?? "0"
   );
 
+  const DynamicInfoCard = ({ highlightedElements, reportData, score, activeAccounts, totalAccounts, recentEnquiriesCount }: {
+    highlightedElements: HighlightState;
+    reportData: any;
+    score: number;
+    activeAccounts: number;
+    totalAccounts: number;
+    recentEnquiriesCount: number;
+  }) => {
+    if (highlightedElements.name) {
+      return (
+        <div className="text-center animate-fade-in">
+          <h3 className="text-xl font-medium text-gray-600 mb-4">Customer Name</h3>
+          <p className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            {`${reportData?.applicant_segment?.["FIRST-NAME"]?.charAt(0).toUpperCase()}${reportData?.applicant_segment?.["FIRST-NAME"]?.slice(1).toLowerCase() || ""} ${reportData?.applicant_segment?.["LAST-NAME"]?.charAt(0).toUpperCase()}${reportData?.applicant_segment?.["LAST-NAME"]?.slice(1).toLowerCase() || ""}`}
+          </p>
+        </div>
+      );
+    }
+
+    if (highlightedElements.score) {
+      return (
+        <div className="text-center animate-fade-in">
+          <h3 className="text-xl font-medium text-gray-600 mb-4">Credit Score</h3>
+          <div className="flex flex-col items-center gap-3">
+            <p className={`text-6xl font-bold ${
+              score >= 750 ? 'bg-gradient-to-r from-green-600 to-emerald-600' : 
+              score >= 600 ? 'bg-gradient-to-r from-yellow-600 to-orange-600' : 
+              'bg-gradient-to-r from-red-600 to-rose-600'
+            } bg-clip-text text-transparent`}>
+              {score}
+            </p>
+            <span className={`inline-block px-4 py-1.5 rounded-full text-sm font-medium ${
+              score >= 750 ? 'bg-green-100 text-green-800' : 
+              score >= 600 ? 'bg-yellow-100 text-yellow-800' : 
+              'bg-red-100 text-red-800'
+            }`}>
+              {score >= 750 ? 'Excellent' : score >= 600 ? 'Good' : 'Low'}
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    if (highlightedElements.recentEnquiries) {
+      return (
+        <div className="text-center animate-fade-in">
+          <h3 className="text-xl font-medium text-gray-600 mb-4">Recent Enquiries</h3>
+          <p className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
+            {recentEnquiriesCount}
+          </p>
+          <p className="text-sm text-gray-500">In the last 6 months</p>
+        </div>
+      );
+    }
+
+    if (highlightedElements.totalAccounts || highlightedElements.activeAccounts) {
+      return (
+        <div className="text-center animate-fade-in">
+          <h3 className="text-xl font-medium text-gray-600 mb-4">
+            {highlightedElements.totalAccounts ? 'Total Accounts' : 'Active Accounts'}
+          </h3>
+          <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-2">
+            {highlightedElements.totalAccounts ? totalAccounts : activeAccounts}
+          </p>
+          <p className="text-sm text-gray-500">
+            {highlightedElements.totalAccounts ? `Including ${activeAccounts} active accounts` : `Out of ${totalAccounts} total accounts`}
+          </p>
+        </div>
+      );
+    }
+
+    if (highlightedElements.creditCards) {
+      const creditCards = reportData?.accounts?.active?.filter((account: Account) => 
+        account.account_type?.toLowerCase().includes('credit card')
+      ) || [];
+      const totalUtilization = creditCards.reduce((acc: number, card: Account) => {
+        return acc + (card.current_balance / (card.credit_limit || 1)) * 100;
+      }, 0) / (creditCards.length || 1);
+
+      return (
+        <div className="text-center animate-fade-in">
+          <h3 className="text-xl font-medium text-gray-600 mb-4">Credit Card Usage</h3>
+          <p className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-sky-600 bg-clip-text text-transparent mb-2">
+            {Math.round(totalUtilization)}%
+          </p>
+          <p className="text-sm text-gray-500">Average utilization across {creditCards.length} cards</p>
+        </div>
+      );
+    }
+
+    if (highlightedElements.overdueAccounts) {
+      const overdueAccounts = reportData?.accounts?.active?.filter((account: Account) => 
+        account.overdue_amount > 0
+      ) || [];
+      const totalOverdue = overdueAccounts.reduce((acc: number, account: Account) => 
+        acc + account.overdue_amount, 0
+      );
+
+      return (
+        <div className="text-center animate-fade-in">
+          <h3 className="text-xl font-medium text-gray-600 mb-4">Overdue Amount</h3>
+          <p className="text-5xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent mb-2">
+            ₹{totalOverdue.toLocaleString()}
+          </p>
+          <p className="text-sm text-gray-500">Across {overdueAccounts.length} accounts</p>
+        </div>
+      );
+    }
+
+    if (highlightedElements.writtenOffAccounts) {
+      const writtenOffAccounts = reportData?.accounts?.closed?.filter((account: Account) => 
+        account.write_off_amount > 0
+      ) || [];
+      const totalWrittenOff = writtenOffAccounts.reduce((acc: number, account: Account) => 
+        acc + account.write_off_amount, 0
+      );
+
+      return (
+        <div className="text-center animate-fade-in">
+          <h3 className="text-xl font-medium text-gray-600 mb-4">Written Off Amount</h3>
+          <p className="text-5xl font-bold bg-gradient-to-r from-red-600 to-rose-600 bg-clip-text text-transparent mb-2">
+            ₹{totalWrittenOff.toLocaleString()}
+          </p>
+          <p className="text-sm text-gray-500">Across {writtenOffAccounts.length} accounts</p>
+        </div>
+      );
+    }
+
+    if (highlightedElements.improvementTips) {
+      // Determine which tip to show based on audio timestamp
+      const tipIndex = Math.floor((currentTime - 160) / 10); // Show each tip for 10 seconds
+
+      return (
+        <div className="text-center animate-fade-in">
+          {tipIndex === 0 && (
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-2xl p-6">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                <h3 className="text-2xl font-semibold text-blue-700">Pay Bills on Time</h3>
+              </div>
+              <p className="text-blue-600 text-lg">Set up automatic payments to never miss a due date</p>
+            </div>
+          )}
+
+          {tipIndex === 1 && (
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-2xl p-6">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                <h3 className="text-2xl font-semibold text-purple-700">Keep Credit Utilization Low</h3>
+              </div>
+              <p className="text-purple-600 text-lg">Try to keep it below 30% of your limit</p>
+            </div>
+          )}
+
+          {tipIndex === 2 && (
+            <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-2xl p-6">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="text-2xl font-semibold text-green-700">Maintain Long-Term Accounts</h3>
+              </div>
+              <p className="text-green-600 text-lg">Keep your oldest accounts active</p>
+            </div>
+          )}
+
+          {tipIndex > 2 && (
+            <div className="text-center animate-fade-in">
+              <p className="text-xl font-medium text-gray-600">
+                Follow these tips to improve your score
+              </p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Default/empty state
+    return (
+      <div className="text-center animate-fade-in">
+        <p className="text-xl font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Video Summary Provided by Financial Health
+        </p>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
       
-      {/* Remove the existing floating buttons and add the new popup component */}
       <FloatingActionPopup score={score} router={router} reportData={reportData} />
 
       <div className="flex-1 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <h1 className="text-2xl font-bold text-center mb-8">
-            {`${reportData?.applicant_segment?.["FIRST-NAME"]?.charAt(0).toUpperCase()}${reportData?.applicant_segment?.["FIRST-NAME"]?.slice(1).toLowerCase() || ""} ${reportData?.applicant_segment?.["LAST-NAME"]?.charAt(0).toUpperCase()}${reportData?.applicant_segment?.["LAST-NAME"]?.slice(1).toLowerCase() || ""}'s Credit Report Summary`}
+            Credit Report Summary
           </h1>
           
-          {/* Audio Player and Score Meter in side-by-side layout with reduced height */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Audio Player Section */}
+          {/* Unified Card */}
+          <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl shadow-lg overflow-hidden mb-12">
+            {/* Content Area with fixed height */}
+            <div className="px-8 pt-8 pb-6 h-[240px] flex items-center justify-center bg-gradient-to-r from-blue-500/5 to-purple-500/5">
+              <div className="w-full">
+                <DynamicInfoCard 
+                  highlightedElements={highlightedElements}
+                  reportData={reportData}
+                  score={score}
+                  activeAccounts={activeAccounts}
+                  totalAccounts={totalAccounts}
+                  recentEnquiriesCount={recentEnquiriesCount}
+                />
+              </div>
+            </div>
+            
+            {/* Audio Controls */}
             {audioUrl && (
-              <div className="bg-white rounded-xl shadow-lg p-6 h-[160px] flex flex-col justify-center">
-                <h2 className="text-base font-semibold mb-2">Audio Summary</h2>
-                <audio controls className="w-full">
-                  <source src={audioUrl} type="audio/mpeg" />
-                  Your browser does not support the audio element.
-                </audio>
+              <div className="px-8 pb-6 bg-white">
+                <div className="pt-6 border-t border-gray-100">
+                  <SyncedAudioPlayer 
+                    audioUrl={audioUrl}
+                    onTimeUpdate={handleAudioTimeUpdate}
+                    onEnded={handleAudioEnded}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Full Report Content */}
+          <div className="space-y-6">
+            {/* Credit Score Card */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <CreditScore score={score} />
+            </div>
+
+            {/* Rest of your existing report sections */}
+            {/* Key Metrics */}
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
+                highlightedElements.activeAccounts ? 'bg-green-50 shadow-lg scale-105' : ''
+              }`}>
+                <h3 className="font-semibold text-gray-600">Active Accounts</h3>
+                <p className={`text-3xl font-bold text-green-600 ${
+                  highlightedElements.activeAccounts ? 'animate-pulse' : ''
+                }`}>{activeAccounts}</p>
+              </div>
+              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
+                highlightedElements.closedAccounts ? 'bg-gray-50 shadow-lg scale-105' : ''
+              }`}>
+                <h3 className="font-semibold text-gray-600">Closed Accounts</h3>
+                <p className={`text-3xl font-bold text-gray-600 ${
+                  highlightedElements.closedAccounts ? 'animate-pulse' : ''
+                }`}>{closedAccounts}</p>
+              </div>
+              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
+                highlightedElements.totalAccounts ? 'bg-blue-50 shadow-lg scale-105' : ''
+              }`}>
+                <h3 className="font-semibold text-gray-600">Total Accounts</h3>
+                <p className={`text-3xl font-bold text-blue-600 ${
+                  highlightedElements.totalAccounts ? 'animate-pulse' : ''
+                }`}>{totalAccounts}</p>
+              </div>
+              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
+                highlightedElements.creditHistory ? 'bg-orange-50 shadow-lg scale-105' : ''
+              }`}>
+                <h3 className="font-semibold text-gray-600">Credit History</h3>
+                <p className={`text-3xl font-bold text-orange-600 ${
+                  highlightedElements.creditHistory ? 'animate-pulse' : ''
+                }`}>
+                  {(() => {
+                    const years = Number(reportData?.score_details?.perform_attributes?.find(
+                      (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-YEAR"
+                    )?.["ATTR-VALUE"] || "0");
+                    
+                    const months = Number(reportData?.score_details?.perform_attributes?.find(
+                      (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-MONTH"
+                    )?.["ATTR-VALUE"] || "0");
+                    
+                    const totalYears = years + (months / 12);
+                    return totalYears.toFixed(1);
+                  })()}
+                </p>
+                <p className="text-sm text-gray-500">Years</p>
+              </div>
+              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
+                highlightedElements.newAccounts ? 'bg-teal-50 shadow-lg scale-105' : ''
+              }`}>
+                <h3 className="font-semibold text-gray-600">New Accounts</h3>
+                <p className={`text-3xl font-bold text-teal-600 ${
+                  highlightedElements.newAccounts ? 'animate-pulse' : ''
+                }`}>
+                  {reportData?.score_details?.perform_attributes?.find(
+                    (attr: any) => attr["ATTR-NAME"] === "NEW-ACCOUNTS-IN-LAST-SIX-MONTHS"
+                  )?.["ATTR-VALUE"] || "0"}
+                </p>
+                <p className="text-sm text-gray-500">Last 6 months</p>
+              </div>
+              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
+                highlightedElements.recentEnquiries ? 'bg-purple-50 shadow-lg scale-105' : ''
+              }`}>
+                <h3 className="font-semibold text-gray-600">Recent Enquiries</h3>
+                <p className={`text-3xl font-bold text-purple-600 ${
+                  highlightedElements.recentEnquiries ? 'animate-pulse' : ''
+                }`}>{recentEnquiriesCount}</p>
+                <p className="text-sm text-gray-500">Last 6 months</p>
+              </div>
+            </div>
+
+            {/* Active Accounts Detail */}
+            <div className={`bg-white rounded-xl shadow-lg p-6 mb-8 transition-all duration-500 ${
+              highlightedElements.activeAccounts ? 'bg-green-50 shadow-xl' : ''
+            }`}>
+              <h2 className="text-xl font-semibold mb-4">Active Accounts</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {reportData?.accounts?.active?.map((account: Account, index: number) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <p className="font-semibold">{account.credit_grantor}</p>
+                    <p className="text-sm text-gray-600">Type: {account.account_type}</p>
+                    <p className="text-sm text-gray-600">Balance: ₹{account.current_balance.toLocaleString()}</p>
+                    {account.overdue_amount > 0 && (
+                      <p className="text-sm text-red-600">Overdue: ₹{account.overdue_amount.toLocaleString()}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Modified Overdue Accounts Section */}
+            {reportData?.accounts?.active?.some((account: Account) => account.overdue_amount > 0) && (
+              <div className={`bg-red-50 rounded-xl shadow-lg p-6 mb-8 transition-all duration-500 ${
+                highlightedElements.overdueAccounts ? 'bg-red-100 shadow-xl scale-105' : ''
+              }`}>
+                <h2 className="text-xl font-semibold mb-4 text-red-800">Overdue Accounts</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {reportData.accounts.active
+                    .filter((account: Account) => account.overdue_amount > 0)
+                    .map((account: Account, index: number) => (
+                      <div key={index} className="bg-white rounded-lg p-4 shadow">
+                        <p className="font-semibold">{account.credit_grantor}</p>
+                        <p className="text-sm text-gray-600">Type: {account.account_type}</p>
+                        <p className="text-red-600">Overdue Amount: ₹{account.overdue_amount.toLocaleString()}</p>
+                      </div>
+                    ))}
+                </div>
               </div>
             )}
 
-            {/* Credit Score */}
-            <div className="bg-white rounded-xl shadow-lg p-6 h-[160px] flex items-center justify-center">
-              <CreditScore score={score} />
-            </div>
-          </div>
+            {/* Modified Written Off Accounts Section */}
+            {reportData?.accounts?.closed?.some((account: Account) => account.write_off_amount > 0) && (
+              <div className={`bg-red-50 rounded-xl shadow-lg p-6 mb-8 transition-all duration-500 ${
+                highlightedElements.writtenOffAccounts ? 'bg-red-100 shadow-xl scale-105' : ''
+              }`}>
+                <h2 className="text-xl font-semibold mb-4 text-red-800">Written Off Accounts</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {reportData.accounts.closed
+                    .filter((account: Account) => account.write_off_amount > 0)
+                    .map((account: Account, index: number) => (
+                      <div key={index} className="bg-white rounded-lg p-4 shadow">
+                        <p className="font-semibold">{account.credit_grantor}</p>
+                        <p className="text-sm text-gray-600">Type: {account.account_type}</p>
+                        <p className="text-red-800">Written Off Amount: ₹{account.write_off_amount.toLocaleString()}</p>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
 
-          {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-600">Active Accounts</h3>
-              <p className="text-3xl font-bold text-green-600">{activeAccounts}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-600">Closed Accounts</h3>
-              <p className="text-3xl font-bold text-gray-600">{closedAccounts}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-600">Total Accounts</h3>
-              <p className="text-3xl font-bold text-blue-600">{totalAccounts}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-600">Credit History</h3>
-              <p className="text-3xl font-bold text-orange-600">
-                {(() => {
-                  const years = Number(reportData?.score_details?.perform_attributes?.find(
-                    (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-YEAR"
-                  )?.["ATTR-VALUE"] || "0");
-                  
-                  const months = Number(reportData?.score_details?.perform_attributes?.find(
-                    (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-MONTH"
-                  )?.["ATTR-VALUE"] || "0");
-                  
-                  const totalYears = years + (months / 12);
-                  return totalYears.toFixed(1);
-                })()}
-              </p>
-              <p className="text-sm text-gray-500">Years</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-600">New Accounts</h3>
-              <p className="text-3xl font-bold text-teal-600">
-                {reportData?.score_details?.perform_attributes?.find(
-                  (attr: any) => attr["ATTR-NAME"] === "NEW-ACCOUNTS-IN-LAST-SIX-MONTHS"
-                )?.["ATTR-VALUE"] || "0"}
-              </p>
-              <p className="text-sm text-gray-500">Last 6 months</p>
-            </div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="font-semibold text-gray-600">Recent Enquiries</h3>
-              <p className="text-3xl font-bold text-purple-600">{recentEnquiriesCount}</p>
-              <p className="text-sm text-gray-500">Last 6 months</p>
-            </div>
-          </div>
-
-          {/* Active Accounts Detail */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <h2 className="text-xl font-semibold mb-4">Active Accounts</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {reportData?.accounts?.active?.map((account: Account, index: number) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <p className="font-semibold">{account.credit_grantor}</p>
-                  <p className="text-sm text-gray-600">Type: {account.account_type}</p>
-                  <p className="text-sm text-gray-600">Balance: ₹{account.current_balance.toLocaleString()}</p>
-                  {account.overdue_amount > 0 && (
-                    <p className="text-sm text-red-600">Overdue: ₹{account.overdue_amount.toLocaleString()}</p>
+            {/* Recent Enquiries and Credit Card Utilization */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* Recent Enquiries */}
+              <div className={`bg-white rounded-xl shadow-lg p-6 transition-all duration-500 ${
+                highlightedElements.recentEnquiries ? 'bg-purple-50 shadow-xl scale-105' : ''
+              }`}>
+                <h2 className="text-xl font-semibold mb-4">Recent Enquiries</h2>
+                <div className="space-y-4">
+                  {recentEnquiriesCount > 0 ? (
+                    reportData?.inquiry_history
+                      ?.filter((inquiry: CreditInquiry) => isWithinLast6Months(inquiry["INQUIRY-DT"]))
+                      .map((inquiry: CreditInquiry, index: number) => (
+                        <div key={index} className="border rounded-lg p-4">
+                          <div className="flex justify-between">
+                            <p className="font-semibold">{inquiry["LENDER-NAME"]}</p>
+                            <p className="text-sm text-gray-600">{inquiry["INQUIRY-DT"]}</p>
+                          </div>
+                          <p className="text-sm text-gray-600">Purpose: {inquiry["CREDIT-INQ-PURPS-TYPE"]}</p>
+                          {inquiry["AMOUNT"] !== "0" && (
+                            <p className="text-sm text-gray-600">Amount: ₹{inquiry["AMOUNT"]}</p>
+                          )}
+                        </div>
+                      ))
+                  ) : (
+                    <div className="text-center text-gray-500 py-4">
+                      No enquiries in the last 6 months
+                    </div>
                   )}
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Modified Overdue Accounts Section */}
-          {reportData?.accounts?.active?.some((account: Account) => account.overdue_amount > 0) && (
-            <div className="bg-red-50 rounded-xl shadow-lg p-6 mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-red-800">Overdue Accounts</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {reportData.accounts.active
-                  .filter((account: Account) => account.overdue_amount > 0)
-                  .map((account: Account, index: number) => (
-                    <div key={index} className="bg-white rounded-lg p-4 shadow">
-                      <p className="font-semibold">{account.credit_grantor}</p>
-                      <p className="text-sm text-gray-600">Type: {account.account_type}</p>
-                      <p className="text-red-600">Overdue Amount: ₹{account.overdue_amount.toLocaleString()}</p>
-                    </div>
-                  ))}
               </div>
-            </div>
-          )}
 
-          {/* Modified Written Off Accounts Section */}
-          {reportData?.accounts?.closed?.some((account: Account) => account.write_off_amount > 0) && (
-            <div className="bg-red-50 rounded-xl shadow-lg p-6 mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-red-800">Written Off Accounts</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {reportData.accounts.closed
-                  .filter((account: Account) => account.write_off_amount > 0)
-                  .map((account: Account, index: number) => (
-                    <div key={index} className="bg-white rounded-lg p-4 shadow">
-                      <p className="font-semibold">{account.credit_grantor}</p>
-                      <p className="text-sm text-gray-600">Type: {account.account_type}</p>
-                      <p className="text-red-800">Written Off Amount: ₹{account.write_off_amount.toLocaleString()}</p>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
+              {/* Credit Card Utilization */}
+              <div className={`bg-white rounded-xl shadow-lg p-6 transition-all duration-500 ${
+                highlightedElements.creditCards ? 'bg-blue-50 shadow-xl scale-105' : ''
+              }`}>
+                <h2 className="text-xl font-semibold mb-4">Credit Card Utilization</h2>
+                {reportData?.accounts?.active?.some((account: Account) => account.account_type?.toLowerCase().includes('credit card')) ? (
+                  <div className="space-y-4">
+                    {reportData.accounts.active
+                      .filter((account: Account) => account.account_type?.toLowerCase().includes('credit card'))
+                      .map((card: Account, index: number) => {
+                        const utilization = (card.current_balance / (card.credit_limit || 1)) * 100;
+                        const utilizationColor = 
+                          utilization > 80 ? 'text-red-500' :
+                          utilization > 30 ? 'text-yellow-500' :
+                          'text-green-500';
 
-          {/* Recent Enquiries and Credit Card Utilization */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Recent Enquiries */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Enquiries</h2>
-              <div className="space-y-4">
-                {recentEnquiriesCount > 0 ? (
-                  reportData?.inquiry_history
-                    ?.filter((inquiry: CreditInquiry) => isWithinLast6Months(inquiry["INQUIRY-DT"]))
-                    .map((inquiry: CreditInquiry, index: number) => (
-                      <div key={index} className="border rounded-lg p-4">
-                        <div className="flex justify-between">
-                          <p className="font-semibold">{inquiry["LENDER-NAME"]}</p>
-                          <p className="text-sm text-gray-600">{inquiry["INQUIRY-DT"]}</p>
-                        </div>
-                        <p className="text-sm text-gray-600">Purpose: {inquiry["CREDIT-INQ-PURPS-TYPE"]}</p>
-                        {inquiry["AMOUNT"] !== "0" && (
-                          <p className="text-sm text-gray-600">Amount: ₹{inquiry["AMOUNT"]}</p>
-                        )}
-                      </div>
-                    ))
+                        return (
+                          <div key={index} className="border rounded-lg p-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <p className="font-semibold">{card.credit_grantor}</p>
+                              <p className={`text-sm font-medium ${utilizationColor}`}>
+                                {utilization.toFixed(1)}% Used
+                              </p>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full ${
+                                  utilization > 80 ? 'bg-red-500' :
+                                  utilization > 30 ? 'bg-yellow-500' :
+                                  'bg-green-500'
+                                }`}
+                                style={{ width: `${Math.min(utilization, 100)}%` }}
+                              />
+                            </div>
+                            <div className="flex justify-between mt-2 text-sm text-gray-600">
+                              <span>Balance: ₹{card.current_balance.toLocaleString()}</span>
+                              <span>Limit: ₹{(card.credit_limit || 0).toLocaleString()}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
                 ) : (
                   <div className="text-center text-gray-500 py-4">
-                    No enquiries in the last 6 months
+                    No active credit cards found
                   </div>
                 )}
               </div>
-            </div>
-
-            {/* Credit Card Utilization */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Credit Card Utilization</h2>
-              {reportData?.accounts?.active?.some((account: Account) => account.account_type?.toLowerCase().includes('credit card')) ? (
-                <div className="space-y-4">
-                  {reportData.accounts.active
-                    .filter((account: Account) => account.account_type?.toLowerCase().includes('credit card'))
-                    .map((card: Account, index: number) => {
-                      const utilization = (card.current_balance / (card.credit_limit || 1)) * 100;
-                      const utilizationColor = 
-                        utilization > 80 ? 'text-red-500' :
-                        utilization > 30 ? 'text-yellow-500' :
-                        'text-green-500';
-
-                      return (
-                        <div key={index} className="border rounded-lg p-4">
-                          <div className="flex justify-between items-center mb-2">
-                            <p className="font-semibold">{card.credit_grantor}</p>
-                            <p className={`text-sm font-medium ${utilizationColor}`}>
-                              {utilization.toFixed(1)}% Used
-                            </p>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${
-                                utilization > 80 ? 'bg-red-500' :
-                                utilization > 30 ? 'bg-yellow-500' :
-                                'bg-green-500'
-                              }`}
-                              style={{ width: `${Math.min(utilization, 100)}%` }}
-                            />
-                          </div>
-                          <div className="flex justify-between mt-2 text-sm text-gray-600">
-                            <span>Balance: ₹{card.current_balance.toLocaleString()}</span>
-                            <span>Limit: ₹{(card.credit_limit || 0).toLocaleString()}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-              ) : (
-                <div className="text-center text-gray-500 py-4">
-                  No active credit cards found
-                </div>
-              )}
             </div>
           </div>
         </div>
       </div>
     </div>
   )
-} 
+}

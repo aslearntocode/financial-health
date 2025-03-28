@@ -110,9 +110,31 @@ export default function SimplifyFinancesPage() {
       <Header />
       <div className="flex-1 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-center mb-8">
+          <h1 className="text-3xl font-bold text-center mb-4">
             Simplify Your Finances
           </h1>
+          <div className="flex justify-center mb-8">
+            <button
+              onClick={() => router.push('/credit/score/report')}
+              className="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-800 
+                bg-white px-4 py-2 rounded-lg shadow hover:shadow-md transition-all duration-200"
+            >
+              <svg 
+                className="w-5 h-5" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18" 
+                />
+              </svg>
+              <span>Back to Report</span>
+            </button>
+          </div>
 
           <div className="space-y-6">
             {/* Option Selection */}
@@ -187,30 +209,6 @@ export default function SimplifyFinancesPage() {
                 </div>
               </div>
             )}
-
-            {/* Back to Report Button - Moved outside conditional rendering */}
-            <div className="flex justify-center pt-4">
-              <button
-                onClick={() => router.push('/credit/score/report')}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 
-                  bg-white px-6 py-3 rounded-lg shadow hover:shadow-md transition-all duration-200"
-              >
-                <svg 
-                  className="w-5 h-5" 
-                  fill="none" 
-                  viewBox="0 0 24 24" 
-                  stroke="currentColor"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18" 
-                  />
-                </svg>
-                <span>Back to Report</span>
-              </button>
-            </div>
           </div>
         </div>
       </div>
