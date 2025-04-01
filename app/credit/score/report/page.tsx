@@ -1079,6 +1079,78 @@ export default function CreditScoreReportPage() {
                     <p className="text-sm text-gray-500">Last 6 months</p>
                   </div>
                 </div>
+
+                {/* Mobile Grid */}
+                <div className="grid grid-cols-2 gap-3 md:hidden">
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.activeAccounts ? 'bg-green-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">Active Accounts</h3>
+                    <p className={`text-2xl font-bold text-green-600 ${
+                      highlightedElements.activeAccounts ? 'animate-pulse' : ''
+                    }`}>{activeAccounts}</p>
+                  </div>
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.closedAccounts ? 'bg-gray-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">Closed Accounts</h3>
+                    <p className={`text-2xl font-bold text-gray-600 ${
+                      highlightedElements.closedAccounts ? 'animate-pulse' : ''
+                    }`}>{closedAccounts}</p>
+                  </div>
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.totalAccounts ? 'bg-blue-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">Total Accounts</h3>
+                    <p className={`text-2xl font-bold text-blue-600 ${
+                      highlightedElements.totalAccounts ? 'animate-pulse' : ''
+                    }`}>{totalAccounts}</p>
+                  </div>
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.creditHistory ? 'bg-orange-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">Credit History</h3>
+                    <p className={`text-2xl font-bold text-orange-600 ${
+                      highlightedElements.creditHistory ? 'animate-pulse' : ''
+                    }`}>
+                      {(() => {
+                        const years = Number(reportData?.score_details?.perform_attributes?.find(
+                          (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-YEAR"
+                        )?.["ATTR-VALUE"] || "0");
+                        
+                        const months = Number(reportData?.score_details?.perform_attributes?.find(
+                          (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-MONTH"
+                        )?.["ATTR-VALUE"] || "0");
+                        
+                        const totalYears = years + (months / 12);
+                        return totalYears.toFixed(1);
+                      })()}
+                    </p>
+                    <p className="text-xs text-gray-500">Years</p>
+                  </div>
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.newAccounts ? 'bg-teal-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">New Accounts</h3>
+                    <p className={`text-2xl font-bold text-teal-600 ${
+                      highlightedElements.newAccounts ? 'animate-pulse' : ''
+                    }`}>
+                      {reportData?.score_details?.perform_attributes?.find(
+                        (attr: any) => attr["ATTR-NAME"] === "NEW-ACCOUNTS-IN-LAST-SIX-MONTHS"
+                      )?.["ATTR-VALUE"] || "0"}
+                    </p>
+                    <p className="text-xs text-gray-500">Last 6 months</p>
+                  </div>
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.recentEnquiries ? 'bg-purple-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">Recent Enquiries</h3>
+                    <p className={`text-2xl font-bold text-purple-600 ${
+                      highlightedElements.recentEnquiries ? 'animate-pulse' : ''
+                    }`}>{recentEnquiriesCount}</p>
+                    <p className="text-xs text-gray-500">Last 6 months</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
