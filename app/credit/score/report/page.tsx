@@ -541,6 +541,37 @@ const styles = `
   }
 `;
 
+// First, rename MobileDropdown to ExpandableSection and update its implementation
+const ExpandableSection = ({ title, children, isHighlighted }: { 
+  title: string, 
+  children: React.ReactNode,
+  isHighlighted?: boolean 
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className={`${isHighlighted ? 'bg-blue-50' : 'bg-white'} rounded-xl shadow-lg transition-all duration-500`}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full p-4 flex justify-between items-center"
+      >
+        <span className="font-semibold">{title}</span>
+        <svg
+          className={`w-5 h-5 transform transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div className={`${isOpen ? 'block' : 'hidden'}`}>
+        {children}
+      </div>
+    </div>
+  );
+};
+
 export default function CreditScoreReportPage() {
   const router = useRouter()
   const [reportData, setReportData] = useState<any>(null)
@@ -937,254 +968,277 @@ export default function CreditScoreReportPage() {
             Credit Report Summary
           </h1>
           
-          {/* Unified Card */}
-          <div className="max-w-md mx-auto bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl shadow-lg overflow-hidden mb-12">
-            {/* Content Area with fixed height */}
-            <div className="px-8 pt-8 pb-6 h-[240px] flex items-center justify-center bg-gradient-to-r from-blue-500/5 to-purple-500/5">
-              <div className="w-full">
-                <DynamicInfoCard 
-                  highlightedElements={highlightedElements}
-                  reportData={reportData}
-                  score={score}
-                  activeAccounts={activeAccounts}
-                  totalAccounts={totalAccounts}
-                  recentEnquiriesCount={recentEnquiriesCount}
-                />
-              </div>
-            </div>
-            
-            {/* Audio Controls */}
-            {audioUrl && (
-              <div className="px-8 pb-6 bg-white">
-                <div className="pt-6 border-t border-gray-100">
-                  <SyncedAudioPlayer 
-                    audioUrl={audioUrl}
-                    onTimeUpdate={handleAudioTimeUpdate}
-                    onEnded={handleAudioEnded}
+          {/* Desktop Layout Container */}
+          <div className="block md:flex md:gap-8 mb-12">
+            {/* Left Column - Audio Player */}
+            <div className="w-full md:w-[400px] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl shadow-lg overflow-hidden mb-8 md:mb-0">
+              {/* Content Area with fixed height */}
+              <div className="px-8 pt-8 pb-6 h-[240px] flex items-center justify-center bg-gradient-to-r from-blue-500/5 to-purple-500/5">
+                <div className="w-full">
+                  <DynamicInfoCard 
+                    highlightedElements={highlightedElements}
+                    reportData={reportData}
+                    score={score}
+                    activeAccounts={activeAccounts}
+                    totalAccounts={totalAccounts}
+                    recentEnquiriesCount={recentEnquiriesCount}
                   />
                 </div>
               </div>
-            )}
+              
+              {/* Audio Controls */}
+              {audioUrl && (
+                <div className="px-8 pb-6 bg-white">
+                  <div className="pt-6 border-t border-gray-100">
+                    <SyncedAudioPlayer 
+                      audioUrl={audioUrl}
+                      onTimeUpdate={handleAudioTimeUpdate}
+                      onEnded={handleAudioEnded}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Score and Metrics */}
+            <div className="flex-1">
+              <div className="space-y-4">
+                {/* Credit Score Card */}
+                <div className="bg-white rounded-xl shadow-lg p-4">
+                  <CreditScore score={score} />
+                </div>
+
+                {/* Key Metrics Grid */}
+                <div className="hidden md:grid grid-cols-3 gap-3">
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.activeAccounts ? 'bg-green-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">Active Accounts</h3>
+                    <p className={`text-2xl font-bold text-green-600 ${
+                      highlightedElements.activeAccounts ? 'animate-pulse' : ''
+                    }`}>{activeAccounts}</p>
+                  </div>
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.closedAccounts ? 'bg-gray-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">Closed Accounts</h3>
+                    <p className={`text-2xl font-bold text-gray-600 ${
+                      highlightedElements.closedAccounts ? 'animate-pulse' : ''
+                    }`}>{closedAccounts}</p>
+                  </div>
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.totalAccounts ? 'bg-blue-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">Total Accounts</h3>
+                    <p className={`text-2xl font-bold text-blue-600 ${
+                      highlightedElements.totalAccounts ? 'animate-pulse' : ''
+                    }`}>{totalAccounts}</p>
+                  </div>
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.creditHistory ? 'bg-orange-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">Credit History</h3>
+                    <p className={`text-2xl font-bold text-orange-600 ${
+                      highlightedElements.creditHistory ? 'animate-pulse' : ''
+                    }`}>
+                      {(() => {
+                        const years = Number(reportData?.score_details?.perform_attributes?.find(
+                          (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-YEAR"
+                        )?.["ATTR-VALUE"] || "0");
+                        
+                        const months = Number(reportData?.score_details?.perform_attributes?.find(
+                          (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-MONTH"
+                        )?.["ATTR-VALUE"] || "0");
+                        
+                        const totalYears = years + (months / 12);
+                        return totalYears.toFixed(1);
+                      })()}
+                    </p>
+                    <p className="text-sm text-gray-500">Years</p>
+                  </div>
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.newAccounts ? 'bg-teal-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">New Accounts</h3>
+                    <p className={`text-2xl font-bold text-teal-600 ${
+                      highlightedElements.newAccounts ? 'animate-pulse' : ''
+                    }`}>
+                      {reportData?.score_details?.perform_attributes?.find(
+                        (attr: any) => attr["ATTR-NAME"] === "NEW-ACCOUNTS-IN-LAST-SIX-MONTHS"
+                      )?.["ATTR-VALUE"] || "0"}
+                    </p>
+                    <p className="text-sm text-gray-500">Last 6 months</p>
+                  </div>
+                  <div className={`bg-white rounded-lg shadow p-3 transition-all duration-500 ${
+                    highlightedElements.recentEnquiries ? 'bg-purple-50 shadow-lg scale-105' : ''
+                  }`}>
+                    <h3 className="font-semibold text-gray-600 text-sm">Recent Enquiries</h3>
+                    <p className={`text-2xl font-bold text-purple-600 ${
+                      highlightedElements.recentEnquiries ? 'animate-pulse' : ''
+                    }`}>{recentEnquiriesCount}</p>
+                    <p className="text-sm text-gray-500">Last 6 months</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Full Report Content */}
-          <div className="space-y-6">
-            {/* Credit Score Card */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <CreditScore score={score} />
-            </div>
-
-            {/* Rest of your existing report sections */}
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
-                highlightedElements.activeAccounts ? 'bg-green-50 shadow-lg scale-105' : ''
-              }`}>
-                <h3 className="font-semibold text-gray-600">Active Accounts</h3>
-                <p className={`text-3xl font-bold text-green-600 ${
-                  highlightedElements.activeAccounts ? 'animate-pulse' : ''
-                }`}>{activeAccounts}</p>
-              </div>
-              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
-                highlightedElements.closedAccounts ? 'bg-gray-50 shadow-lg scale-105' : ''
-              }`}>
-                <h3 className="font-semibold text-gray-600">Closed Accounts</h3>
-                <p className={`text-3xl font-bold text-gray-600 ${
-                  highlightedElements.closedAccounts ? 'animate-pulse' : ''
-                }`}>{closedAccounts}</p>
-              </div>
-              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
-                highlightedElements.totalAccounts ? 'bg-blue-50 shadow-lg scale-105' : ''
-              }`}>
-                <h3 className="font-semibold text-gray-600">Total Accounts</h3>
-                <p className={`text-3xl font-bold text-blue-600 ${
-                  highlightedElements.totalAccounts ? 'animate-pulse' : ''
-                }`}>{totalAccounts}</p>
-              </div>
-              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
-                highlightedElements.creditHistory ? 'bg-orange-50 shadow-lg scale-105' : ''
-              }`}>
-                <h3 className="font-semibold text-gray-600">Credit History</h3>
-                <p className={`text-3xl font-bold text-orange-600 ${
-                  highlightedElements.creditHistory ? 'animate-pulse' : ''
-                }`}>
-                  {(() => {
-                    const years = Number(reportData?.score_details?.perform_attributes?.find(
-                      (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-YEAR"
-                    )?.["ATTR-VALUE"] || "0");
-                    
-                    const months = Number(reportData?.score_details?.perform_attributes?.find(
-                      (attr: any) => attr["ATTR-NAME"] === "LENGTH-OF-CREDIT-HISTORY-MONTH"
-                    )?.["ATTR-VALUE"] || "0");
-                    
-                    const totalYears = years + (months / 12);
-                    return totalYears.toFixed(1);
-                  })()}
-                </p>
-                <p className="text-sm text-gray-500">Years</p>
-              </div>
-              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
-                highlightedElements.newAccounts ? 'bg-teal-50 shadow-lg scale-105' : ''
-              }`}>
-                <h3 className="font-semibold text-gray-600">New Accounts</h3>
-                <p className={`text-3xl font-bold text-teal-600 ${
-                  highlightedElements.newAccounts ? 'animate-pulse' : ''
-                }`}>
-                  {reportData?.score_details?.perform_attributes?.find(
-                    (attr: any) => attr["ATTR-NAME"] === "NEW-ACCOUNTS-IN-LAST-SIX-MONTHS"
-                  )?.["ATTR-VALUE"] || "0"}
-                </p>
-                <p className="text-sm text-gray-500">Last 6 months</p>
-              </div>
-              <div className={`bg-white rounded-lg shadow p-6 transition-all duration-500 ${
-                highlightedElements.recentEnquiries ? 'bg-purple-50 shadow-lg scale-105' : ''
-              }`}>
-                <h3 className="font-semibold text-gray-600">Recent Enquiries</h3>
-                <p className={`text-3xl font-bold text-purple-600 ${
-                  highlightedElements.recentEnquiries ? 'animate-pulse' : ''
-                }`}>{recentEnquiriesCount}</p>
-                <p className="text-sm text-gray-500">Last 6 months</p>
-              </div>
-            </div>
-
-            {/* Active Accounts Detail */}
-            <div className={`bg-white rounded-xl shadow-lg p-6 mb-8 transition-all duration-500 ${
-              highlightedElements.activeAccounts ? 'bg-green-50 shadow-xl' : ''
-            }`}>
-              <h2 className="text-xl font-semibold mb-4">Active Accounts</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {reportData?.accounts?.active?.map((account: Account, index: number) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <p className="font-semibold">{account.credit_grantor}</p>
-                    <p className="text-sm text-gray-600">Type: {account.account_type}</p>
-                    <p className="text-sm text-gray-600">Balance: ₹{account.current_balance.toLocaleString()}</p>
-                    {account.overdue_amount > 0 && (
-                      <p className="text-sm text-red-600">Overdue: ₹{account.overdue_amount.toLocaleString()}</p>
-                    )}
+          {/* Dropdowns Section */}
+          <div className="space-y-6 md:grid md:grid-cols-2 md:gap-6 md:space-y-0">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Active Accounts Dropdown */}
+              <ExpandableSection 
+                title="Active Accounts" 
+                isHighlighted={highlightedElements.activeAccounts}
+              >
+                <div className="p-4 md:p-6">
+                  <h2 className="text-xl font-semibold mb-4 hidden md:block">Active Accounts</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {reportData?.accounts?.active?.map((account: Account, index: number) => (
+                      <div key={index} className="border rounded-lg p-4">
+                        <p className="font-semibold">{account.credit_grantor}</p>
+                        <p className="text-sm text-gray-600">Type: {account.account_type}</p>
+                        <p className="text-sm text-gray-600">Balance: ₹{account.current_balance.toLocaleString()}</p>
+                        {account.overdue_amount > 0 && (
+                          <p className="text-sm text-red-600">Overdue: ₹{account.overdue_amount.toLocaleString()}</p>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              </ExpandableSection>
+
+              {/* Overdue Accounts Dropdown */}
+              {reportData?.accounts?.active?.some((account: Account) => account.overdue_amount > 0) && (
+                <ExpandableSection 
+                  title="Overdue Accounts" 
+                  isHighlighted={highlightedElements.overdueAccounts}
+                >
+                  <div className="p-4 md:p-6">
+                    <h2 className="text-xl font-semibold mb-4 text-red-800 hidden md:block">Overdue Accounts</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {reportData.accounts.active
+                        .filter((account: Account) => account.overdue_amount > 0)
+                        .map((account: Account, index: number) => (
+                          <div key={index} className="bg-white rounded-lg p-4 shadow">
+                            <p className="font-semibold">{account.credit_grantor}</p>
+                            <p className="text-sm text-gray-600">Type: {account.account_type}</p>
+                            <p className="text-red-600">Overdue Amount: ₹{account.overdue_amount.toLocaleString()}</p>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </ExpandableSection>
+              )}
+
+              {/* Written Off Accounts Dropdown */}
+              {reportData?.accounts?.closed?.some((account: Account) => account.write_off_amount > 0) && (
+                <ExpandableSection 
+                  title="Written Off Accounts" 
+                  isHighlighted={highlightedElements.writtenOffAccounts}
+                >
+                  <div className="p-4 md:p-6">
+                    <h2 className="text-xl font-semibold mb-4 text-red-800 hidden md:block">Written Off Accounts</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {reportData.accounts.closed
+                        .filter((account: Account) => account.write_off_amount > 0)
+                        .map((account: Account, index: number) => (
+                          <div key={index} className="bg-white rounded-lg p-4 shadow">
+                            <p className="font-semibold">{account.credit_grantor}</p>
+                            <p className="text-sm text-gray-600">Type: {account.account_type}</p>
+                            <p className="text-red-800">Written Off Amount: ₹{account.write_off_amount.toLocaleString()}</p>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </ExpandableSection>
+              )}
             </div>
 
-            {/* Modified Overdue Accounts Section */}
-            {reportData?.accounts?.active?.some((account: Account) => account.overdue_amount > 0) && (
-              <div className={`bg-red-50 rounded-xl shadow-lg p-6 mb-8 transition-all duration-500 ${
-                highlightedElements.overdueAccounts ? 'bg-red-100 shadow-xl scale-105' : ''
-              }`}>
-                <h2 className="text-xl font-semibold mb-4 text-red-800">Overdue Accounts</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {reportData.accounts.active
-                    .filter((account: Account) => account.overdue_amount > 0)
-                    .map((account: Account, index: number) => (
-                      <div key={index} className="bg-white rounded-lg p-4 shadow">
-                        <p className="font-semibold">{account.credit_grantor}</p>
-                        <p className="text-sm text-gray-600">Type: {account.account_type}</p>
-                        <p className="text-red-600">Overdue Amount: ₹{account.overdue_amount.toLocaleString()}</p>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
+            {/* Right Column */}
+            <div className="space-y-6">
+              <ExpandableSection 
+                title="Credit Card Utilization" 
+                isHighlighted={highlightedElements.creditCards}
+              >
+                <div className="p-4 md:p-6">
+                  <h2 className="text-xl font-semibold mb-4 hidden md:block">Credit Card Utilization</h2>
+                  {reportData?.accounts?.active?.some((account: Account) => account.account_type?.toLowerCase().includes('credit card')) ? (
+                    <div className="space-y-4">
+                      {reportData.accounts.active
+                        .filter((account: Account) => account.account_type?.toLowerCase().includes('credit card'))
+                        .map((card: Account, index: number) => {
+                          const utilization = (card.current_balance / (card.credit_limit || 1)) * 100;
+                          const utilizationColor = 
+                            utilization > 80 ? 'text-red-500' :
+                            utilization > 30 ? 'text-yellow-500' :
+                            'text-green-500';
 
-            {/* Modified Written Off Accounts Section */}
-            {reportData?.accounts?.closed?.some((account: Account) => account.write_off_amount > 0) && (
-              <div className={`bg-red-50 rounded-xl shadow-lg p-6 mb-8 transition-all duration-500 ${
-                highlightedElements.writtenOffAccounts ? 'bg-red-100 shadow-xl scale-105' : ''
-              }`}>
-                <h2 className="text-xl font-semibold mb-4 text-red-800">Written Off Accounts</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {reportData.accounts.closed
-                    .filter((account: Account) => account.write_off_amount > 0)
-                    .map((account: Account, index: number) => (
-                      <div key={index} className="bg-white rounded-lg p-4 shadow">
-                        <p className="font-semibold">{account.credit_grantor}</p>
-                        <p className="text-sm text-gray-600">Type: {account.account_type}</p>
-                        <p className="text-red-800">Written Off Amount: ₹{account.write_off_amount.toLocaleString()}</p>
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
-
-            {/* Recent Enquiries and Credit Card Utilization */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Recent Enquiries */}
-              <div className={`bg-white rounded-xl shadow-lg p-6 transition-all duration-500 ${
-                highlightedElements.recentEnquiries ? 'bg-purple-50 shadow-xl scale-105' : ''
-              }`}>
-                <h2 className="text-xl font-semibold mb-4">Recent Enquiries</h2>
-                <div className="space-y-4">
-                  {recentEnquiriesCount > 0 ? (
-                    reportData?.inquiry_history
-                      ?.filter((inquiry: CreditInquiry) => isWithinLast6Months(inquiry["INQUIRY-DT"]))
-                      .map((inquiry: CreditInquiry, index: number) => (
-                        <div key={index} className="border rounded-lg p-4">
-                          <div className="flex justify-between">
-                            <p className="font-semibold">{inquiry["LENDER-NAME"]}</p>
-                            <p className="text-sm text-gray-600">{inquiry["INQUIRY-DT"]}</p>
-                          </div>
-                          <p className="text-sm text-gray-600">Purpose: {inquiry["CREDIT-INQ-PURPS-TYPE"]}</p>
-                          {inquiry["AMOUNT"] !== "0" && (
-                            <p className="text-sm text-gray-600">Amount: ₹{inquiry["AMOUNT"]}</p>
-                          )}
-                        </div>
-                      ))
+                          return (
+                            <div key={index} className="border rounded-lg p-4">
+                              <div className="flex justify-between items-center mb-2">
+                                <p className="font-semibold">{card.credit_grantor}</p>
+                                <p className={`text-sm font-medium ${utilizationColor}`}>
+                                  {utilization.toFixed(1)}% Used
+                                </p>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className={`h-2 rounded-full ${
+                                    utilization > 80 ? 'bg-red-500' :
+                                    utilization > 30 ? 'bg-yellow-500' :
+                                    'bg-green-500'
+                                  }`}
+                                  style={{ width: `${Math.min(utilization, 100)}%` }}
+                                />
+                              </div>
+                              <div className="flex justify-between mt-2 text-sm text-gray-600">
+                                <span>Balance: ₹{card.current_balance.toLocaleString()}</span>
+                                <span>Limit: ₹{(card.credit_limit || 0).toLocaleString()}</span>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
                   ) : (
                     <div className="text-center text-gray-500 py-4">
-                      No enquiries in the last 6 months
+                      No active credit cards found
                     </div>
                   )}
                 </div>
-              </div>
+              </ExpandableSection>
 
-              {/* Credit Card Utilization */}
-              <div className={`bg-white rounded-xl shadow-lg p-6 transition-all duration-500 ${
-                highlightedElements.creditCards ? 'bg-blue-50 shadow-xl scale-105' : ''
-              }`}>
-                <h2 className="text-xl font-semibold mb-4">Credit Card Utilization</h2>
-                {reportData?.accounts?.active?.some((account: Account) => account.account_type?.toLowerCase().includes('credit card')) ? (
+              <ExpandableSection 
+                title="Recent Enquiries" 
+                isHighlighted={highlightedElements.recentEnquiries}
+              >
+                <div className="p-4 md:p-6">
+                  <h2 className="text-xl font-semibold mb-4 hidden md:block">Recent Enquiries</h2>
                   <div className="space-y-4">
-                    {reportData.accounts.active
-                      .filter((account: Account) => account.account_type?.toLowerCase().includes('credit card'))
-                      .map((card: Account, index: number) => {
-                        const utilization = (card.current_balance / (card.credit_limit || 1)) * 100;
-                        const utilizationColor = 
-                          utilization > 80 ? 'text-red-500' :
-                          utilization > 30 ? 'text-yellow-500' :
-                          'text-green-500';
-
-                        return (
+                    {recentEnquiriesCount > 0 ? (
+                      reportData?.inquiry_history
+                        ?.filter((inquiry: CreditInquiry) => isWithinLast6Months(inquiry["INQUIRY-DT"]))
+                        .map((inquiry: CreditInquiry, index: number) => (
                           <div key={index} className="border rounded-lg p-4">
-                            <div className="flex justify-between items-center mb-2">
-                              <p className="font-semibold">{card.credit_grantor}</p>
-                              <p className={`text-sm font-medium ${utilizationColor}`}>
-                                {utilization.toFixed(1)}% Used
-                              </p>
+                            <div className="flex justify-between">
+                              <p className="font-semibold">{inquiry["LENDER-NAME"]}</p>
+                              <p className="text-sm text-gray-600">{inquiry["INQUIRY-DT"]}</p>
                             </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className={`h-2 rounded-full ${
-                                  utilization > 80 ? 'bg-red-500' :
-                                  utilization > 30 ? 'bg-yellow-500' :
-                                  'bg-green-500'
-                                }`}
-                                style={{ width: `${Math.min(utilization, 100)}%` }}
-                              />
-                            </div>
-                            <div className="flex justify-between mt-2 text-sm text-gray-600">
-                              <span>Balance: ₹{card.current_balance.toLocaleString()}</span>
-                              <span>Limit: ₹{(card.credit_limit || 0).toLocaleString()}</span>
-                            </div>
+                            <p className="text-sm text-gray-600">Purpose: {inquiry["CREDIT-INQ-PURPS-TYPE"]}</p>
+                            {inquiry["AMOUNT"] !== "0" && (
+                              <p className="text-sm text-gray-600">Amount: ₹{inquiry["AMOUNT"]}</p>
+                            )}
                           </div>
-                        );
-                      })}
+                        ))
+                    ) : (
+                      <div className="text-center text-gray-500 py-4">
+                        No enquiries in the last 6 months
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="text-center text-gray-500 py-4">
-                    No active credit cards found
-                  </div>
-                )}
-              </div>
+                </div>
+              </ExpandableSection>
             </div>
           </div>
         </div>
