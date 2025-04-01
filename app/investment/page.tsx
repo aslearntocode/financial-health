@@ -81,6 +81,26 @@ interface ChartState {
   expected_return: number;
 }
 
+function calculateFinalCorpus(
+  currentSavings: number,
+  monthlySavings: number,
+  years: number,
+  expectedReturn: number
+): number {
+  // Convert annual return to monthly rate
+  const monthlyRate = expectedReturn / 100 / 12;
+  const totalMonths = years * 12;
+
+  // Calculate future value of current savings
+  const futureValueLumpSum = currentSavings * Math.pow(1 + monthlyRate, totalMonths);
+
+  // Calculate future value of monthly investments
+  const futureValueSIP = monthlySavings * ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate);
+
+  // Return total corpus rounded to nearest integer
+  return Math.round(futureValueLumpSum + futureValueSIP);
+}
+
 async function checkExistingRecord(formData: FormData, userId: string) {
   console.log('checkExistingRecord function called');
   console.log('Input parameters:', { formData, userId });
@@ -266,14 +286,14 @@ function extractRiskScore(data: any): number {
   }
 }
 
-// Add this new component before the main InvestmentPage component
+// Update the FloatingActionPopup component
 const FloatingActionPopup = ({ router, handleMutualFundClick, handleStockClick, showPopup }: { 
   router: any, 
   handleMutualFundClick: () => void, 
   handleStockClick: () => void,
   showPopup: boolean
 }) => {
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
 
   if (!showPopup) return null;
 
@@ -286,10 +306,10 @@ const FloatingActionPopup = ({ router, handleMutualFundClick, handleStockClick, 
       {/* Header with minimize/maximize button */}
       <div className="flex items-center justify-between p-3 bg-blue-500 text-white rounded-lg cursor-pointer"
            onClick={() => setIsMinimized(!isMinimized)}>
-        <span className={`font-medium text-sm ${isMinimized ? 'mr-2' : ''}`}>
-          Generate New or View Existing Recommendations
+        <span className="font-medium text-sm mr-2">
+          {isMinimized ? 'Generate New or View Existing Recommendations' : 'Generate New or View Existing Recommendations'}
         </span>
-        <button className="text-white hover:text-gray-100">
+        <button className="text-white hover:text-gray-100 flex-shrink-0">
           {isMinimized ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
@@ -1446,39 +1466,59 @@ export default function InvestmentPage() {
                   </div>
 
                   <div className="mt-6 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {/* Risk Level Card */}
-                      <div className="p-4 bg-blue-50 rounded-lg shadow-sm border border-blue-100">
-                        <h3 className="font-semibold text-blue-800 text-base mb-2 flex items-center">
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="p-3 bg-blue-50 rounded-lg shadow-sm border border-blue-100">
+                        <h3 className="font-semibold text-blue-800 text-sm mb-1 flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                           Risk Level
                         </h3>
                         <div className="flex items-baseline">
-                          <p className="text-blue-600 text-2xl font-bold">
+                          <p className="text-blue-600 text-xl font-bold">
                             {chartData.risk_score?.toFixed(0)}
                           </p>
-                          <p className="text-blue-600 ml-2 text-sm">
+                          <p className="text-blue-600 ml-1 text-xs">
                             out of 10
                           </p>
                         </div>
                       </div>
 
                       {/* Expected Return Card */}
-                      <div className="p-4 bg-green-50 rounded-lg shadow-sm border border-green-100">
-                        <h3 className="font-semibold text-green-800 text-base mb-2 flex items-center">
-                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="p-3 bg-green-50 rounded-lg shadow-sm border border-green-100">
+                        <h3 className="font-semibold text-green-800 text-sm mb-1 flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                           </svg>
                           Expected Annual Return
                         </h3>
                         <div className="flex items-baseline">
-                          <p className="text-green-700 text-2xl font-bold">
+                          <p className="text-green-700 text-xl font-bold">
                             {chartData.expected_return?.toFixed(1)}
                           </p>
-                          <p className="text-green-600 ml-1 text-base">
+                          <p className="text-green-600 ml-1 text-xs">
                             %
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Final Corpus Card */}
+                      <div className="p-3 bg-purple-50 rounded-lg shadow-sm border border-purple-100">
+                        <h3 className="font-semibold text-purple-800 text-sm mb-1 flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          Expected Final Corpus
+                        </h3>
+                        <div className="flex items-baseline">
+                          <p className="text-purple-700 text-xl font-bold whitespace-nowrap">
+                            ₹{(calculateFinalCorpus(
+                              parseFloat(formData.current_savings) || 0,
+                              parseFloat(formData.monthly_savings) || 0,
+                              parseInt(formData.investment_horizon_years) || 0,
+                              chartData.expected_return || 0
+                            )).toLocaleString('en-IN')}
                           </p>
                         </div>
                       </div>

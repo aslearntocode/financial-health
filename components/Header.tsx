@@ -34,16 +34,21 @@ export default function Header() {
       if (user?.uid) {
         try {
           // Check for mutual fund recommendations
-          const { data: mfData, error: mfError } = await supabaseClient
+          const { data: mfData, error: mfError } = await supabase
             .from('mutual_fund_recommendations')
             .select('id')
             .eq('user_id', user.uid)
-            .order('created_at', { ascending: false })
             .limit(1)
 
-          if (mfError) {
-            console.error('Error checking MF access:', mfError)
+          // Only log error if it's not a "no data found" error
+          if (mfError && mfError.code !== 'PGRST116') {
+            console.error('Error checking MF access:', {
+              code: mfError.code,
+              message: mfError.message,
+              details: mfError.details
+            })
           }
+
           setHasRecommendationAccess(Boolean(mfData?.length))
 
           // Check for stock recommendations - aligned with MF check
@@ -85,8 +90,10 @@ export default function Header() {
           // Only show disputes link if user has submitted disputes before
           setHasDisputes(Boolean(disputeData?.length))
 
-        } catch (err) {
-          console.error('Error checking user data:', err)
+        } catch (error) {
+          // Handle unexpected errors
+          console.error('Unexpected error checking recommendations:', error)
+          setHasRecommendationAccess(false)
         }
       } else {
         // Reset all states when user is not logged in
