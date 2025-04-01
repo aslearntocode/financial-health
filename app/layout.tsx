@@ -2,7 +2,7 @@ import './globals.css'
 import type { Metadata, Viewport } from 'next'
 import { Analytics } from "@vercel/analytics/react"
 import Footer from "@/components/Footer"
-import { Toaster } from 'react-hot-toast'
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: 'Financial Health',

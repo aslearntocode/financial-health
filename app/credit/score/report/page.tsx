@@ -398,7 +398,7 @@ const isWithinLast6Months = (dateString: string) => {
 
 // Add this new component before the main CreditScoreReportPage component
 const FloatingActionPopup = ({ score, router, reportData }: { score: number, router: any, reportData: any }) => {
-  const [isMinimized, setIsMinimized] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
 
   return (
     <div 
@@ -409,7 +409,7 @@ const FloatingActionPopup = ({ score, router, reportData }: { score: number, rou
       {/* Header with minimize/maximize button */}
       <div className="flex items-center justify-between p-3 bg-blue-500 text-white rounded-lg cursor-pointer"
            onClick={() => setIsMinimized(!isMinimized)}>
-        <span className={`font-medium text-sm ${isMinimized ? 'mr-2' : ''}`}>
+        <span className="font-medium text-sm mr-2">
           Quick Actions
         </span>
         <button className="text-white hover:text-gray-100">

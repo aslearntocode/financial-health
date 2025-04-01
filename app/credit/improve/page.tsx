@@ -182,8 +182,7 @@ export default function CreditScoreImprovePage() {
                                 if (e.target.value) {
                                   const route = {
                                     'pay_full': '/credit/resolve/pay-full',
-                                    'settle': '/credit/resolve/settle',
-                                    'connect': '/credit/resolve/connect'
+                                    'settle': '/credit/resolve/settle'
                                   }[e.target.value];
                                   router.push(`${route}?account=${account.account_number}`);
                                 }
@@ -193,7 +192,6 @@ export default function CreditScoreImprovePage() {
                               <option value="" disabled>Choose Resolution Option</option>
                               <option value="pay_full">Pay In Full</option>
                               <option value="settle">Settle The Account</option>
-                              <option value="connect">Connect With Lender</option>
                             </select>
                           </div>
                         ))}
@@ -231,8 +229,7 @@ export default function CreditScoreImprovePage() {
                                 if (e.target.value) {
                                   const route = {
                                     'pay_full': '/credit/resolve/pay-full',
-                                    'settle': '/credit/resolve/settle',
-                                    'connect': '/credit/resolve/connect'
+                                    'settle': '/credit/resolve/settle'
                                   }[e.target.value];
                                   router.push(`${route}?account=${account.account_number}`);
                                 }
@@ -242,7 +239,6 @@ export default function CreditScoreImprovePage() {
                               <option value="" disabled>Choose Resolution Option</option>
                               <option value="pay_full">Pay In Full</option>
                               <option value="settle">Settle The Account</option>
-                              <option value="connect">Connect With Lender</option>
                             </select>
                           </div>
                         ))}

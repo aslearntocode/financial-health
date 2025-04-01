@@ -433,7 +433,7 @@ export default function Home() {
                           href="/credit/score/report" 
                           className={buttonStyles}
                         >
-                          View Full Report
+                          View Credit Report Summary Video
                           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                           </svg>
@@ -543,16 +543,6 @@ export default function Home() {
       }
     }
   }
-
-  useEffect(() => {
-    if (!isMobile) {  // Only run on desktop
-      const timer = setInterval(() => {
-        setActiveSection((current) => current === 'distribution' ? 'offer' : 'distribution')
-      }, 10000) // Switch every 10 seconds
-
-      return () => clearInterval(timer)
-    }
-  }, [isMobile])
 
   return (
     <div 
@@ -888,7 +878,7 @@ export default function Home() {
                     href="/credit/score" 
                     className="w-full inline-block text-center rounded-md bg-green-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-green-700 transition-colors"
                   >
-                    Get Started with Credit Solutions
+                    Generate Personalized Credit Score Video
                   </Link>
                 </div>
               </div>
@@ -940,347 +930,38 @@ export default function Home() {
           </div>
         )}
 
-        {/* Sliding Sections Container */}
-        <div className="relative overflow-hidden mb-16">
-          {/* Why Distribution Matters Section */}
-          <div className={`transition-all duration-3000 ${
-            activeSection === 'distribution' || isMobile
-              ? 'translate-x-0 opacity-100' 
-              : '-translate-x-full opacity-0'
-          } absolute w-full ${activeSection === 'offer' && !isMobile ? 'pointer-events-none' : ''}`}>
-            <div className="bg-gray-50 py-16">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-3xl font-bold text-center mb-12">Why Distribution Matters</h2>
-                <p className="text-xl text-center text-gray-600 mb-12 italic">
-                  &quot;The right balance between savings, investments, and risk can help you achieve your financial goals faster and with greater confidence.&quot;
-                </p>
-                
-                {/* Desktop Grid */}
-                <div className="hidden md:grid md:grid-cols-4 gap-8">
-                  <div className="bg-white p-8 rounded-lg shadow-md">
-                    <h3 className="text-xl font-semibold mb-4">Maximize Your Resources</h3>
-                    <p className="text-gray-600">
-                      Allocating your funds wisely ensures every dollar works towards your goals—whether it&apos;s building wealth, securing your retirement, or achieving short-term milestones.
-                    </p>
-                  </div>
-                  <div className="bg-white p-8 rounded-lg shadow-md">
-                    <h3 className="text-xl font-semibold mb-4">Mitigate Risks</h3>
-                    <p className="text-gray-600">
-                      Over-concentrating funds in one area can leave you vulnerable to unexpected financial shocks. Diversification helps balance growth potential and safety.
-                    </p>
-                  </div>
-                  <div className="bg-white p-8 rounded-lg shadow-md">
-                    <h3 className="text-xl font-semibold mb-4">Tailored to Your Life Stage</h3>
-                    <p className="text-gray-600">
-                      Your financial needs evolve—someone starting their career will have different priorities than someone nearing retirement. Distribution ensures your money adapts as your life changes.
-                    </p>
-                  </div>
-                  <div className="bg-white p-8 rounded-lg shadow-md">
-                    <h3 className="text-xl font-semibold mb-4">Peace of Mind</h3>
-                    <p className="text-gray-600">
-                      A clear, balanced financial plan reduces stress by showing you a roadmap to meet your obligations and build for the future, even during economic uncertainty.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Mobile Slider */}
-                <div className="md:hidden">
-                  <div className="overflow-x-auto scrollbar-hide">
-                    <div className="flex gap-4 w-max pb-4">
-                      <div className="bg-white p-6 rounded-lg shadow-md w-[280px] flex-shrink-0">
-                        <h3 className="text-xl font-semibold mb-4">Maximize Your Resources</h3>
-                        <p className="text-gray-600">
-                          Allocating your funds wisely ensures every dollar works towards your goals—whether it&apos;s building wealth, securing your retirement, or achieving short-term milestones.
-                        </p>
-                      </div>
-                      <div className="bg-white p-6 rounded-lg shadow-md w-[280px] flex-shrink-0">
-                        <h3 className="text-xl font-semibold mb-4">Mitigate Risks</h3>
-                        <p className="text-gray-600">
-                          Over-concentrating funds in one area can leave you vulnerable to unexpected financial shocks. Diversification helps balance growth potential and safety.
-                        </p>
-                      </div>
-                      <div className="bg-white p-6 rounded-lg shadow-md w-[280px] flex-shrink-0">
-                        <h3 className="text-xl font-semibold mb-4">Tailored to Your Life Stage</h3>
-                        <p className="text-gray-600">
-                          Your financial needs evolve—someone starting their career will have different priorities than someone nearing retirement. Distribution ensures your money adapts as your life changes.
-                        </p>
-                      </div>
-                      <div className="bg-white p-6 rounded-lg shadow-md w-[280px] flex-shrink-0">
-                        <h3 className="text-xl font-semibold mb-4">Peace of Mind</h3>
-                        <p className="text-gray-600">
-                          A clear, balanced financial plan reduces stress by showing you a roadmap to meet your obligations and build for the future, even during economic uncertainty.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Optional: Add scroll indicator dots */}
-                  <div className="flex justify-center space-x-2 mt-4">
-                    <div className="w-2 h-2 rounded-full bg-blue-600"></div>
-                    <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                    <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                    <div className="w-2 h-2 rounded-full bg-gray-300"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* What We Offer Section */}
-          <div className={`transition-all duration-3000 hidden md:block ${
-            activeSection === 'offer' 
-              ? 'translate-x-0 opacity-100' 
-              : 'translate-x-full opacity-0'
-          } absolute w-full ${activeSection === 'distribution' ? 'pointer-events-none' : ''}`}>
-            <div className="bg-gray-50 py-16">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 className="text-3xl font-bold text-center mb-12">What We Offer</h2>
-                <p className="text-xl text-center text-gray-600 mb-12 italic">
-                  &quot;We analyze your inputs with advanced AI to provide an actionable and easy-to-understand fund distribution plan.&quot;
-                </p>
-                
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                  {/* Investment Analysis Box */}
-                  <div className="bg-white p-8 rounded-lg shadow-md col-span-2">
-                    <h3 className="text-xl font-semibold mb-4">Investment Analysis</h3>
-                    <p className="text-gray-600 mb-4">Comprehensive investment planning including:</p>
-                    <ul className="text-gray-600 space-y-2">
-                      <li>• Portfolio optimization and rebalancing</li>
-                      <li>• Mutual funds and stock recommendations</li>
-                      <li>• Risk assessment and management</li>
-                      <li>• Retirement planning strategies</li>
-                    </ul>
-                  </div>
-
-                  {/* Credit Solutions Box */}
-                  <div className="bg-white p-8 rounded-lg shadow-md col-span-2">
-                    <h3 className="text-xl font-semibold mb-4">Credit Solutions</h3>
-                    <p className="text-gray-600 mb-4">Smart credit management including:</p>
-                    <ul className="text-gray-600 space-y-2">
-                      <li>• Personal and business loan options</li>
-                      <li>• Credit card recommendations</li>
-                      <li>• Debt consolidation strategies</li>
-                      <li>• Credit score improvement tips</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Slide Indicators - Hide on Mobile */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 hidden md:flex space-x-2">
-            <button
-              onClick={() => setActiveSection('distribution')}
-              className={`w-2 h-2 rounded-full transition-all ${
-                activeSection === 'distribution' ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
-            />
-            <button
-              onClick={() => setActiveSection('offer')}
-              className={`w-2 h-2 rounded-full transition-all ${
-                activeSection === 'offer' ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
-            />
-          </div>
-
-          {/* Spacer div - Adjust height for mobile */}
-          <div className="h-[650px] md:h-[650px]" />
-        </div>
-
-        {/* Did You Know Section */}
-        <div className="bg-blue-50 py-12 mb-16">
+        {/* What We Offer Section */}
+        <div className="bg-gray-50 py-16 mb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-lg shadow-lg p-8 relative overflow-hidden">
-              {/* Decorative Element */}
-              <div className="absolute top-0 right-0 w-32 h-32 transform translate-x-8 -translate-y-8">
-                <div className="absolute inset-0 bg-blue-100 rounded-full opacity-50"></div>
-                <div className="absolute inset-2 bg-blue-200 rounded-full opacity-50"></div>
-              </div>
-              
-              <div className="relative">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <span className="text-3xl">💡</span>
-                  Did You Know?
-                </h2>
-                
-                <div className="grid md:grid-cols-2 gap-6">
-                  {/* Closed-End Funds */}
-                  <div className="bg-gray-50 p-6 rounded-lg">
-                    <h3 className="text-xl font-semibold text-blue-600 mb-3">Closed-End Mutual Funds</h3>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">•</span>
-                        <span><strong>Fixed Number of Shares</strong> – They issue a fixed number of shares through an IPO and trade on the stock exchange like stocks.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">•</span>
-                        <span><strong>Market Price Fluctuations</strong> – Prices depend on supply and demand, often trading at a premium or discount to NAV.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">•</span>
-                        <span><strong>No Direct Redemption</strong> – Investors buy/sell on the secondary market instead of redeeming shares from the fund.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">•</span>
-                        <span><strong>Active Trading</strong> – Can be actively managed with leverage, making them riskier but potentially more profitable.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-1">•</span>
-                        <span><strong>Dividends & Distributions</strong> – Often provide regular income through dividends.</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* Open-End Funds */}
-                  <div className="bg-gray-50 p-6 rounded-lg">
-                    <h3 className="text-xl font-semibold text-green-600 mb-3">Open-End Mutual Funds</h3>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2">
-                        <span className="text-green-500 mt-1">•</span>
-                        <span><strong>Unlimited Shares</strong> – Investors can buy and redeem shares directly from the fund at the NAV price.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-green-500 mt-1">•</span>
-                        <span><strong>Price Based on NAV</strong> – Shares are priced once a day based on the total value of fund assets.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-green-500 mt-1">•</span>
-                        <span><strong>Liquidity</strong> – Easier to buy/sell as redemptions happen directly with the fund.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-green-500 mt-1">•</span>
-                        <span><strong>Management Style</strong> – Can be actively or passively managed (e.g., index funds).</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="text-green-500 mt-1">•</span>
-                        <span><strong>No Exchange Trading</strong> – Unlike closed-end funds, they don't trade on stock exchanges.</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <Link
-                  href="/learning-center/mutual-funds/types"
-                  className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold group mt-4"
-                >
-                  Learn More About Mutual Funds
-                  <svg 
-                    className="w-4 h-4 ml-1 transform transition-transform group-hover:translate-x-1" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round" 
-                      strokeWidth="2" 
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Pricing Section - New Addition */}
-        <div className="bg-white py-16 relative">
-          {/* Beta Testing Overlay */}
-          <div className="absolute inset-0 bg-gray-900/50 z-10 flex items-center justify-center">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6 rounded-lg shadow-xl max-w-2xl mx-4 text-center">
-              <h3 className="text-2xl font-bold mb-2">🎉 Free During Beta Testing!</h3>
-              <p className="text-lg">
-                We're currently in beta and offering all premium features completely free. 
-                Try it out and share your valuable feedback with us.
-              </p>
-            </div>
-          </div>
-
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative opacity-50">
-            <h2 className="text-3xl font-bold text-center mb-12">Choose Your Plan</h2>
-            <div className="flex justify-center gap-8 flex-wrap">
-              {/* Basic Plan */}
-              <div className="bg-white p-8 rounded-lg shadow-lg border border-gray-100 w-full max-w-sm">
-                <div className="text-sm font-semibold text-gray-600 mb-4">For Beginners</div>
-                <h3 className="text-2xl font-bold mb-4">Basic</h3>
-                <div className="mb-8">
-                  <span className="text-4xl font-bold">₹999</span>
-                  <span className="text-gray-600">/half-yearly</span>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Generate a personalized investment allocation dashboard
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Get recommendations on Mutual Funds based on your risk appetite
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Generate up to 3 portfolios in six months
-                  </li>
-                  
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Chat Support
-                  </li>
+            <h2 className="text-3xl font-bold text-center mb-12">What We Offer</h2>
+            <p className="text-xl text-center text-gray-600 mb-12 italic">
+              &quot;We analyze your inputs with advanced AI to provide an actionable and easy-to-understand fund distribution plan.&quot;
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              {/* Credit Solutions Box - Now First */}
+              <div className="bg-white p-8 rounded-lg shadow-md col-span-2">
+                <h3 className="text-xl font-semibold mb-4 text-green-600">Credit Solutions</h3>
+                <ul className="text-gray-600 space-y-2">
+                  <li>• Credit Card Recommendations</li>
+                  <li>• Debt Consolidation Strategies</li>
+                  <li>• Credit Score Improvement Tips</li>
+                  <li>• Settle Overdue or Written Off Loans</li>
+                  <li>• Raise Disputes in the Credit Report</li>
                 </ul>
-                <button className="w-full bg-gray-900 text-white rounded-md py-3 font-semibold hover:bg-gray-800 transition-colors">
-                  Get Started
-                </button>
               </div>
 
-              {/* Premium Plan */}
-              <div className="bg-white p-8 rounded-lg shadow-lg border-2 border-blue-600 w-full max-w-sm relative">
-                <div className="absolute -top-3 right-8 bg-yellow-500 text-black text-sm font-semibold px-3 py-1 rounded-full">
-                  Recommended
-                </div>
-                <div className="text-sm font-semibold text-gray-600 mb-4">For Investors</div>
-                <h3 className="text-2xl font-bold mb-4">Premium</h3>
-                <div className="mb-8">
-                  <span className="text-4xl font-bold">₹1199</span>
-                  <span className="text-gray-600">/half-yearly</span>
-                </div>
-                <ul className="space-y-4 mb-8">
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Generate a personalized investment allocation dashboard
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Get recommendations on Mutual Funds, Stocks, Bonds etc. based on your risk appetite
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Generate up to 5 portfolios in six months
-                  </li>
-                  <li className="flex items-center">
-                    <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                    </svg>
-                    Chat Support
-                  </li>
-                  
+              {/* Investment Analysis Box - Now Second */}
+              <div className="bg-white p-8 rounded-lg shadow-md col-span-2">
+                <h3 className="text-xl font-semibold mb-4 text-blue-600">Investment Planning</h3>
+                <p className="text-gray-600 mb-4">Comprehensive investment planning including:</p>
+                <ul className="text-gray-600 space-y-2">
+                  <li>• Portfolio Optimization and Rebalancing</li>
+                  <li>• Mutual Funds Recommendations</li>
+                  <li>• Stock Recommendations</li>
+                  <li>• Risk Assessment and Management</li>
+                  <li>• Retirement Planning Strategies</li>
                 </ul>
-                <button className="w-full bg-blue-600 text-white rounded-md py-3 font-semibold hover:bg-blue-700 transition-colors">
-                  Get Started
-                </button>
               </div>
             </div>
           </div>

@@ -18,6 +18,14 @@ export default function FAQPage() {
           "text": "You should have at least 5 multiples of your annual income as Life Cover. If you haven't secured this level of coverage yet, it's recommended to purchase Life Insurance that can provide the required protection for your family."
         }
       },
+      {
+        "@type": "Question",
+        "name": "What is an AI-Powered Credit Score Video?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The video summarizes the key elements of the credit report and presents the metrics in an understandable way. The video also gives recommendations to improve the score by using various strategies."
+        }
+      },
       // Add more FAQ items...
     ]
   }
@@ -73,6 +81,10 @@ export default function FAQPage() {
                       </ul>
                     </div>
                   )
+                },
+                {
+                  question: "What is an AI-Powered Credit Score Video?",
+                  answer: "The video summarizes the key elements of the credit report and presents the metrics in an understandable way without any jargons. The video also gives recommendations to improve the score by using various strategies."
                 }
               ].map((faq, index) => (
                 <div 

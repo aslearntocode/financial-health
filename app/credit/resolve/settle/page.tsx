@@ -5,6 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/Header'
 import { auth } from '@/lib/firebase'
 import { supabase } from '@/lib/supabase'
+import { toast } from '@/components/ui/use-toast'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 // Create a separate component for the part that uses useSearchParams
 function SettleContent() {
@@ -15,6 +18,7 @@ function SettleContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [settlementAmount, setSettlementAmount] = useState<number | null>(null)
+  const [hasNegotiated, setHasNegotiated] = useState(false)
 
   useEffect(() => {
     const fetchAccountDetails = async () => {
@@ -67,6 +71,14 @@ function SettleContent() {
       setIsLoading(false)
     }
   }, [accountNumber])
+
+  const handleNegotiateTerms = () => {
+    toast({
+      title: "Request Submitted",
+      description: "We have passed your request to the lender. Someone from their team will reach out to you soon.",
+      variant: "default",
+    });
+  };
 
   if (isLoading) {
     return (
@@ -156,12 +168,22 @@ function SettleContent() {
                 Accept & Pay Settlement Amount
               </button>
               
-              <button
-                onClick={() => router.push(`/credit/resolve/connect?account=${accountNumber}`)}
-                className="w-full bg-blue-100 text-blue-600 py-3 rounded-lg hover:bg-blue-200 transition-colors"
+              <Button
+                variant="secondary"
+                className={cn(
+                  "w-full md:w-auto px-6",
+                  hasNegotiated ? "opacity-50 cursor-not-allowed" : ""
+                )}
+                onClick={() => {
+                  if (!hasNegotiated) {
+                    handleNegotiateTerms()
+                    setHasNegotiated(true)
+                  }
+                }}
+                disabled={hasNegotiated}
               >
                 Negotiate Different Terms
-              </button>
+              </Button>
               
               <button
                 onClick={() => router.back()}
