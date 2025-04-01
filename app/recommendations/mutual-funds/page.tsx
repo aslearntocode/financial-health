@@ -49,54 +49,67 @@ function MutualFundRecommendationsContent() {
 
   useEffect(() => {
     const fetchRecommendations = async () => {
-      try {
-        const user = auth.currentUser
-        if (!user) {
-          router.push('/login')
-          return
+      const maxRetries = 3;
+      let currentTry = 0;
+
+      while (currentTry < maxRetries) {
+        try {
+          const user = auth.currentUser;
+          if (!user) {
+            router.push('/login');
+            return;
+          }
+
+          const recommendationId = searchParams.get('id');
+          if (!recommendationId) {
+            router.push('/investment');
+            return;
+          }
+
+          // Add timeout to the Supabase query with proper typing
+          const { data: recommendation, error } = await Promise.race([
+            supabase
+              .from('mutual_fund_recommendations')
+              .select('*')
+              .eq('id', recommendationId)
+              .eq('user_id', user.uid)
+              .single()
+              .then((response): { data: MutualFundRecommendation | null; error: any } => response),
+            new Promise<{ data: MutualFundRecommendation | null; error: any }>((_, reject) => 
+              setTimeout(() => reject(new Error('Request timeout')), 15000)
+            )
+          ]);
+
+          if (error) throw error;
+
+          if (!recommendation) {
+            console.error('No recommendation found for ID:', recommendationId);
+            router.push('/investment');
+            return;
+          }
+
+          setRecommendationData(recommendation);
+          setRecommendations(recommendation.recommendations);
+          setLoading(false);
+          return; // Success, exit the retry loop
+
+        } catch (err) {
+          currentTry++;
+          console.error(`Attempt ${currentTry} failed:`, err);
+          
+          if (currentTry === maxRetries) {
+            setError('Unable to load recommendations. Please try again later.');
+            setLoading(false);
+          } else {
+            // Wait before retrying (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, currentTry)));
+          }
         }
-
-        const recommendationId = searchParams.get('id')
-        if (!recommendationId) {
-          router.push('/investment')
-          return
-        }
-
-        console.log('Fetching recommendation with ID:', recommendationId)
-
-        const { data: recommendation, error } = await supabase
-          .from('mutual_fund_recommendations')
-          .select('*')
-          .eq('id', recommendationId)
-          .eq('user_id', user.uid)
-          .single()
-
-        if (error) {
-          console.error('Error fetching recommendation:', error)
-          setError('Failed to load recommendations')
-          setLoading(false)
-          return
-        }
-
-        if (!recommendation) {
-          console.log('No recommendation found')
-          router.push('/investment')
-          return
-        }
-
-        console.log('Fetched recommendation:', recommendation)
-        setRecommendationData(recommendation)
-        setRecommendations(recommendation.recommendations)
-        setLoading(false)
-      } catch (err) {
-        console.error('Error:', err)
-        setError('Failed to load recommendations')
-        setLoading(false)
       }
-    }
+    };
 
-    fetchRecommendations()
-  }, [router, searchParams])
+    fetchRecommendations();
+  }, [router, searchParams]);
 
   if (loading) {
     return (
