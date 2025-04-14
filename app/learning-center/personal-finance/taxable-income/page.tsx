@@ -7,16 +7,18 @@ import './styles.css';
 
 // Update interfaces
 interface SubCategories {
-  shortTerm: string[];
-  longTerm: string[];
+  shortTerm?: string[];
+  longTerm?: string[];
   speculative?: string[];
   nonSpeculative?: string[];
 }
 
+type SubCategoriesType = Partial<SubCategories>;
+
 interface IncomeHead {
   title: string;
   details?: string[];
-  subCategories?: SubCategories;
+  subCategories?: SubCategoriesType;
 }
 
 const TaxableIncomePage = () => {
