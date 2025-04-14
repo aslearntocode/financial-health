@@ -148,6 +148,13 @@ const articles: Article[] = [
     category: 'Personal Finance',
     readTime: '10 min read',
     link: '/learning-center/personal-finance/comparison'
+  },{
+    id: '18',
+    title: 'Taxable Income: How to Calculate Your Taxable Income',
+    description: 'Learn how to calculate your taxable income and understand the different components of your income.',
+    category: 'Personal Finance',
+    readTime: '10 min read',
+    link: '/learning-center/personal-finance/taxable-income'
   }
 
 ]

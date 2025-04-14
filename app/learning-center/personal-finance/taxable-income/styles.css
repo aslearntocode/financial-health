@@ -1,0 +1,33 @@
+:root {
+  --step-1-bg: #f0f7ff;
+  --step-1-border: #93c5fd;
+  --step-2-bg: #f0fdf4;
+  --step-2-border: #86efac;
+  --step-3-bg: #fdf4ff;
+  --step-3-border: #e879f9;
+  --step-4-bg: #fff7ed;
+  --step-4-border: #fdba74;
+  --connector-line: #e2e8f0;
+}
+
+/* Add these animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.workflow-step {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Optional hover effects */
+.workflow-icon:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+} 
