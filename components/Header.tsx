@@ -181,6 +181,10 @@ export default function Header() {
     }
   }
 
+  const handleCreditCardClick = () => {
+    router.push('/products/credit-card')
+  }
+
   const navigationItems = [
     { name: 'Dashboard', href: '/dashboard' },
     { name: 'Stocks Dashboard', href: '/stocks-dashboard' },
@@ -244,6 +248,12 @@ export default function Header() {
                     left: '28rem'
                   }}
                 >
+                  <Link 
+                    href="/products/credit-card" 
+                    className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
+                  >
+                    <span className="text-base">Credit Cards</span>
+                  </Link>
                   <Link 
                     href="/credit/score" 
                     className="flex items-center px-4 py-3 text-black hover:bg-gray-50"
@@ -387,6 +397,12 @@ export default function Header() {
               </button>
               {isCreditDropdownOpen && (
                 <div className="absolute bottom-full mb-2 w-48 bg-white rounded-lg shadow-lg py-2" style={{ left: '50%', transform: 'translateX(-50%)' }}>
+                  <Link 
+                    href="/products/credit-card" 
+                    className="block px-4 py-2 text-sm text-black hover:bg-gray-50"
+                  >
+                    Credit Cards
+                  </Link>
                   <Link 
                     href="/credit/score" 
                     className="block px-4 py-2 text-sm text-black hover:bg-gray-50"

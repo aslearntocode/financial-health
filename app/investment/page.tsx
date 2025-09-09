@@ -367,6 +367,7 @@ export default function InvestmentPage() {
   const [showChart, setShowChart] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
   const [isAuthReady, setIsAuthReady] = useState(false)
   const [savedRecord, setSavedRecord] = useState<InvestmentRecord | null>(null)
   const [allocation, setAllocation] = useState<Array<{ name: string; value: number; color: string }>>([])
@@ -452,6 +453,7 @@ export default function InvestmentPage() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setInfo(null);
 
     try {
       if (!auth.currentUser) {
@@ -522,6 +524,13 @@ export default function InvestmentPage() {
 
       const responseData = await response.json();
       console.log('API Response:', responseData);
+
+      // Check if this is a fallback response
+      if (responseData.fallback) {
+        console.log('Using fallback allocation:', responseData.message);
+        // Show an info notification to the user about fallback mode
+        setInfo(`Note: ${responseData.message}. This is a basic allocation based on your profile.`);
+      }
 
       // Explicitly define only the fields we want to save
       const dbRecord = {
@@ -813,6 +822,7 @@ export default function InvestmentPage() {
 
     setIsLoading(true);
     setError(null);
+    setInfo(null);
 
     try {
       // FIRST: Check for existing record
@@ -1031,6 +1041,12 @@ export default function InvestmentPage() {
 
       const result = await response.json();
 
+      // Check if this is a fallback response
+      if (result.fallback) {
+        console.log('Using fallback mutual fund recommendations:', result.message);
+        setInfo(`Note: ${result.message}. These are basic recommendations based on your profile.`);
+      }
+
       // Save new recommendations to Supabase
       const { data: savedRec, error: saveError } = await supabase
         .from('mutual_fund_recommendations')
@@ -1160,6 +1176,12 @@ export default function InvestmentPage() {
       }
 
       const result = await response.json();
+
+      // Check if this is a fallback response
+      if (result.fallback) {
+        console.log('Using fallback stock recommendations:', result.message);
+        setInfo(`Note: ${result.message}. These are basic recommendations based on your profile.`);
+      }
 
       const { data: savedRec, error: saveError } = await supabase
         .from('stock_recommendations')
@@ -1295,6 +1317,11 @@ export default function InvestmentPage() {
               {error && (
                 <div className="mb-3 p-3 text-red-700 bg-red-100 rounded-md">
                   {error}
+                </div>
+              )}
+              {info && (
+                <div className="mb-3 p-3 text-blue-700 bg-blue-100 rounded-md">
+                  {info}
                 </div>
               )}
               <form 

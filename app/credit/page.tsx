@@ -1,10 +1,19 @@
 'use client'
 
 import Header from "@/components/Header"
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function CreditPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const type = searchParams.get('type')
+    if (type === 'credit-cards') {
+      router.push('/products/credit-card')
+    }
+  }, [searchParams, router])
 
   return (
     <div className="min-h-screen flex flex-col">

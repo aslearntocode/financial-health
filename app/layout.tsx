@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Analytics } from "@vercel/analytics/react"
 import Footer from "@/components/Footer"
 import { Toaster } from "@/components/ui/toaster"
+import { AuthProvider } from "@/context/AuthContext"
 
 export const metadata: Metadata = {
   title: 'Financial Health',
@@ -33,10 +34,12 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body className="min-h-screen">
-        <main>
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <main>
+            {children}
+          </main>
+          <Footer />
+        </AuthProvider>
         <Analytics />
         <Toaster />
       </body>

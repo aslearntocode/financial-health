@@ -5,7 +5,7 @@ export async function POST(request: Request) {
     // Forward the request to the actual API
     const body = await request.json()
     
-    const response = await fetch('http://172.210.82.112:5001/analyze', {
+    const response = await fetch('http://172.210.82.112:5000/analyze', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

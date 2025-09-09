@@ -31,24 +31,93 @@ export async function POST(req: Request) {
       approximate_debt: (parseFloat(data.approximate_debt) || 0).toString()
     })
 
-    const url = `http://172.210.82.112:5000/api/portfolio-recommendation?${queryParams.toString()}`
-    console.log('2. Calling URL:', url)
-
-    const recommendationResponse = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
+    // Try both ports in case of server configuration changes
+    const urls = [
+      `http://172.210.82.112:5001/api/portfolio-recommendation?${queryParams.toString()}`,
+      `http://172.210.82.112:5000/api/portfolio-recommendation?${queryParams.toString()}`
+    ]
+    
+    let recommendationResponse = null
+    let lastError = null
+    
+    for (const url of urls) {
+      try {
+        console.log('2. Trying URL:', url)
+        
+        // Create AbortController for timeout
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+        
+        recommendationResponse = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          },
+          signal: controller.signal
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (recommendationResponse.ok) {
+          console.log('3. Success with URL:', url)
+          break
+        } else {
+          const errorText = await recommendationResponse.text()
+          console.error(`API Error for ${url}:`, errorText)
+          lastError = errorText
+        }
+      } catch (error) {
+        console.error(`Network error for ${url}:`, error)
+        lastError = error instanceof Error ? error.message : 'Network error'
       }
-    })
+    }
 
-    // Add error handling for non-200 responses
-    if (!recommendationResponse.ok) {
-      const errorText = await recommendationResponse.text()
-      console.error('API Error:', errorText)
-      return NextResponse.json(
-        { error: `API Error: ${errorText}` },
-        { status: recommendationResponse.status }
-      )
+    // If all URLs failed, provide fallback response
+    if (!recommendationResponse || !recommendationResponse.ok) {
+      console.error('All API endpoints failed, providing fallback response')
+      
+      // Provide a basic fallback allocation based on user profile
+      const age = parseInt(data.age)
+      const riskTolerance = age < 30 ? 'high' : age < 50 ? 'medium' : 'low'
+      const hasExperience = data.has_investment_experience.toLowerCase() === 'y'
+      
+      let fallbackAllocation = []
+      let riskScore = 5
+      let expectedReturn = 8
+      
+      if (riskTolerance === 'high' && hasExperience) {
+        fallbackAllocation = [
+          { name: 'Equity', value: 70, color: '#2563eb' },
+          { name: 'Mutual Funds', value: 20, color: '#7c3aed' },
+          { name: 'Bonds', value: 10, color: '#059669' }
+        ]
+        riskScore = 8
+        expectedReturn = 12
+      } else if (riskTolerance === 'medium') {
+        fallbackAllocation = [
+          { name: 'Equity', value: 50, color: '#2563eb' },
+          { name: 'Mutual Funds', value: 30, color: '#7c3aed' },
+          { name: 'Bonds', value: 20, color: '#059669' }
+        ]
+        riskScore = 6
+        expectedReturn = 10
+      } else {
+        fallbackAllocation = [
+          { name: 'Equity', value: 30, color: '#2563eb' },
+          { name: 'Mutual Funds', value: 40, color: '#7c3aed' },
+          { name: 'Bonds', value: 30, color: '#059669' }
+        ]
+        riskScore = 4
+        expectedReturn = 7
+      }
+      
+      return NextResponse.json({
+        allocation: fallbackAllocation,
+        risk_score: riskScore,
+        expected_return: expectedReturn,
+        fallback: true,
+        message: 'Using fallback allocation due to API unavailability'
+      })
     }
 
     const responseText = await recommendationResponse.text()
