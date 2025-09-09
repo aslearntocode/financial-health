@@ -2,9 +2,9 @@
 
 import Header from "@/components/Header"
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, Suspense } from 'react'
 
-export default function CreditPage() {
+function CreditPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -70,5 +70,20 @@ export default function CreditPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function CreditPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    }>
+      <CreditPageContent />
+    </Suspense>
   )
 } 
